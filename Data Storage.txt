@@ -1,0 +1,8 @@
+Shortcut:
+.a add			.b by			.c copy			.d delete
+.e edit			.f from			.g				.h help
+.i				.j				.k				.l last
+.m move			.n next			.o open			.p paste
+.q quit			.r replace		.s search		.t to
+.u user(switch)	.v view			.w				.x exit
+.y				.z
