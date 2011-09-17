@@ -1,3 +1,5 @@
+#ifndef TEMPLATE_H_
+#define TEMPLATE_H_
 #include "TimePeriod.h"
 #include <string>
 using namespace std;
@@ -48,3 +50,5 @@ public:
 	bool operator<= (Template);
 	bool operator>= (Template);
 };
+
+#endif
