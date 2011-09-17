@@ -1,0 +1,16 @@
+Shortcut:
+.a add			.b by			.c copy			.d delete
+.e edit			.f from			.g				.h help
+.i				.j				.k				.l last
+.m move			.n new			.o open			.p paste
+.q quit			.r replace		.s search		.t to
+.u user(switch)	.v view			.w				.x exit
+.y redo			.z undo
+
+.af force add
+.ac check-for-clash add
+.se search exact match
+.si search individual match
+.ss search similar match
+.nx next
+.mv move
