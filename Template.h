@@ -16,10 +16,13 @@ private:
 	string _description;
 	Time _time;
 	TimePeriod _period;
+	int index;					//each template is to be given a unique index for a faster search performance
 
 	bool forceAdd;				//forceAdd need to be true if user want to add it altough it's clashed
 	PriorityLevel _priority;	//indicate priority level of simultaneous task
 								//first come, first serve basis for the tasks with the same priority level
+	friend class ToDoMngr;		//ToDoMngr could access these private attribute freely
+
 public:
 	Template (TemplateType, Time);
 	Template (TemplateType, TimePeriod);
@@ -34,7 +37,8 @@ public:
 	void modify_description ();
 	void modify_forceAdd ();
 	void modify_priority ();
-	
+	void modify_index ();
+
 	string get_name ();
 	Time get_time ();
 	TimePeriod get_period ();
@@ -42,6 +46,7 @@ public:
 	string get_description ();
 	bool get_forceAdd ();
 	PriorityLevel get_priority ();
+	int get_index ();
 
 	//tool for any sorting algorithm
 	bool operator< (Template);
@@ -51,4 +56,6 @@ public:
 	bool operator>= (Template);
 };
 
+void sort (list<Template>&, string sortType);
+// sort the list based on specified sorting type -- sorting type is to be determined
 #endif
