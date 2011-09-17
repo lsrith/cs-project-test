@@ -95,6 +95,12 @@ bool _valid_time (clk_t time)
 		return false;
 }
 
+int Time::get_day ()
+{
+	int numDays = count_days ();
+	return (numDays + 3) % 7;
+}
+
 void Time::modify_date (date_t new_date)
 {
 	if (_valid_date (new_date))
@@ -111,13 +117,81 @@ void Time::modify_time (clk_t new_time)
 		throw (INVALID_TIME);
 }
 
+void Time::current_time ()
+{
+	time_t curr_time;
+	time (&curr_time);
+	string curr_time_str = ctime (&curr_time);
+	istringstream str (curr_time_str);
+	
+	string month, clk;
+	int year, day;
+	str >> month >> month;
+	str >> day >> clk >> year;
+
+	int mth;
+	if (month == "Jan")			mth = 1;
+	else if (month == "Feb")	mth = 2;
+	else if (month == "Mar")	mth = 3;
+	else if (month == "Apr")	mth = 4;
+	else if (month == "May")	mth = 5;
+	else if (month == "Jun")	mth = 6;
+	else if (month == "Jul")	mth = 7;
+	else if (month == "Aug")	mth = 8;
+	else if (month == "Sep")	mth = 9;
+	else if (month == "Oct")	mth = 10;
+	else if (month == "Nov")	mth = 11;
+	else if (month == "Dec")	mth = 12;
+	else						mth = 0;
+
+	_date = day * 1000000 + mth * 10000 + year;
+	_time = (clk[0] - '0') * 1000 + (clk[1] - '0') * 100 + (clk[3] - '0') * 10 + (clk[4] - '0');
+}
+
 string Time::display_date ()
 {
 	ostringstream str;
-	str << setw (2) << setfill ('0') << _date / 1000000 << "/" << setw (2) <<
-		setfill ('0') << (_date % 1000000) / 10000 << "/" << setw(2) <<
-		setfill ('0') <<_date % 10000;
+	str << display_day (get_day ()) << " " << setw (2) << setfill ('0')
+		<< _date / 1000000 << " " << display_month ((_date % 1000000) / 10000)
+		<< " " << setw(2) << setfill ('0') <<_date % 10000;
 	return str.str ();
+}
+
+string Time::display_month (int mth)
+{
+	string month;
+	switch (mth) {
+	case 1:		month = "Jan";	break;
+	case 2:		month = "Feb";	break;
+	case 3:		month = "Mar";	break;
+	case 4:		month = "Apr";	break;
+	case 5:		month = "May";	break;
+	case 6:		month = "Jun";	break;
+	case 7:		month = "Jul";	break;
+	case 8:		month = "Aug";	break;
+	case 9:		month = "Sep";	break;
+	case 10:	month = "Oct";	break;
+	case 11:	month = "Nov";	break;
+	case 12:	month = "Dec";	break;
+	default:	month = "Err";	break;
+	}
+	return month;
+}
+
+string Time::display_day (int day)
+{
+	string dayStr;
+	switch (day) {
+	case 0:		dayStr = "Sun";	break;
+	case 1:		dayStr = "Mon";	break;
+	case 2:		dayStr = "Tue";	break;
+	case 3:		dayStr = "Wed";	break;
+	case 4:		dayStr = "Thu";	break;
+	case 5:		dayStr = "Fri";	break;
+	case 6:		dayStr = "Sat";	break;
+	default:	dayStr = "Err";	break;
+	}
+	return dayStr;
 }
 
 string Time::display_time ()
@@ -212,17 +286,36 @@ int Time::operator- (Time time)
 
 	return duration;
 }
+/*
+Time Time::operator+ (Time time)
+{
+}
 
+Time Time::operator= (Time time)
+{
+	this->_date = time._date;
+	this->_time = time._time;
+	return *this;
+}
+*/
 int Time::convert_to_mins ()
 {
 	short int hour = _time / 100;
 	short int min = _time % 100;
+	unsigned int numMins, numDays;
+
+	numDays = count_days ();
+	numMins = ((numDays * 24) + hour) * 60 + min;
+
+	return numMins;
+}
+
+int Time::count_days ()
+{
 	short int day = _date / 1000000;
 	short int mnth = (_date % 1000000) / 10000;
 	short int year = _date % 10000;
-	unsigned int numMins, numDays;
-
-	numDays = day;
+	int numDays = day;
 	switch (mnth)
 	{
 		case 12:	numDays += 30;
@@ -243,15 +336,13 @@ int Time::convert_to_mins ()
 		default:	break;
 	}
 
-	for (int i = 0; i < year; i++)
+	for (int i = 1970; i < year; i++)
 		if (LeapYear (i))
 			numDays += 366;
 		else
 			numDays += 365;
-
-	numMins = ((numDays * 24) + hour) * 60 + min;
-
-	return numMins;
+	
+	return numDays;
 }
 
 bool LeapYear (int year)
