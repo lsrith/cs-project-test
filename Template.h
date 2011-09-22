@@ -6,6 +6,26 @@ using namespace std;
 
 enum TemplateType {DEADLINE, MEETING, CLASS, DEFAULT};
 enum PriorityLevel {HIGH, IMPORTANT, SIMPLE};
+enum RepeatType {};
+
+//which one shoud we use??
+
+struct Template {
+	TemplateType _type;
+
+	string _name;
+	string _venue;
+	string _description;
+	Time _time;
+	TimePeriod _period;
+	Time _alert;				//if it need to be alerted
+	RepeatType _repeat_t;		
+	int _index;					//each template is to be given a unique index for a faster search performance
+
+	bool _forceAdd;				//forceAdd need to be true if user want to add it altough it's clashed
+	PriorityLevel _priority;	//indicate priority level of simultaneous task
+								//first come, first serve basis for the tasks with the same priority level
+};
 
 class Template {
 private:
@@ -16,9 +36,11 @@ private:
 	string _description;
 	Time _time;
 	TimePeriod _period;
-	int index;					//each template is to be given a unique index for a faster search performance
+	Time _alert;				//if it need to be alerted
+	RepeatType _repeat_t;		
+	int _index;					//each template is to be given a unique index for a faster search performance
 
-	bool forceAdd;				//forceAdd need to be true if user want to add it altough it's clashed
+	bool _forceAdd;				//forceAdd need to be true if user want to add it altough it's clashed
 	PriorityLevel _priority;	//indicate priority level of simultaneous task
 								//first come, first serve basis for the tasks with the same priority level
 	friend class ToDoMngr;		//ToDoMngr could access these private attribute freely

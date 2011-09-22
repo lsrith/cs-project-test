@@ -2,25 +2,19 @@
 #define TODOMNGR_H
 #include "TimePeriod.h"
 #include "Template.h"
+#include "Command.h"
 #include <list>
 #include <queue>
 #include <stack>
 #include <string>
 using namespace std;
 
-enum searchType {EXACT, SIMILAR};
-enum repeatType {};
+enum searchType {EXACT, SIMILAR, INDIVIDUAL};
 
 class ToDoMngr {
 private:
 	string _storageFile;
 	string _userInput;
-	queue<string> _splitedCommand;
-	stack<string> _undoHistory;
-	stack<string> _redoHistory;
-	string* _shortcut;
-	string* _command;
-
 	void splitCommand ();
 	bool invalidCommand ();
 
@@ -78,7 +72,7 @@ private:
 	// if forceAdd is true, just add and return a fresh Template
 	// else return the clashed task
 
-	list<Template> addTask (Template task, repeatType repeat, bool forceAdd);
+	list<Template> addTask (Template task, RepeatType repeat, bool forceAdd);
 	// add a task to the dataStorage based on repeat type
 
 	void editTask (/*argument to be specified*/);
