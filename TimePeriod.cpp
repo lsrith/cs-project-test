@@ -9,6 +9,10 @@ string TimePeriod::MSG_START_AFTER_END = "The starting time must be before the e
 
 TimePeriod::TimePeriod ()
 {
+	_start._date = Time::INF_DATE;
+	_start._time = Time::INF_TIME;
+	_end._date = Time::INF_DATE;
+	_end._time = Time::INF_TIME;
 }
 
 TimePeriod::TimePeriod (Time start_time, Time end_time)
@@ -47,16 +51,18 @@ Time TimePeriod::get_end_time ()
 
 time_period_cmp TimePeriod::compare (TimePeriod timePeriod)
 {
+	time_period_cmp result;
 	if (this->_end == timePeriod._start)
-		return RIGHT_AFTER;
+		result = RIGHT_AFTER;
 	else if (timePeriod._end == this->_start)
-		return RIGHT_BEFORE;
+		result = RIGHT_BEFORE;
 	else if (this->_end < timePeriod._start)
-		return AFTER;
+		result = AFTER;
 	else if (timePeriod._end < this->_start)
-		return BEFORE;
+		result = BEFORE;
 	else
-		return CLASH;
+		result = CLASH;
+	return result;
 }
 
 bool TimePeriod::operator== (TimePeriod timePeriod)

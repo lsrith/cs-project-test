@@ -1,4 +1,3 @@
-/*
 #include "Command.h"
 
 //#include "TimePeriod.h"
@@ -179,4 +178,3 @@ void Command::splitInput () {
 		}
 	}
 }
-*/

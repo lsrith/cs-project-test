@@ -1,4 +1,3 @@
-/*
 #ifndef COMMAND_H_
 #define COMMAND_H_
 #include <string>
@@ -16,14 +15,14 @@ public:
 				HIGH, IMPT, INPT, IND, LOC, LOG, LAST, MOV, MTH, NAME, NX, PER, 
 				PRE, PREV, PRI, PRNT, PST, PSW, REDO, REM, REP, SML, SORT, SRCH, 
 				TAB, TEMP, TIME, TO, UNDO, VIEW, WK, YR, INT, STR};
-/--
+/*
 	struct command {
 		string cmd;
 		indx_t indx;
 		vector<indx_t> exe_cmd;	
 		//store the indice of the next to-be-executed commands
 	};
---/
+*/
 	Command ();
 	//Command will load CmdList from built-in file
 	Command (string cmdFile, string validCmdFile);
@@ -73,4 +72,3 @@ operator+= (queue<data_t>& Q1, queue<data_t> Q2);
 template <typename data_t>
 void clear (queue<data_t>& Q);
 #endif
-*/

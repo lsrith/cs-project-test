@@ -1,4 +1,3 @@
-/*
 #ifndef TODOMNGR_H
 #define TODOMNGR_H
 #include "TimePeriod.h"
@@ -86,4 +85,3 @@ public:
 	//run the program
 };
 #endif
-*/

@@ -1,7 +1,7 @@
 /*
 * author Chew
 */
-/*
+
 #ifndef DATASTORAGE_H_
 #define DATASTORAGE_H_
 #include "TimePeriod.h"
@@ -11,6 +11,7 @@
 using namespace std;
 
 class DataStorage {
+
 private:
 	string _storageFile;
 	int _largestIndex;
@@ -39,8 +40,8 @@ public:
 	string search (string searchedWord, searchType type);
 	// search based on any specified word.. return a string to be displayed
 	// type to indicate exact match or similar match
-	string costomSearch (/*arguments to be modify*/);
+	string costomSearch (//arguments to be modify//);
 	// search based on some criteria
+
 };
 #endif
-*/

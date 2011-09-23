@@ -1,8 +1,7 @@
-/*
 #ifndef TEMPLATE_H_
 #define TEMPLATE_H_
-#include "TimePeriod.h"
 #include "Time.h"
+#include "TimePeriod.h"
 #include <string>
 using namespace std;
 
@@ -18,11 +17,14 @@ private:
 
 	friend class DataStorage;
 
-	string spaceMarker (int);
+	static string spaceMarker;
+
+//	string spaceMarker (int);
 	RepeatType intToRepeat (int);
 	PriorityLevel intToPriority (int);
 	int repeatToInt (RepeatType);
 	int priorityToInt (PriorityLevel);
+	int findPosition (string, string, int);
 
 public:
 	string _name;
@@ -35,23 +37,24 @@ public:
 	PriorityLevel _priority;	//indicate priority level of simultaneous task
 								//first come, first serve basis for the tasks with the same priority level
 
+	Template ();
 	Template (Time);
 	Template (TimePeriod);
 	Template (string&);			//an inverse of string convert ()
 
-	string convert ();			//convert the whole Template to string
+	void invConvert (string&);
+	string stringConvert ();			//convert the whole Template to string
 
 	Time get_time ();
 	TimePeriod get_period ();
 	unsigned int get_index ();
-
+/*
 	//tool for any sorting algorithm
 	bool operator< (Template);
 	bool operator> (Template);
 	bool operator== (Template);
 	bool operator<= (Template);
 	bool operator>= (Template);
-
+*/
 };
 #endif
-*/

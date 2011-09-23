@@ -1,14 +1,20 @@
-/*
 #include "Template.h"
 #include <sstream>
-#include <iomanip>
+#include <iostream>
 using namespace std;
+
+string Template::spaceMarker = " _' ";
+
+Template::Template ()
+{
+}
 
 Template::Template (Time time) {
 	_time = time;
 	_repeat_t = NONE;
 	_forceAdd = false;
 	_priority = SIMPLE;
+	_index = 0;
 }
 
 Template::Template (TimePeriod period) {
@@ -16,28 +22,35 @@ Template::Template (TimePeriod period) {
 	_repeat_t = NONE;
 	_forceAdd = false;
 	_priority = SIMPLE;
+	_index = 0;
 }
 
 Template::Template (string& str) {
-	unsigned int i, start_pos, end_pos;
-	string spMarker, tempStr;
+	invConvert (str);
+}
+
+void Template::invConvert (string& str) {
+	unsigned int i, size, start_pos, end_pos;
 	int tempInt;
 	Time tempTime;
-	stringstream strStream;
 
 	i = 0;
 	start_pos = 0;
 	end_pos = 0;
+	size = spaceMarker.size ();
 
-	while (end_pos != string::npos) {
-		start_pos = end_pos + spMarker.size ();
-		spMarker = spaceMarker (i);
-		end_pos = str.find (spMarker);
-		strStream << str.substr (start_pos, end_pos - start_pos);
+	while (i <= 16 && end_pos != string::npos) {
+		stringstream strStream;
+		end_pos = findPosition (str, spaceMarker, start_pos);
+		if (end_pos == string::npos)
+			strStream << str.substr (start_pos);
+		else
+			strStream << str.substr (start_pos, end_pos - start_pos);
 
 		switch (i) {
 		case 0:
-			strStream >> _index;
+			strStream >> tempInt;
+			_index = tempInt;
 			break;
 		case 1:
 			strStream >> tempInt;
@@ -103,18 +116,21 @@ Template::Template (string& str) {
 		default:
 			break;
 		}
+
+		i++;
+		start_pos = end_pos + size - 1;
 	}
 }
 
-string Template::convert () {
+string Template::stringConvert () {
 	ostringstream str;
-	str << _index << spaceMarker (0) << _time.get_date () << spaceMarker (1) << _time.get_time ();
-	str << spaceMarker (2) << _period.get_start_time ().get_date () << spaceMarker (3) << _period.get_end_time ().get_time ();
-	str << spaceMarker (4) << _period.get_end_time ().get_date () << spaceMarker (5) << _period.get_end_time ().get_time ();
-	str << spaceMarker (6) << _name << spaceMarker (7) << _venue << spaceMarker (8) << _note;
-	str << spaceMarker (9) << _alert.get_date () << spaceMarker (10) << _alert.get_time ();
-	str << spaceMarker (11) << repeatToInt (_repeat_t) << spaceMarker (12) << _repeat.get_date () << spaceMarker (13) << _repeat.get_time ();
-	str << spaceMarker (14) << _forceAdd << spaceMarker (15) << priorityToInt (_priority);
+	str << _index << spaceMarker << _time.get_date () << spaceMarker << _time.get_time ();
+	str << spaceMarker << _period.get_start_time ().get_date () << spaceMarker << _period.get_end_time ().get_time ();
+	str << spaceMarker << _period.get_end_time ().get_date () << spaceMarker << _period.get_end_time ().get_time ();
+	str << spaceMarker << _name << spaceMarker << _venue << spaceMarker << _note;
+	str << spaceMarker << _alert.get_date () << spaceMarker << _alert.get_time ();
+	str << spaceMarker << repeatToInt (_repeat_t) << spaceMarker << _repeat.get_date () << spaceMarker << _repeat.get_time ();
+	str << spaceMarker << _forceAdd << spaceMarker << priorityToInt (_priority);
 	return str.str ();
 }
 
@@ -129,7 +145,7 @@ TimePeriod Template::get_period () {
 unsigned int Template::get_index () {
 	return _index;
 }
-
+/*
 string Template::spaceMarker (int num)
 {
 	string str;
@@ -186,7 +202,7 @@ string Template::spaceMarker (int num)
 
 	return str;
 }
-
+*/
 RepeatType Template::intToRepeat (int num) {
 	switch (num) {
 	case 0:		return HOUR;
@@ -200,11 +216,20 @@ RepeatType Template::intToRepeat (int num) {
 }
 
 PriorityLevel Template::intToPriority (int num) {
+	PriorityLevel priority;
 	switch (num) {
-	case 0:		return HIGH;
-	case 1:		return IMPORTANT;
-	case 2:		return SIMPLE;
+	case 0:
+		priority = HIGH;
+		break;
+	case 1:
+		priority = IMPORTANT;
+		break;
+	default:
+		priority = SIMPLE;
+		break;
 	}
+
+	return priority;
 }
 
 int Template::repeatToInt (RepeatType repeat) {
@@ -220,10 +245,36 @@ int Template::repeatToInt (RepeatType repeat) {
 }
 
 int Template::priorityToInt (PriorityLevel priority) {
+	int num;
 	switch (priority) {
-	case HIGH:		return 0;
-	case IMPORTANT:	return 1;
-	case SIMPLE:	return 2;
+	case HIGH:
+		num = 0;
+		break;
+	case IMPORTANT:	
+		num = 1;
+		break;
+	default:
+		num = 2;
+		break;
 	}
+	return num;
 }
-*/
+
+int Template::findPosition (string str, string subStr, int init_pos) {
+	const int size1 = str.size ();
+	const int size2 = subStr.size ();
+	int i, j;
+	bool found = false;
+	for (i = init_pos; !found && (i < size1 - size2); i++) {
+		found = true;
+		for (j = 0; found && (j < size2); j++) {
+			if (str[i + j] != subStr[j])
+				found = false;
+		}
+	}
+
+	if (found)
+		return i;
+	else
+		return size1;
+}

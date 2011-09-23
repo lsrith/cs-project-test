@@ -1,38 +1,41 @@
-#include "TimePeriod.h"
-#include "Time.h"
-//#include "Template.h"
+#include "Template.h"
 #include <iostream>
 #include <string>
 using namespace std;
-/*
+
 int main ()
 {
 	Time start (23092011, 1600);
 	Time end (24092011, 1000);
 	TimePeriod period (start, end);
-
+//cout << "-1-" << endl;
 	Template B (start);
 	B._note = "GOOGLE";
 	B._forceAdd = true;
 	B._priority = HIGH;
 	B._repeat_t = COSTOM;
 	B._repeat = end;
-
+//cout << "-2-" << endl;
 	Template A (period);
 	A._name = "BABE";
 	A._venue = "NUS";
 	A._note = "I LOVE YOU";
-
-	Template C (A.convert ());
-	Template D (B.convert ());
-
-	cout << C.convert () << endl;
-	cout << D.convert () << endl;
+//cout << "\n-3-" << endl;
+//cout << A.convert () << endl;
+	Template C;
+	C.invConvert (A.stringConvert ());
+//cout << "\n-4-" << endl;
+//cout << B.convert () << endl;
+	Template D (B.stringConvert ());
+//cout << "\n-5-" << endl;
+	cout << C.stringConvert () << endl;
+//cout << "\n-6-" << endl;
+	cout << D.stringConvert () << endl;
 
 	return 0;
 }
-*/
 
+/*
 int main ()
 {
 /*
@@ -45,7 +48,7 @@ int main ()
 	int sec = time (NULL);
 	cout << sec << endl;
 	cout << ctime (&rawTime) << endl;
-*/
+
 	Time time1 (25021992, 530);
 	Time time2 (17092011, 849);
 	Time time3;
@@ -79,3 +82,4 @@ int main ()
 
 	return 0;
 }
+*/

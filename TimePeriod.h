@@ -2,7 +2,6 @@
 #ifndef TIMEPERIOD_H
 #define TIMEPERIOD_H
 #include "Time.h"
-#include "Template.h"
 #include <string>
 using namespace std;
 

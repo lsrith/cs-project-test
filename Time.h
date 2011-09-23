@@ -1,6 +1,5 @@
 #ifndef TIME_H_
 #define TIME_H_
-#include "Template.h"
 #include <time.h>
 #include <string>
 using namespace std;
@@ -18,6 +17,11 @@ class Time {                            //class name is to be modified
 private:
 	clk_t _time;
 	date_t _date;
+
+	static string INVALID_DATE;
+	static string INVALID_TIME;
+	static clk_t INF_TIME;
+	static date_t INF_DATE;
 	friend class TimePeriod;
    
 	int count_days ();					//count number of days since 01/01/1970
@@ -38,6 +42,9 @@ public:
 	clk_t get_time ();
 	string display_time ();
 	string display_date ();
+
+	bool _valid_date (date_t);
+	bool _valid_time (clk_t);
 
 	bool operator== (Time time);
 	bool operator> (Time time);

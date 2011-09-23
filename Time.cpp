@@ -5,10 +5,10 @@
 #include <iostream>
 using namespace std;
 
-const string INVALID_DATE = "The date is invalid!";
-const string INVALID_TIME = "The time is invalid!";
-const clk_t INF_TIME = 2359;				//infinite time
-const date_t INF_DATE = 31129999;			//infinite date
+string Time::INVALID_DATE = "The date is invalid!";
+string Time::INVALID_TIME = "The time is invalid!";
+clk_t Time::INF_TIME = 2359;				//infinite time
+date_t Time::INF_DATE = 31129999;			//infinite date
 
 Time::Time ()
 {
@@ -29,7 +29,7 @@ Time::Time (date_t date, clk_t time)
 		_time = INF_TIME;
 }
 
-bool _valid_date (date_t date)
+bool Time::_valid_date (date_t date)
 {
 	if (date == INF_DATE)
 		return true;
@@ -80,7 +80,7 @@ bool _valid_date (date_t date)
 	return valid_date;
 }
 
-bool _valid_time (clk_t time)
+bool Time::_valid_time (clk_t time)
 {
 	if (time == INF_TIME)
 		return true;
