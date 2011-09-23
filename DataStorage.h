@@ -1,7 +1,7 @@
 /*
 * author Chew
 */
-
+/*
 #ifndef DATASTORAGE_H_
 #define DATASTORAGE_H_
 #include "TimePeriod.h"
@@ -43,3 +43,4 @@ public:
 	// search based on some criteria
 };
 #endif
+*/

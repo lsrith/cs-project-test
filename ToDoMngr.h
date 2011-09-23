@@ -1,3 +1,4 @@
+/*
 #ifndef TODOMNGR_H
 #define TODOMNGR_H
 #include "TimePeriod.h"
@@ -57,10 +58,10 @@ private:
 	list<Template> addTask (Template task, RepeatType repeat, bool forceAdd);
 	// add a task to the dataStorage based on repeat type
 
-	void editTask (/*argument to be specified*/);
-	Template editTask (/*argument to be specified*/);
-	list<Template> editTask (/*argument to be specified*/);
-	void eraseTask (/*argument to be specified*/);
+	void editTask (//argument to be specified//);
+	Template editTask (//argument to be specified//);
+	list<Template> editTask (//argument to be specified//);
+	void eraseTask (//argument to be specified//);
 	// functions overloading are considerable
 
 	bool newTable (string name, TimePeriod period);
@@ -69,8 +70,8 @@ private:
 	list<Template> addInTable (Template task);
 	// add tasks periodically to the table
 	// return a list of clashed tasks if any
-	void editInTable (/*argument to be specified*/);
-	void eraseInTable (/*argument to be specified*/);
+	void editInTable (//argument to be specified//);
+	void eraseInTable (//argument to be specified//);
 	// function overloading are considerable
 	// edit or erase all task periodically
 	void eraseTable (string name);
@@ -85,3 +86,4 @@ public:
 	//run the program
 };
 #endif
+*/

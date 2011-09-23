@@ -7,6 +7,10 @@ using namespace std;
 
 string TimePeriod::MSG_START_AFTER_END = "The starting time must be before the ending time.";
 
+TimePeriod::TimePeriod ()
+{
+}
+
 TimePeriod::TimePeriod (Time start_time, Time end_time)
 {
 	if (start_time < end_time)
@@ -19,6 +23,26 @@ TimePeriod::TimePeriod (Time start_time, Time end_time)
 		_start = end_time;
 		_end = start_time;
 	}
+}
+
+void TimePeriod::modify_start_time (Time start)
+{
+	_start = start;
+}
+
+void TimePeriod::modify_end_time (Time end)
+{
+	_end = end;
+}
+
+Time TimePeriod::get_start_time ()
+{
+	return _start;
+}
+
+Time TimePeriod::get_end_time ()
+{
+	return _end;
 }
 
 time_period_cmp TimePeriod::compare (TimePeriod timePeriod)

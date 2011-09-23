@@ -1,9 +1,10 @@
-#include "Command.h"
 /*
-#include "TimePeriod.h"
-#include "ToDoMngr.h"
-#include "Template.h"
-*/
+#include "Command.h"
+
+//#include "TimePeriod.h"
+//#include "ToDoMngr.h"
+//#include "Template.h"
+
 #include <fstream>
 #include <sstream>
 using namespace std;
@@ -178,3 +179,4 @@ void Command::splitInput () {
 		}
 	}
 }
+*/

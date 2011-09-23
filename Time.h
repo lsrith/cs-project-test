@@ -1,5 +1,6 @@
 #ifndef TIME_H_
 #define TIME_H_
+#include "Template.h"
 #include <time.h>
 #include <string>
 using namespace std;
@@ -32,6 +33,9 @@ public:
 	void modify_date (date_t new_date);	//throw invalid date if entered date is invalid
 	void modify_time (clk_t new_time);	//throw invalid time if entered time is invalid
 	void current_time ();				//set _time and _date to current time and date
+	
+	date_t get_date ();
+	clk_t get_time ();
 	string display_time ();
 	string display_date ();
 

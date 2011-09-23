@@ -148,6 +148,16 @@ void Time::current_time ()
 	_time = (clk[0] - '0') * 1000 + (clk[1] - '0') * 100 + (clk[3] - '0') * 10 + (clk[4] - '0');
 }
 
+clk_t Time::get_time ()
+{
+	return _time;
+}
+
+date_t Time::get_date ()
+{
+	return _date;
+}
+
 string Time::display_date ()
 {
 	ostringstream str;
