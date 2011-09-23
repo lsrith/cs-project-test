@@ -3,6 +3,7 @@
 #include "TimePeriod.h"
 #include "Template.h"
 #include "Command.h"
+#include "DataStorage.h"
 #include <list>
 #include <queue>
 #include <stack>
@@ -13,7 +14,9 @@ enum searchType {EXACT, SIMILAR, INDIVIDUAL};
 
 class ToDoMngr {
 private:
-	string _storageFile;
+	static string _storageFile;
+	static DataStorage _dataStorage;
+
 	string _userInput;
 	void splitCommand ();
 	bool invalidCommand ();
@@ -44,27 +47,6 @@ private:
 	// for V0.1, suppose that the command is always NULL.
 	
 	//***Switch User*** function prototype to be completed
-
-//Chew:
-	void save (list<Template> toDoList);
-	// save the templates to the storageFile by overwriting any overlapping TimePeriod
-	list<Template> load (TimePeriod period);
-	// return a list of templates within a time period input :) get it from our storageFile
-
-	void save (string tableName, TimePeriod period, list<string> tasksName);
-	// save the timetable with the name and period so that you can load back a tasks
-	list<Template> load (string tableName);
-	// return a list of templates of the timetable
-	list<string> load_table_name ();
-	// return a list of names of existing timetable
-
-	void reIndexingTemplates ();
-	// when to do it is based on your decision @chew
-	string search (string searchedWord, searchType type);
-	// search based on any specified word.. return a string to be displayed
-	// type to indicate exact match or similar match
-	string costomSearch (/*arguments to be modify*/);
-	// search based on some criteria
 
 //Ben:
 	Template addTask (Template task, bool forceAdd);
