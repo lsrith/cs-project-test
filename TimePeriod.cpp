@@ -9,10 +9,12 @@ string TimePeriod::MSG_START_AFTER_END = "The starting time must be before the e
 
 TimePeriod::TimePeriod ()
 {
+/*
 	_start._date = Time::INF_DATE;
 	_start._time = Time::INF_TIME;
 	_end._date = Time::INF_DATE;
 	_end._time = Time::INF_TIME;
+*/
 }
 
 TimePeriod::TimePeriod (Time start_time, Time end_time)

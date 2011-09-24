@@ -34,11 +34,10 @@ int main ()
 
 	return 0;
 }
-
 /*
 int main ()
 {
-/*
+
 	Time now;
 	now.current_time ();
 	cout << now.display_date () << " at " << now.display_time () << endl;
@@ -54,13 +53,11 @@ int main ()
 	Time time3;
 	time3.modify_date (11092011);
 	time3.modify_time (1523);
-	Time time4 = time1;
+	Time time4;
 	Time time5 (12092011, 2000);
 
-//	time4 = time1 - time2;
-
-
-//----------------------	
+	time4 = time1;
+	
 	TimePeriod period1 (time1, time2);
 	TimePeriod period2 (time2, time1);
 	TimePeriod period3 (time3, time1);

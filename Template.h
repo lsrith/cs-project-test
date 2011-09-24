@@ -19,7 +19,6 @@ private:
 
 	static string spaceMarker;
 
-//	string spaceMarker (int);
 	RepeatType intToRepeat (int);
 	PriorityLevel intToPriority (int);
 	int repeatToInt (RepeatType);

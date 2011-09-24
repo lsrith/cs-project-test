@@ -54,8 +54,8 @@ public:
 /*
 	Time operator+ (Time time);		//return the sum of two time
 									//to be implemented -- be careful
-	Time operator= (Time time);
 */
+	Time& operator= (Time& time);
 };
 
 #endif

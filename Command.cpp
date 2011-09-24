@@ -50,16 +50,27 @@ void Command::loadCmdList () {
 		command temp;
 		string tempStr;
 		indx_t indx;
-		stringstream str;
+		int counter;
+		int MAX_PREV_EXE_CMD;
+
+		inFile >> MAX_PREV_EXE_CMD;
 
 		while (getline (inFile, tempStr)){
+			stringstream str;
 			str << tempStr;
 			str >> temp.cmd >> temp.indx;
 
-			while (str >> indx)
-				temp.exe_cmd.push_back (indx);
-			
-			str.clear ();
+			counter = 0;
+			while (str >> indx) {
+				if (counter < MAX_PREV_EXE_CMD) {
+					if (indx != 0)
+						temp.prev.push_back (indx);
+				} else {
+					temp.next.push_back (indx);
+				}
+				
+				counter++;
+			}
 		}
 	} else {
 		throw (LOST_FILE + _cmdFile);
@@ -80,7 +91,7 @@ void Command::loadValidCmdList ()
 
 template <typename data_t>
 void clear (queue<data_t>& Q) {
-	while (!Q.empty)
+	while (!Q.empty ())
 		Q.pop ();
 }
 
@@ -110,11 +121,12 @@ void Command::addInput (queue<command> cmdInput, queue <string> dataInput, queue
 }
 
 template <typename data_t>
-operator+= (queue<data_t>& Q1, queue<data_t> Q2) {
+queue<data_t>& operator+= (queue<data_t>& Q1, queue<data_t> Q2) {
 	while (!Q2.empty ()) {
 		Q1.push (Q2.front ());
 		Q2.pop ();
 	}
+	return Q1;
 }
 
 vector<Command::command> Command::getCmdList () {

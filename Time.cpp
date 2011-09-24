@@ -300,14 +300,14 @@ int Time::operator- (Time time)
 Time Time::operator+ (Time time)
 {
 }
-
-Time Time::operator= (Time time)
+*/
+Time& Time::operator= (Time& time)
 {
 	this->_date = time._date;
 	this->_time = time._time;
 	return *this;
 }
-*/
+
 int Time::convert_to_mins ()
 {
 	short int hour = _time / 100;

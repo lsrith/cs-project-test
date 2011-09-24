@@ -5,24 +5,33 @@
 #include <queue>
 using namespace std;
 
+template <typename data_t>
+queue<data_t>& operator+= (queue<data_t>& Q1, queue<data_t> Q2);
+
+template <typename data_t>
+void clear (queue<data_t>& Q);
+
 class Command {
 public:
 	typedef unsigned short int indx_t;
 	enum input_t {CMD, DATA, NONE};
 	enum data_t {INT, STRING, TIME};
+/*
 	enum command {ACC, ADD, ALRT, BACK, CLSH, CLR, CMD, CST, CP, CUT, DATA, 
 				DATE, DAY, DEL, DES, EDIT, ENT, EXCT, EXIT, FRC, FROM, HELP, 
 				HIGH, IMPT, INPT, IND, LOC, LOG, LAST, MOV, MTH, NAME, NX, PER, 
 				PRE, PREV, PRI, PRNT, PST, PSW, REDO, REM, REP, SML, SORT, SRCH, 
 				TAB, TEMP, TIME, TO, UNDO, VIEW, WK, YR, INT, STR};
-/*
+*/
 	struct command {
 		string cmd;
 		indx_t indx;
-		vector<indx_t> exe_cmd;	
+		vector<indx_t> prev;	
+		//store the indice of the prev to-be-executed commands
+		vector<indx_t> next;	
 		//store the indice of the next to-be-executed commands
 	};
-*/
+
 	Command ();
 	//Command will load CmdList from built-in file
 	Command (string cmdFile, string validCmdFile);
@@ -65,10 +74,4 @@ private:
 	//return an fresh command and flag the error if command is not valid
 	void* translateData (data_t, string);
 };
-
-template <typename data_t>
-operator+= (queue<data_t>& Q1, queue<data_t> Q2);
-
-template <typename data_t>
-void clear (queue<data_t>& Q);
 #endif

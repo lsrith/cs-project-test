@@ -7,6 +7,7 @@ string Template::spaceMarker = " _' ";
 
 Template::Template ()
 {
+	_index = 0;
 }
 
 Template::Template (Time time) {
@@ -145,74 +146,34 @@ TimePeriod Template::get_period () {
 unsigned int Template::get_index () {
 	return _index;
 }
-/*
-string Template::spaceMarker (int num)
-{
-	string str;
+
+RepeatType Template::intToRepeat (int num) {
+	RepeatType repeat;
 	switch (num) {
 	case 0:
-		str = " _td' ";
+		repeat = HOUR;
 		break;
 	case 1:
-		str = " _tc' ";
+		repeat = DAY;
 		break;
 	case 2:
-		str = " _psd' ";
+		repeat = WEEK;
 		break;
 	case 3:
-		str = " _pst' ";
+		repeat = FORTNIGHT;
 		break;
 	case 4:
-		str = " _ped' ";
+		repeat = MONTH;
 		break;
 	case 5:
-		str = " _pet' ";
-		break;
-	case 6:
-		str = " _n' ";
-		break;
-	case 7:
-		str = " _v' ";
-		break;
-	case 8:
-		str = " _n' ";
-		break;
-	case 9:
-		str = " _ad' ";
-		break;
-	case 10:
-		str = " _at' ";
-		break;
-	case 11:
-		str = " _r' ";
-		break;
-	case 12:
-		str = " _rd' ";
-		break;
-	case 13:
-		str = " _rt' ";
-		break;
-	case 14:
-		str = " _p' ";
+		repeat = COSTOM;
 		break;
 	default:
-		str = " _' ";
+		repeat = NONE;
 		break;
 	}
 
-	return str;
-}
-*/
-RepeatType Template::intToRepeat (int num) {
-	switch (num) {
-	case 0:		return HOUR;
-	case 1:		return DAY;
-	case 2:		return WEEK;
-	case 3:		return FORTNIGHT;
-	case 4:		return MONTH;
-	case 5:		return COSTOM;
-	case 6:		return NONE;
-	}
+	return repeat;
 }
 
 PriorityLevel Template::intToPriority (int num) {
