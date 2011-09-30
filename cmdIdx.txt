@@ -1,0 +1,56 @@
+acc		1	32	40
+add		2	48	43	20
+alrt	3	12	48
+back	4	25
+clsh	5	11
+clr		6	34
+cmd		7
+cst		8	44 50
+cp		9	
+cut		10
+data	11
+date	12
+day		13
+del		14
+des		15
+edit	16
+ent		17
+exct	18
+exit	19
+frc		20
+from	21
+help	22
+high	23
+impt	24
+ind		25
+inpt	26
+last	27
+loc		28
+log		29
+mov		30
+mth		31
+name	32
+nx		33
+per		34
+pre		35
+prev	36
+pri		37
+prnt	38
+pst		39
+psw		40
+redo	41
+rem		42
+rep		43
+sml		44
+sort	45
+srch	46
+tab		47
+temp	48
+time	49
+to		50
+undo	51
+view	52
+wk		53
+yr		54
+int		55
+str		56

@@ -1,5 +1,5 @@
-#ifndef COMMAND_H_
-#define COMMAND_H_
+#ifndef CMDCONTROL_H_
+#define CMDCONTROL_H_
 #include <string>
 #include <vector>
 #include <queue>
@@ -11,32 +11,31 @@ queue<data_t>& operator+= (queue<data_t>& Q1, queue<data_t> Q2);
 template <typename data_t>
 void clear (queue<data_t>& Q);
 
-class Command {
+template <typename data_t>
+int binary_find (vector<data_t>&, data_t&);
+
+template <typename data_t>
+int binary_find (vector<data_t>&, data_t&, int, int);
+
+class CmdControl {
 public:
 	typedef unsigned short int indx_t;
 	enum input_t {CMD, DATA, NONE};
-	enum data_t {INT, STRING, TIME};
-/*
-	enum command {ACC, ADD, ALRT, BACK, CLSH, CLR, CMD, CST, CP, CUT, DATA, 
-				DATE, DAY, DEL, DES, EDIT, ENT, EXCT, EXIT, FRC, FROM, HELP, 
-				HIGH, IMPT, INPT, IND, LOC, LOG, LAST, MOV, MTH, NAME, NX, PER, 
-				PRE, PREV, PRI, PRNT, PST, PSW, REDO, REM, REP, SML, SORT, SRCH, 
-				TAB, TEMP, TIME, TO, UNDO, VIEW, WK, YR, INT, STR};
-*/
+//	enum data_t {INT, STRING, TIME};
+
 	struct command {
 		string cmd;
-		indx_t indx;
 		vector<indx_t> prev;	
 		//store the indice of the prev to-be-executed commands
 		vector<indx_t> next;	
 		//store the indice of the next to-be-executed commands
 	};
 
-	Command ();
+	CmdControl ();
 	//Command will load CmdList from built-in file
-	Command (string cmdFile, string validCmdFile);
+	CmdControl (string cmdFile, string validCmdFile);
 	//Command will load CmdList from specified file
-	Command (vector<command> cmdList, vector<string> validCmd);
+	CmdControl (vector<command> cmdList, vector<string> validCmd);
 	//Command will use the cmdList given
 	
 	void updateInput (string& input);
@@ -47,13 +46,13 @@ public:
 	
 	string getLeftOverInput ();
 	//return a string of input that could not be able to access
-	void executeCmd ();
+	string executeCmd ();
 	input_t getErrorFlag ();
 
 private:	
 	vector<command>* _cmdList;
 	string _input;
-	queue<command>* _cmdInput;
+	queue<command*>* _cmdInput;
 	queue<string>* _dataInput;
 	queue<input_t>* _sequence;
 	vector<string>* _validCmd;
@@ -70,8 +69,10 @@ private:
 	void loadCmdList ();
 	void loadValidCmdList ();
 	void splitInput ();
-	command translateCmd (string);
+	indx_t translateCmd (string);
 	//return an fresh command and flag the error if command is not valid
-	void* translateData (data_t, string);
+//	void* translateData (data_t, string);
+	int convertToInt (string);
+	Time convertToTime (string);
 };
 #endif

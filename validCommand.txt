@@ -63,6 +63,7 @@ Command:
 .log		switch user (log off)
 .last	-	last
 .m 			move
+.mon		monthly
 .month		monthly
 .mov		move
 .move		move
@@ -72,6 +73,7 @@ Command:
 .name		name
 .new		new
 .next	-	next
+.note		description
 .nx 		next
 .o 			open
 .on			on
@@ -80,8 +82,8 @@ Command:
 .paste		paste
 .per		period
 .period		period
-.pre	-	previous
-.prev		preview
+.pre	-	preview
+.prev		previous
 .previous	previous
 .pri		priority
 .print		print

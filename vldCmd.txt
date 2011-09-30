@@ -1,0 +1,61 @@
+-c
+-f
+-e
+-i
+-s
+.a				2
+.acc			1
+.add			2
+.al				3
+.alert			3
+.b				49
+.back			4
+.by				49
+.c				9
+.cl
+.cla
+.clash
+.clear
+.clsh
+.cmd
+.command
+.copy
+.costom
+.cp
+.cut
+.d
+.day
+.del
+.delete
+.des
+.description
+.e
+.edit
+.en
+.enter
+.exit
+.f
+.force
+.from
+.h
+.help
+.high
+.impt
+.importance
+.l
+.last
+.loc
+.log
+.m
+.mon
+.month
+.mov
+.move
+.mv
+.n
+.name
+.new
+.next
+.note
+.nx
+.on				49
