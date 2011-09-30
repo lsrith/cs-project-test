@@ -1,8 +1,30 @@
-#include "Task.h"
+#include "CmdControl.h"
 #include <iostream>
 #include <string>
 using namespace std;
 
+int main () {
+	string str;
+	try {
+		CmdControl cmdControl;
+		while (str != ".exit") {
+			cout << "command: ";
+			getline (cin, str);
+			cout << str << endl;
+			try {
+				cmdControl.addInput (str);
+				cout << cmdControl.executeCmd () << endl;
+			} catch (string xcpt) {
+				cout << "INV" << endl;
+			}
+		}
+	} catch (string xcpt) {
+		cout << xcpt << endl;
+	}
+	return 0;
+}
+
+/*
 int main ()
 {
 	Time start (23092011, 1600);
@@ -47,13 +69,7 @@ cout << b << endl;
 		cout << "false" << endl;
 
 	cout << B.priority << " " << D.priority << endl;
-/*
-	return 0;
-}
 
-int main ()
-{
-*/
 	Time now;
 	now.current_time ();
 	cout << now.string_date () << " at " << now.string_clock () << endl;
@@ -95,3 +111,4 @@ int main ()
 
 	return 0;
 }
+*/

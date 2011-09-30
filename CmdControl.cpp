@@ -1,78 +1,38 @@
 #include "CmdControl.h"
-#include "ToDoMngr.h"
+//#include "ToDoMngr.h"
 #include <fstream>
 #include <sstream>
+#include <iostream>
 using namespace std;
 
 string LOST_FILE = "unable to find a file: ";
 string INV_CMD = "unknown command: ";
 
 CmdControl::CmdControl () {
-	_cmdFile = "cmdIdx.txt";
 	_validCmdFile = "vldCmd.txt";
 	_flagError = NONE;
 
 	try {
-		loadCmdList ();
 		loadValidCmdList ();
 	} catch (string message) {
 		throw (message);
 	}
 }
 
-CmdControl::CmdControl (string cmdFile, string validCmdFile) {
-	_cmdFile = cmdFile;
+CmdControl::CmdControl (string validCmdFile) {
 	_validCmdFile = validCmdFile;
 	_flagError = NONE;
 
 	try {
-		loadCmdList ();
 		loadValidCmdList ();
 	} catch (string message) {
 		throw (message);
 	}
 }
 
-CmdControl::CmdControl (vector<command> cmdList, vector<string> validCmdFile) {
-	_cmdList = &cmdList;
-	_validCmd = &validCmdFile;
+CmdControl::CmdControl (vector<cmd_pair> validCmd) {
+	_validCmd = validCmd;
 	_flagError = NONE;
-}
-
-void CmdControl::loadCmdList () {
-	ifstream inFile (_cmdFile);
-
-	if (inFile.is_open ()) {
-		string tempStr;
-		indx_t indx;
-		int counter;
-		int MAX_PREV_EXE_CMD;
-
-		inFile >> MAX_PREV_EXE_CMD;
-
-		while (getline (inFile, tempStr)){
-			command temp;
-			stringstream str;
-			str << tempStr;
-			str >> temp.cmd;
-
-			counter = 0;
-			while (str >> indx) {
-				if (counter < MAX_PREV_EXE_CMD) {
-					if (indx != 0)
-						temp.prev.push_back (indx);
-				} else {
-					temp.next.push_back (indx);
-				}
-				
-				counter++;
-			}
-
-			_cmdList->push_back (temp);
-		}
-	} else {
-		throw (LOST_FILE + _cmdFile);
-	}
 }
 
 void CmdControl::loadValidCmdList ()
@@ -80,9 +40,12 @@ void CmdControl::loadValidCmdList ()
 	ifstream inFile (_validCmdFile);
 
 	if (inFile.is_open ()) {
-		string str;
-		while (inFile >> str)
-			_validCmd->push_back (str);
+		cmd_pair cmd;
+		int cmdIndx;
+		while (inFile >> cmdIndx && inFile >> cmd.str_cmd) {
+			cmd.enum_cmd = convertToCommand (cmdIndx);
+			_validCmd.push_back (cmd);
+		}
 	} else
 		throw (LOST_FILE + _validCmdFile);
 }
@@ -95,28 +58,24 @@ void clear (queue<data_t>& Q) {
 
 void CmdControl::updateInput (string& input) {
 	_input = input;
-	clear (*_cmdInput);
-	clear (*_dataInput);
-	clear (*_sequence);
-	splitInput ();
+	clear (_cmdInput);
+	clear (_dataInput);
+	clear (_sequence);
+	try {
+		splitInput ();
+	} catch (string message) {
+		throw (message);
+	}
 };
 
 void CmdControl::addInput (string& input) {
 	_input = input;
-	splitInput ();
+	try {
+		splitInput ();
+	} catch (string message) {
+		throw (message);
+	}
 };
-
-void CmdControl::updateInput (queue<command> cmdInput, queue <string> dataInput, queue<input_t> sequence) {
-	_cmdInput = &cmdInput;
-	_dataInput = &dataInput;
-	_sequence = &sequence;
-};
-
-void CmdControl::addInput (queue<command> cmdInput, queue <string> dataInput, queue<input_t> sequence) {
-	*_cmdInput += cmdInput;
-	*_dataInput += dataInput;
-	*_sequence += sequence;
-}
 
 template <typename data_t>
 queue<data_t>& operator+= (queue<data_t>& Q1, queue<data_t> Q2) {
@@ -127,228 +86,171 @@ queue<data_t>& operator+= (queue<data_t>& Q1, queue<data_t> Q2) {
 	return Q1;
 }
 
-vector<CmdControl::command> CmdControl::getCmdList () {
-	return *_cmdList;
-}
-
 CmdControl::input_t CmdControl::getErrorFlag () {
 	return _flagError;
 }
 
-string CmdControl::getLeftOverInput () {
-	queue<command> cmdInput = *_cmdInput;
-	queue<string> dataInput = *_dataInput;
-	queue<input_t> sequence = *_sequence;
-	ostringstream str;
-
-	while (!sequence.empty ()) {
-		switch (sequence.front ()) {
-		case CMD:
-			str << " ." + cmdInput.front ().cmd;
-			cmdInput.pop ();
-			break;
-		case DATA:
-			str << " " + dataInput.front ();
-			dataInput.pop ();
-			break;
-		case NONE:
-			break;
-		}
-		sequence.pop ();
-	}
-	return str.str ();
-}
-
 void CmdControl::splitInput () {
 	string temp;
-	unsigned int end_pos;
+	unsigned int end_pos = 0;
 
 	while (!_input.empty ()) {
-		if (_input[0] == '.') {
-			end_pos = _input.find_first_of (" .");
+		if (_input[0] == '.' || _input[0] == '-') {
+			end_pos = _input.find_first_of (" .-", 1);
 			temp = _input.substr (0, end_pos);
-
-			indx_t indx = translateCmd (temp);
+			command cmd = translateCmd (temp);
 			if (_flagError != CMD) {
-				_sequence->push (CMD);
-				_cmdInput->push (&(_cmdList->at(indx)));
+				_sequence.push (CMD);
+				_cmdInput.push (cmd);
 
-				if (_input[end_pos] == ' ')
-					_input.erase (0, end_pos + 1);
-				else
+				if (end_pos == string::npos || _input[end_pos] != ' ')
 					_input.erase (0, end_pos);
+				else
+					_input.erase (0, end_pos + 1);
 			} else
-				throw (INV_CMD + temp);
+				throw (INV_CMD);
 		} else {
-			end_pos = _input.find (" .");
+			end_pos = _input.find_first_of (" .\n");
 			temp = _input.substr (0, end_pos);
-			_sequence->push (DATA);
-			_dataInput->push (temp);
-			_input.erase (0, end_pos + 1);
+			_sequence.push (DATA);
+			_dataInput.push (temp);
+
+			if (end_pos != string::npos)
+				_input.erase (0, end_pos + 1);
+			else
+				_input.erase (0, end_pos);
 		}
 	}
 }
 
-CmdControl::indx_t CmdControl::translateCmd (string str) {
-	int	pos = binary_find (*_validCmd, str);
-	command cmd;
-	indx_t indx = 0;
-
-	if (pos < _validCmd->size ())
-		_flagError != CMD;
-	else {
-		switch (pos) {
-		case 0:		/*.a*/
-		case 2:		/*.add*/
-			indx = 2;
-			break;
-		case 1:		/*.acc*/
-			indx = 1;
-			break;
-		case 3:		/*.al*/
-		case 4:		/*.alert*/
-			indx = 3;
-			break;
-		case 5:		/*.b*/
-		case 7:		/*.by*/
-		case 55:	/*.on*/
-			indx = 49;
-			break;
-		case 6:		/*.back*/
-			indx = 4;
-			break;
-		case 8:		/*.c*/
-			if (_sequence->empty () || _sequence->back () != CMD)
-				indx = 9;
-			else {
-				command* temp = _cmdInput->back ();
-				if (temp == &(_cmdList->at (2)) /*add*/|| temp == &(_cmdList->at (16)) /*edit*/) 
-					indx = 5;
-				else if (temp == &(_cmdList->at (46)) /*srch*/|| temp == &(_cmdList->at (52)) /*view*/)
-					indx = 8;
-				else
-					_flagError = CMD;
-			}
-			break;
-		case 9:		/*.cl*/
-		case 12:	/*.clear*/
-			indx = 6;
-			break;
-		case 10:	/*.cla*/
-		case 11:	/*.clash*/
-		case 13:	/*.clsh*/
-			indx = 5;
-			break;
-		case 14:	/*.cmd*/
-		case 15:	/*.command*/
-			indx = 7;
-			break;
-		case 16:	/*.copy*/
-		case 18:	/*.cp*/
-			indx = 9;
-			break;
-		case 17:	/*.costom*/
-			indx = 8;
-			break;
-		case 19:	/*.cut*/
-			indx = 10;
-			break;
-		case 20:	/*.d*/
-		case 22:	/*.del*/
-		case 23:	/*.delete*/
-			indx = 14;
-			break;
-		case 21:	/*.day*/
-			indx = 13;
-			break;
-		case 24:	/*.des*/
-		case 25:	/*.description*/
-		case 53:	/*.note*/
-			indx = 15;
-			break;
-		case 26:	/*.e*/
-		case 27:	/*.edit*/
-			indx = 16;
-			break;
-		case 28:	/*.en*/
-		case 29:	/*.enter*/
-		case 49:	/*.n*/
-		case 51:	/*.new*/
-			indx = 17;
-			break;
-		case 30:	/*.exit*/
-			indx = 19;
-			break;
-		case 31:	/*.f*/
-			if (_sequence->empty () || _sequence->back () != CMD)
-				indx = 21;
-			else {
-				command* temp = _cmdInput->back ();
-				if (temp == &(_cmdList->at (2)) /*add*/|| temp == &(_cmdList->at (16)) /*edit*/) 
-					indx = 20;
-				else
-					_flagError = CMD;
-			}
-			break;
-		case 32:	/*.force*/
-			indx = 20;
-			break;
-		case 33:	/*.from*/
-			indx = 21;
-			break;
-		case 34:	/*.h*/
-		case 35:	/*.help*/
-			indx = 22;
-			break;
-		case 36:	/*.high*/
-			indx = 23;
-			break;
-		case 37:	/*.impt*/
-		case 38:	/*.importance*/
-			indx = 24;
-			break;
-		case 39:	/*.l*/	
-		case 40:	/*.last*/
-			indx = 27;
-			break;
-		case 41:	/*.loc*/
-			indx = 28;
-			break;
-		case 42:	/*.log*/
-			indx = 29;
-			break;
-		case 43:	/*.m*/
-		case 46:	/*.mov*/
-		case 47:	/*.move*/
-		case 48:	/*.mv*/
-			indx = 30;
-			break;
-		case 44:	/*.mon*/
-		case 45:	/*.month*/
-			indx = 31;
-			break;
-		case 50:	/*.name*/
-			indx = 32;
-			break;
-		case 52:	/*.next*/
-		case 54:	/*.nx*/
-			indx = 33;
-			break;
-		case 56:	/*.p*/
-		case 57:	/*.paste*/
-			indx = 39;
-			break;
-		case 58:	/*.per*/
-		case 59:	/*.period*/
-			indx = 34;
-			break;
-		case 60:	/*.pre*/
-		default:
-			break;
+CmdControl::command CmdControl::translateCmd (string str) {
+	int size = _validCmd.size ();
+	bool found = false;
+	command cmd = VOID;
+	for (int i = 0; !found && i < size; i++) {
+		if (str == _validCmd[i].str_cmd) {
+			found = true;
+			cmd = _validCmd[i].enum_cmd;
 		}
 	}
 
-	return indx;
+	if (!found)
+		_flagError = CMD;
+	
+	return cmd;
+}
+
+string CmdControl::convertToString (command cmd) {
+	string str;
+	switch (cmd) {
+	case (COSTOM):		str = "COSTOM";		break;
+	case (FORCE):		str = "FORCE";		break;
+	case (EXACT):		str = "EXACT";		break;
+	case (SIMILAR):		str = "SIMILAR";	break;
+	case (EACH):		str = "EACH";		break;
+	case (COMMAND):		str = "COMMAND";	break;
+	case (TIME):		str = "TIME";		break;
+	case (DATE):		str = "DATE";		break;
+	case (FROM):		str = "FROM";		break;
+	case (TO):			str = "TO";			break;
+	case (NAME):		str = "NAME";		break;
+	case (VENUE):		str = "VENUE";		break;
+	case (NOTE):		str = "NOTE";		break;
+	case (ALERT):		str = "ALERT";		break;
+	case (REPEAT):		str = "REPEAT";		break;
+	case (HIGH):		str = "HIGH";		break;
+	case (IMPT):		str = "IMPT";		break;
+	case (NOMAL):		str = "NOMAL";		break;
+	case (DAY):			str = "DAY";		break;
+	case (WEEK):		str = "WEEK";		break;
+	case (MONTH):		str = "MONTH";		break;
+	case (ADD):			str = "ADD";		break;
+	case (EDIT):		str = "EDIT";		break;
+	case (DELETE):		str = "DELETE";		break;
+	case (TABLE):		str = "TABLE";		break;
+	case (VIEW):		str = "VIEW";		break;
+	case (REMINDER):	str = "REMINDER";	break;
+	case (NEXT):		str = "NEXT";		break;
+	case (PREVIOUS):	str = "PREVIOUS";	break;
+	case (FIRST):		str = "FIRST";		break;
+	case (LAST):		str = "LAST";		break;
+	case (UNDO):		str = "UNDO";		break;
+	case (REDO):		str = "REDO";		break;
+	case (HELP):		str = "HELP";		break;
+	case (SORT):		str = "SORT";		break;
+	case (SEARCH):		str = "SEARCH";		break;
+	case (CLEAR):		str = "CLEAR";		break;
+	case (RESET):		str = "RESET";		break;
+	case (EXIT):		str = "EXIT";		break;
+	default:			str = "VOID";		break;
+	}
+	return str;
+}
+
+CmdControl::command CmdControl::convertToCommand (int indx) {
+	command cmd;
+	switch (indx) {
+	case 0:		cmd = COSTOM;	break;
+	case 1:		cmd = FORCE;	break;
+	case 2:		cmd = EXACT;	break;
+	case 3:		cmd = SIMILAR;	break;
+	case 4:		cmd = EACH;		break;
+	case 5:		cmd = COMMAND;	break;
+	case 6:		cmd = TIME;		break;
+	case 7:		cmd = DATE;		break;
+	case 8:		cmd = FROM;		break;
+	case 9:		cmd = TO;		break;
+	case 10:	cmd = NAME;		break;
+	case 11:	cmd = VENUE;	break;
+	case 12:	cmd = NOTE;		break;
+	case 13:	cmd = ALERT;	break;
+	case 14:	cmd = REPEAT;	break;
+	case 15:	cmd = HIGH;		break;
+	case 16:	cmd = IMPT;		break;
+	case 17:	cmd = NOMAL;	break;
+	case 18:	cmd = DAY;		break;
+	case 19:	cmd = WEEK;		break;
+	case 20:	cmd = MONTH;	break;
+	case 21:	cmd = ADD;		break;
+	case 22:	cmd = EDIT;		break;
+	case 23:	cmd = DELETE;	break;
+	case 24:	cmd = TABLE;	break;
+	case 25:	cmd = VIEW;		break;
+	case 26:	cmd = REMINDER;	break;
+	case 27:	cmd = NEXT;		break;
+	case 28:	cmd = PREVIOUS;	break;
+	case 29:	cmd = FIRST;	break;
+	case 30:	cmd = LAST;		break;
+	case 31:	cmd = UNDO;		break;
+	case 32:	cmd = REDO;		break;
+	case 33:	cmd = HELP;		break;
+	case 34:	cmd = SORT;		break;
+	case 35:	cmd = SEARCH;	break;
+	case 36:	cmd = CLEAR;	break;
+	case 37:	cmd = RESET;	break;
+	case 38:	cmd = EXIT;		break;
+	default:	cmd = VOID;		break;
+	}
+
+	return cmd;
+}
+
+string CmdControl::executeCmd () {
+	string str;
+	while (_sequence.empty () == false) {
+		if (_sequence.front () == CMD) {
+			str += convertToString (_cmdInput.front ());
+			str += " ";
+			_cmdInput.pop ();
+		} else if (_sequence.front () == DATA) {
+			str += _dataInput.front ();
+			str += " ";
+			_dataInput.pop ();
+		} else
+			str += "\nError\n";
+		_sequence.pop ();
+	}
+	return str;
 }
 
 template <typename data_t>

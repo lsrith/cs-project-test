@@ -1,61 +1,79 @@
--c
--f
--e
--i
--s
-.a				2
-.acc			1
-.add			2
-.al				3
-.alert			3
-.b				49
-.back			4
-.by				49
-.c				9
-.cl
-.cla
-.clash
-.clear
-.clsh
-.cmd
-.command
-.copy
-.costom
-.cp
-.cut
-.d
-.day
-.del
-.delete
-.des
-.description
-.e
-.edit
-.en
-.enter
-.exit
-.f
-.force
-.from
-.h
-.help
-.high
-.impt
-.importance
-.l
-.last
-.loc
-.log
-.m
-.mon
-.month
-.mov
-.move
-.mv
-.n
-.name
-.new
-.next
-.note
-.nx
-.on				49
+0 -c
+0 .costom
+1 -f
+2 -e
+3 -s
+4 -i
+21 .a
+21 .add
+13 .al
+13 .alert
+6 .by
+36 .clr
+36 .clear
+5 .cmd
+5 .command
+7 .d
+18 .day
+23 .del
+23 .delete
+12 .des
+12 .description
+22 .e
+22 .edit
+38 .exit
+8 .f
+1 .force
+8 .from
+15 .h
+33 .help
+15 .high
+16 .i
+16 .impt
+16 .importance
+30 .l
+30 .last
+11 .loc
+20 .m
+20 .mon
+20 .month
+10 .n
+10 .name
+27 .next
+12 .note
+27 .nx
+6 .on
+28 .pre
+28 .prev
+28 .previous
+38 .q
+38 .quit
+32 .re
+32 .redo
+26 .rem
+26 .reminder
+14 .rep
+14 .repeat
+35 .s
+35 .search
+34 .sort
+9 .t
+24 .tab
+24 .table
+6 .time
+9 .to
+24 .tt
+31 .un
+31 .undo
+11 .v
+11 .venue
+25 .view
+19 .w
+19 .wk
+19 .week
+38 .x
+32 .y
+31 .z
+.tip
+.prior
+.priority

@@ -21,58 +21,53 @@ class CmdControl {
 public:
 	typedef unsigned short int indx_t;
 	enum input_t {CMD, DATA, NONE};
-//	enum data_t {INT, STRING, TIME};
-
-	struct command {
-		string cmd;
-		vector<indx_t> prev;	
-		//store the indice of the prev to-be-executed commands
-		vector<indx_t> next;	
-		//store the indice of the next to-be-executed commands
+	enum command {	COSTOM, FORCE, EXACT, SIMILAR, EACH, COMMAND,					//extension
+					TIME, DATE, FROM, TO, NAME, VENUE, NOTE, ALERT, REPEAT,			//marker
+					HIGH, IMPT, NOMAL, DAY, WEEK, MONTH,							//object 
+					ADD, EDIT, DELETE, TABLE, VIEW, REMINDER, NEXT, PREVIOUS,		//command
+					FIRST, LAST, UNDO, REDO, HELP, SORT, SEARCH, CLEAR, RESET, EXIT, VOID};
+	struct cmd_pair {
+		string str_cmd;
+		command enum_cmd;
 	};
 
 	CmdControl ();
 	//Command will load CmdList from built-in file
-	CmdControl (string cmdFile, string validCmdFile);
+	CmdControl (string validCmdFile);
 	//Command will load CmdList from specified file
-	CmdControl (vector<command> cmdList, vector<string> validCmd);
+	CmdControl (vector<cmd_pair> validCmd);
 	//Command will use the cmdList given
 	
 	void updateInput (string& input);
 	void addInput (string& input);
-	void updateInput (queue<command> cmdInput, queue<string> dataInput, queue<input_t> sequence);
-	void addInput (queue<command> cmdInput, queue<string> dataInput, queue<input_t> sequence);
-	vector<command> getCmdList ();
-	
-	string getLeftOverInput ();
+
+//	string getLeftOverInput ();
 	//return a string of input that could not be able to access
 	string executeCmd ();
 	input_t getErrorFlag ();
 
 private:	
-	vector<command>* _cmdList;
 	string _input;
-	queue<command*>* _cmdInput;
-	queue<string>* _dataInput;
-	queue<input_t>* _sequence;
-	vector<string>* _validCmd;
+	queue<command> _cmdInput;
+	queue<string> _dataInput;
+	queue<input_t> _sequence;
+	vector<cmd_pair> _validCmd;
 
 	input_t _flagError;
-	string _cmdFile;
 	string _validCmdFile;
 
 	const string LOST_FILE;
 	const string INV_CMD;
 	const string INV_DATA;
 
-	bool executeCmd (command);
-	void loadCmdList ();
+//	bool executeCmd (command);
 	void loadValidCmdList ();
 	void splitInput ();
-	indx_t translateCmd (string);
+	command translateCmd (string);
 	//return an fresh command and flag the error if command is not valid
-//	void* translateData (data_t, string);
-	int convertToInt (string);
-	Time convertToTime (string);
+//	int convertToInt (string);
+//	Time convertToTime (string);
+	command convertToCommand (int);
+	string convertToString (command);
 };
 #endif
