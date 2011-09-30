@@ -9,12 +9,6 @@ string TimePeriod::MSG_START_AFTER_END = "The starting time must be before the e
 
 TimePeriod::TimePeriod ()
 {
-/*
-	_start._date = Time::INF_DATE;
-	_start._time = Time::INF_TIME;
-	_end._date = Time::INF_DATE;
-	_end._time = Time::INF_TIME;
-*/
 }
 
 TimePeriod::TimePeriod (Time start_time, Time end_time)
@@ -75,9 +69,25 @@ bool TimePeriod::operator== (TimePeriod timePeriod)
 		return false;
 }
 
+bool TimePeriod::operator== (Time time)
+{
+	if (_start < time && time < _end)
+		return true;
+	else
+		return false;
+}
+
 bool TimePeriod::operator< (TimePeriod timePeriod)
 {
 	if (this->_end < timePeriod._start)
+		return true;
+	else
+		return false;
+}
+
+bool TimePeriod::operator< (Time time)
+{
+	if (_end < time)
 		return true;
 	else
 		return false;
@@ -91,6 +101,14 @@ bool TimePeriod::operator> (TimePeriod timePeriod)
 		return false;
 }
 
+bool TimePeriod::operator> (Time time)
+{
+	if (_start > time)
+		return true;
+	else
+		return false;
+}
+
 bool TimePeriod::operator<= (TimePeriod timePeriod)
 {
 	if (this->_end == timePeriod._start)
@@ -99,9 +117,25 @@ bool TimePeriod::operator<= (TimePeriod timePeriod)
 		return false;
 }
 
+bool TimePeriod::operator<= (Time time)
+{
+	if (_end == time)
+		return true;
+	else
+		return false;
+}
+
 bool TimePeriod::operator>= (TimePeriod timePeriod)
 {
 	if (this->_start == timePeriod._end)
+		return true;
+	else
+		return false;
+}
+
+bool TimePeriod::operator>= (Time time)
+{
+	if (_start == time)
 		return true;
 	else
 		return false;
@@ -134,10 +168,10 @@ int TimePeriod::operator- (TimePeriod timePeriod)
 	return duration;
 }
 
-string TimePeriod::display_time_period ()
+string TimePeriod::string_time_period ()
 {
 	ostringstream str;
-	str << "From: " << _start.display_date () << " at " << _start.display_time ()
-		<< "\nTo:   " << _end.display_date () << " at " << _end.display_time ();
+	str << "From: " << _start.string_date () << " at " << _start.string_clock ()
+		<< "\nTo:   " << _end.string_date () << " at " << _end.string_clock ();
 	return str.str ();
 }

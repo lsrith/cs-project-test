@@ -7,26 +7,27 @@ using namespace std;
 
 string Time::INVALID_DATE = "The date is invalid!";
 string Time::INVALID_TIME = "The time is invalid!";
-clk_t Time::INF_TIME = 2359;				//infinite time
+clk_t Time::INF_CLOCK = 2359;				//infinite time
 date_t Time::INF_DATE = 31129999;			//infinite date
+int Time::DAY = 1440;						//1 day = 1440 mins
 
 Time::Time ()
 {
-	_time = INF_TIME;
+	_clk = INF_CLOCK;
 	_date = INF_DATE;
 }
 
-Time::Time (date_t date, clk_t time)
+Time::Time (date_t date, clk_t clk)
 {
 	if (_valid_date (date))
 		_date = date;
 	else
 		_date = INF_DATE;
 
-	if (_valid_time (time))
-		_time = time;
+	if (_valid_clock (clk))
+		_clk = clk;
 	else
-		_time = INF_TIME;
+		_clk = INF_CLOCK;
 }
 
 bool Time::_valid_date (date_t date)
@@ -80,14 +81,14 @@ bool Time::_valid_date (date_t date)
 	return valid_date;
 }
 
-bool Time::_valid_time (clk_t time)
+bool Time::_valid_clock (clk_t clk)
 {
-	if (time == INF_TIME)
+	if (clk == INF_CLOCK)
 		return true;
 
 	clk_t hour, min;
-	hour = time / 100;
-	min = time % 100;
+	hour = clk / 100;
+	min = clk % 100;
 
 	if ((hour >= 00 && hour <= 23) && (min >= 00 && min <= 59))
 		return true;
@@ -109,10 +110,10 @@ void Time::modify_date (date_t new_date)
 		throw (INVALID_DATE);
 }
 
-void Time::modify_time (clk_t new_time)
+void Time::modify_time (clk_t new_clk)
 {
-	if (_valid_time (new_time))
-		_time = new_time;
+	if (_valid_clock (new_clk))
+		_clk = new_clk;
 	else
 		throw (INVALID_TIME);
 }
@@ -145,12 +146,12 @@ void Time::current_time ()
 	else						mth = 0;
 
 	_date = day * 1000000 + mth * 10000 + year;
-	_time = (clk[0] - '0') * 1000 + (clk[1] - '0') * 100 + (clk[3] - '0') * 10 + (clk[4] - '0');
+	_clk = (clk[0] - '0') * 1000 + (clk[1] - '0') * 100 + (clk[3] - '0') * 10 + (clk[4] - '0');
 }
 
-clk_t Time::get_time ()
+clk_t Time::get_clock ()
 {
-	return _time;
+	return _clk;
 }
 
 date_t Time::get_date ()
@@ -158,7 +159,7 @@ date_t Time::get_date ()
 	return _date;
 }
 
-string Time::display_date ()
+string Time::string_date ()
 {
 	ostringstream str;
 	str << display_day (get_day ()) << " " << setw (2) << setfill ('0')
@@ -204,11 +205,11 @@ string Time::display_day (int day)
 	return dayStr;
 }
 
-string Time::display_time ()
+string Time::string_clock ()
 {
 	ostringstream str;
-	str << setw(2) << setfill ('0') << _time / 100 << ":" << setw(2) <<
-		setfill ('0') << _time % 100;
+	str << setw(2) << setfill ('0') << _clk / 100 << ":" << setw(2) <<
+		setfill ('0') << _clk % 100;
 	return str.str ();
 }
 
@@ -243,7 +244,7 @@ bool Time::operator> (Time time)
 	bool isSmall;
 	if (this->_date == time._date)
 	{
-		if (time._time < this->_time)
+		if (time._clk < this->_clk)
 			isSmall = true;
 		else
 			isSmall = false;
@@ -258,10 +259,13 @@ bool Time::operator> (Time time)
 
 bool Time::operator== (Time time)
 {
-	if (this->_date == time._date && this->_time == time._time)
-		return true;
+	bool isEqual;
+	if (this->_date == time._date && this->_clk == time._clk)
+		isEqual = true;
 	else
-		return false;
+		isEqual = false;
+	
+	return isEqual;
 }
 
 bool Time::operator< (Time time)
@@ -269,7 +273,7 @@ bool Time::operator< (Time time)
 	bool isSmall;
 	if (this->_date == time._date)
 	{
-		if (time._time > this->_time)
+		if (time._clk > this->_clk)
 			isSmall = true;
 		else
 			isSmall = false;
@@ -296,28 +300,53 @@ int Time::operator- (Time time)
 
 	return duration;
 }
-/*
-Time Time::operator+ (Time time)
+
+Time& Time::operator+ (int mins)
 {
+	unsigned int duration = this->convert_to_mins () + mins;
+	Time sum;
+	sum.convert_from_mins (duration);
+	return sum;
 }
-*/
-Time& Time::operator= (Time& time)
+
+Time& Time::operator= (Time time)
 {
 	this->_date = time._date;
-	this->_time = time._time;
+	this->_clk = time._clk;
 	return *this;
 }
 
-int Time::convert_to_mins ()
+unsigned int Time::convert_to_mins ()
 {
-	short int hour = _time / 100;
-	short int min = _time % 100;
+	short int hour = _clk / 100;
+	short int min = _clk % 100;
 	unsigned int numMins, numDays;
 
 	numDays = count_days ();
-	numMins = ((numDays * 24) + hour) * 60 + min;
+	numMins = numDays * DAY + hour * 60 + min;
 
 	return numMins;
+}
+
+void Time::convert_from_mins (unsigned int numMins)
+{
+	short int min = numMins % 60;
+	short int hour = ((numMins - min) % DAY) / 60;
+	unsigned int numDays = (numMins - hour * 60 - min) / DAY;
+	int year, mnth, day;
+
+	for (year = 1970; numDays > 365 ; year++)
+		if (LeapYear (year))
+			numDays -= 366;
+		else
+			numDays -= 365;
+	
+	for (mnth = 1; numDays > days_in_month (mnth, year); mnth++)
+		numDays -= days_in_month (mnth, year);
+	
+	day = numDays;
+	_clk = hour * 100 + min;
+	_date = day * 1000000 + mnth * 10000 + year;
 }
 
 int Time::count_days ()
@@ -353,6 +382,31 @@ int Time::count_days ()
 			numDays += 365;
 	
 	return numDays;
+}
+
+int Time::days_in_month (int mnth, int year)
+{
+	int days;
+	switch (mnth) {
+	case 1:		days = 31;	break;
+	case 2:		if (LeapYear (year))
+					days = 29;
+				else
+					days = 28;
+				break;
+	case 3:		days = 31;	break;
+	case 4:		days = 30;	break;
+	case 5:		days = 31;	break;
+	case 6:		days = 30;	break;
+	case 7:		days = 31;	break;
+	case 8:		days = 31;	break;
+	case 9:		days = 30;	break;
+	case 10:	days = 31;	break;
+	case 11:	days = 30;	break;
+	case 12:	days = 31;	break;
+	default:	days = 0;	break;
+	}
+	return days;
 }
 
 bool LeapYear (int year)

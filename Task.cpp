@@ -146,23 +146,18 @@ void Task::invConvert (string& str) {
 
 string Task::stringConvert () {
 	ostringstream str;
-
+	
+	str << _index << spaceMarker << timeTask;
 	if (timeTask) {
-		str << _index << spaceMarker << timeTask;
-		str << spaceMarker << _time.get_date () << spaceMarker << _time.get_time ();
-		str << spaceMarker << name << spaceMarker << venue << spaceMarker << note;
-		str << spaceMarker << alert.get_date () << spaceMarker << alert.get_time ();
-		str << spaceMarker << repeat_t << spaceMarker << repeat.get_date () << spaceMarker << repeat.get_time ();
-		str << spaceMarker << forceAdd << spaceMarker << priority;
+		str << spaceMarker << _time.get_date () << spaceMarker << _time.get_clock ();
 	} else {
-		str << _index << spaceMarker << timeTask;
-		str << spaceMarker << _period.get_start_time ().get_date () << spaceMarker << _period.get_start_time ().get_time ();
-		str << spaceMarker << _period.get_end_time ().get_date () << spaceMarker << _period.get_end_time ().get_time ();
-		str << spaceMarker << name << spaceMarker << venue << spaceMarker << note;
-		str << spaceMarker << alert.get_date () << spaceMarker << alert.get_time ();
-		str << spaceMarker << repeat_t << spaceMarker << repeat.get_date () << spaceMarker << repeat.get_time ();
-		str << spaceMarker << forceAdd << spaceMarker << priority;
+		str << spaceMarker << _period.get_start_time ().get_date () << spaceMarker << _period.get_start_time ().get_clock ();
+		str << spaceMarker << _period.get_end_time ().get_date () << spaceMarker << _period.get_end_time ().get_clock ();
 	}
+	str << spaceMarker << name << spaceMarker << venue << spaceMarker << note;
+	str << spaceMarker << alert.get_date () << spaceMarker << alert.get_clock ();
+	str << spaceMarker << repeat_t << spaceMarker << repeat.get_date () << spaceMarker << repeat.get_clock ();
+	str << spaceMarker << forceAdd << spaceMarker << priority;
 	
 	return str.str ();
 }

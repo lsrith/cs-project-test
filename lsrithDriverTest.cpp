@@ -47,15 +47,16 @@ cout << b << endl;
 		cout << "false" << endl;
 
 	cout << B.priority << " " << D.priority << endl;
+/*
 	return 0;
 }
-/*
+
 int main ()
 {
-
+*/
 	Time now;
 	now.current_time ();
-	cout << now.display_date () << " at " << now.display_time () << endl;
+	cout << now.string_date () << " at " << now.string_clock () << endl;
 
 	time_t rawTime;
 	time (&rawTime);
@@ -71,19 +72,19 @@ int main ()
 	Time time4;
 	Time time5 (12092011, 2000);
 
-	time4 = time1;
+	time4 = time1 + 40;
 	
 	TimePeriod period1 (time1, time2);
 	TimePeriod period2 (time2, time1);
 	TimePeriod period3 (time3, time1);
 	TimePeriod period4 (time3, time5);
-	TimePeriod period5 (time4, time4);
+	TimePeriod period5 (time1 + 40, time4);
 
-	cout << period1.display_time_period () << endl;
-	cout << period2.display_time_period () << endl;
-	cout << period3.display_time_period () << endl;
-	cout << period4.display_time_period () << endl;
-	cout << period5.display_time_period () << endl;
+	cout << period1.string_time_period () << endl;
+	cout << period2.string_time_period () << endl;
+	cout << period3.string_time_period () << endl;
+	cout << period4.string_time_period () << endl;
+	cout << period5.string_time_period () << endl;
 
 	cout << period1 - period2 << endl;
 	cout << period2 - period3 << endl;
@@ -94,4 +95,3 @@ int main ()
 
 	return 0;
 }
-*/
