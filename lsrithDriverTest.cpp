@@ -1,4 +1,4 @@
-#include "Template.h"
+#include "Task.h"
 #include <iostream>
 #include <string>
 using namespace std;
@@ -9,29 +9,44 @@ int main ()
 	Time end (24092011, 1000);
 	TimePeriod period (start, end);
 //cout << "-1-" << endl;
-	Template B (start);
-	B._note = "GOOGLE";
-	B._forceAdd = true;
-	B._priority = HIGH;
-	B._repeat_t = COSTOM;
-	B._repeat = end;
+	Task B (start);
+	B.note = "GOOGLE";
+	B.forceAdd = true;
+	B.priority = HIGH;
+	B.repeat_t = COSTOM;
+	B.repeat = end;
 //cout << "-2-" << endl;
-	Template A (period);
-	A._name = "BABE";
-	A._venue = "NUS";
-	A._note = "I LOVE YOU";
+	Task A (period);
+	A.name = "BABE";
+	A.venue = "NUS";
+	A.note = "I LOVE YOU";
 //cout << "\n-3-" << endl;
-//cout << A.convert () << endl;
-	Template C;
+	string a, b, c, d;
+a = A.stringConvert ();
+cout << a << endl;
+	Task C;
 	C.invConvert (A.stringConvert ());
 //cout << "\n-4-" << endl;
-//cout << B.convert () << endl;
-	Template D (B.stringConvert ());
+b = B.stringConvert ();
+cout << b << endl;
+	Task D (B.stringConvert ());
 //cout << "\n-5-" << endl;
-	cout << C.stringConvert () << endl;
+	c = C.stringConvert ();
+	cout << c << endl;
 //cout << "\n-6-" << endl;
-	cout << D.stringConvert () << endl;
+	d = D.stringConvert ();
+	cout << d << endl;
 
+	if (a == c)
+		cout << "true" << endl;
+	else
+		cout << "false" << endl;
+	if (b == d)
+		cout << "true" << endl;
+	else
+		cout << "false" << endl;
+
+	cout << B.priority << " " << D.priority << endl;
 	return 0;
 }
 /*
