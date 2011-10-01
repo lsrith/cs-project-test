@@ -45,7 +45,7 @@ Time TimePeriod::get_end_time ()
 	return _end;
 }
 
-time_period_cmp TimePeriod::compare (TimePeriod timePeriod)
+TimePeriod::time_period_cmp TimePeriod::compare (TimePeriod timePeriod)
 {
 	time_period_cmp result;
 	if (this->_end == timePeriod._start)

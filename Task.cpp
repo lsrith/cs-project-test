@@ -13,7 +13,7 @@ Task::Task ()
 Task::Task (Time time) {
 	_time = time;
 	timeTask = true;
-	repeat_t = NONE;
+	repeat_t = NOREPEAT;
 	forceAdd = false;
 	priority = SIMPLE;
 	_index = 0;
@@ -22,7 +22,7 @@ Task::Task (Time time) {
 Task::Task (TimePeriod period) {
 	_period = period;
 	timeTask = false;
-	repeat_t = NONE;
+	repeat_t = NOREPEAT;
 	forceAdd = false;
 	priority = SIMPLE;
 	_index = 0;
@@ -196,7 +196,7 @@ RepeatType Task::intToRepeat (int num) {
 		repeat = COSTOM;
 		break;
 	default:
-		repeat = NONE;
+		repeat = NOREPEAT;
 		break;
 	}
 
@@ -228,7 +228,7 @@ int Task::repeatToInt (RepeatType repeat) {
 	case FORTNIGHT:	return 3;
 	case MONTH:		return 4;
 	case COSTOM:	return 5;
-	case NONE:		return 6;
+	case NOREPEAT:	return 6;
 	}
 }
 

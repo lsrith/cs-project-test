@@ -7,8 +7,8 @@ using namespace std;
 
 string Time::INVALID_DATE = "The date is invalid!";
 string Time::INVALID_TIME = "The time is invalid!";
-clk_t Time::INF_CLOCK = 2359;				//infinite time
-date_t Time::INF_DATE = 31129999;			//infinite date
+Time::clk_t Time::INF_CLOCK = 2359;				//infinite time
+Time::date_t Time::INF_DATE = 31129999;			//infinite date
 int Time::DAY = 1440;						//1 day = 1440 mins
 
 Time::Time ()
@@ -149,12 +149,12 @@ void Time::current_time ()
 	_clk = (clk[0] - '0') * 1000 + (clk[1] - '0') * 100 + (clk[3] - '0') * 10 + (clk[4] - '0');
 }
 
-clk_t Time::get_clock ()
+Time::clk_t Time::get_clock ()
 {
 	return _clk;
 }
 
-date_t Time::get_date ()
+Time::date_t Time::get_date ()
 {
 	return _date;
 }
@@ -213,7 +213,7 @@ string Time::string_clock ()
 	return str.str ();
 }
 
-bool isAfter (date_t start_date, date_t end_date)
+bool Time::isAfter (date_t start_date, date_t end_date)
 {
 	bool _isAfter;
 	
@@ -409,7 +409,7 @@ int Time::days_in_month (int mnth, int year)
 	return days;
 }
 
-bool LeapYear (int year)
+bool Time::LeapYear (int year)
 {
 	if (year % 400 == 0 || (year % 4 == 0 && year % 100 != 0))
 		return true;

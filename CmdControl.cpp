@@ -1,5 +1,4 @@
 #include "CmdControl.h"
-//#include "ToDoMngr.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -11,6 +10,7 @@ string INV_CMD = "unknown command: ";
 CmdControl::CmdControl () {
 	_validCmdFile = "vldCmd.txt";
 	_flagError = NONE;
+	_dateBeforeMonth = true;
 
 	try {
 		loadValidCmdList ();
@@ -22,6 +22,7 @@ CmdControl::CmdControl () {
 CmdControl::CmdControl (string validCmdFile) {
 	_validCmdFile = validCmdFile;
 	_flagError = NONE;
+	_dateBeforeMonth = true;
 
 	try {
 		loadValidCmdList ();
@@ -33,6 +34,7 @@ CmdControl::CmdControl (string validCmdFile) {
 CmdControl::CmdControl (vector<cmd_pair> validCmd) {
 	_validCmd = validCmd;
 	_flagError = NONE;
+	_dateBeforeMonth = true;
 }
 
 void CmdControl::loadValidCmdList ()
@@ -237,6 +239,7 @@ CmdControl::command CmdControl::convertToCommand (int indx) {
 
 string CmdControl::executeCmd () {
 	string str;
+/*
 	while (_sequence.empty () == false) {
 		if (_sequence.front () == CMD) {
 			str += convertToString (_cmdInput.front ());
@@ -250,7 +253,176 @@ string CmdControl::executeCmd () {
 			str += "\nError\n";
 		_sequence.pop ();
 	}
+*/
+	_sequence.push (DATA);
+	_dataInput.push ("12.00");
+	_sequence.push (DATA);
+	_dataInput.push ("PM");
+
+	Time::clk_t clock = get_clock ();
+	cout << clock << endl;
+	cout << _sequence.size () << endl;
+
 	return str;
+}
+
+Time::date_t CmdControl::get_date () {
+	string strDate = _dataInput.front ();
+	int size = strDate.size ();
+	int date = 0;
+	return date;
+}
+
+void CmdControl::convertToInt (string str, int& day, int& mnth) {
+	day = 7;
+	mnth = 0;
+	if (str == "Sun" || str == "sun")
+		day = 0;
+	else if (str == "Mon" || str == "mon")
+		day = 1;
+	else if (str == "Tue" || str == "tue")
+		day = 2;
+	else if (str == "Wed" || str == "wed")
+		day = 3;
+	else if (str == "Thu" || str == "thu")
+		day = 4;
+	else if (str == "Fri" || str == "fri")
+		day = 5;
+	else if (str == "Sat" || str == "sat")
+		day = 6;
+	else if (str == "Jan" || str == "jan")
+		mnth = 1;
+	else if (str == "Feb" || str == "feb")
+		mnth = 2;
+	else if (str == "Mar" || str == "mar")
+		mnth = 3;
+	else if (str == "Apr" || str == "apr")
+		mnth = 4;
+	else if (str == "May" || str == "may")
+		mnth = 5;
+	else if (str == "Jun" || str == "jun")
+		mnth = 6;
+	else if (str == "Jul" || str == "jul")
+		mnth = 7;
+	else if (str == "Aug" || str == "aug")
+		mnth = 8;
+	else if (str == "Sep" || str == "sep")
+		mnth = 9;
+	else if (str == "Oct" || str == "oct")
+		mnth = 10;
+	else if (str == "Nov" || str == "nov")
+		mnth = 11;
+	else if (str == "Dec" || str == "dec")
+		mnth = 12;
+	else;
+}
+
+Time::clk_t CmdControl::get_clock () {
+	string strClk = _dataInput.front ();
+	int size = strClk.size ();
+	int clock = 0;
+	
+	switch (size) {
+	case 7:
+	case 5:
+		if ((strClk[2] == '.' || strClk[2] == ':') &&
+			(strClk.substr (3, 2) >= "00" && strClk.substr (3, 2) <= "59"))
+				clock += (strClk[3] - '0') * 10 + strClk[4] - '0';
+		else
+			_flagError = DATA;
+	case 4:
+	case 2:
+		if (strClk.substr (0, 2) >= "00" && strClk.substr (0, 2) <= "23")
+			clock += (strClk[0] - '0') * 1000 + (strClk[1] - '0') * 100;
+		else
+			_flagError = DATA;
+		break;
+	case 3:
+	case 1:
+		if (strClk[0] >= '0' && strClk[0] <= '9')
+			clock += (strClk[0] - '0') * 100;
+		else
+			_flagError = DATA;
+		break;
+	default:
+		_flagError = DATA;
+		break;
+	}
+
+	if (_flagError != DATA) {
+		switch (size) {
+		case 5:
+		case 2:
+		case 1:
+			_dataInput.pop ();
+			_sequence.pop ();
+			if (clock <= 1259 && notMorning ()) {
+				if (clock != 1200)
+					clock += 1200;
+			}
+			else if (clock <= 1259 && clock == 1200)
+					clock += 1200;
+			else;
+			break;
+		case 7:
+		case 4:
+		case 3:
+			if (clock >= 1259)
+				_flagError = DATA;
+			else if (notMorning (strClk.substr (size - 2))) {
+				if (clock != 1200)
+					clock += 1200;
+			}
+			else
+				if (clock == 1200)
+					clock += 1200;
+
+			if (_flagError != DATA) {
+				_dataInput.pop ();
+				_sequence.pop ();
+			}
+			break;
+		}
+	}
+
+	if (clock > 2359)
+		clock -= 2400;
+
+	if (!Time::_valid_clock (clock))
+		_flagError = DATA;
+
+	if (_flagError == DATA)
+		clock = 0;
+
+	return clock;
+}
+
+bool CmdControl::notMorning (string str) {
+	if (str.size () == 2 && (str[0] == 'p' || str[0] == 'P') && (str[1] == 'm' || str[1] == 'M'))
+		return true;
+	else if (str.size () == 2 && (str[0] == 'a' || str[0] == 'A') && (str[1] == 'm' || str[1] == 'M'))
+		return false;
+	else {
+		_flagError = DATA;
+		return false;
+	}
+}
+
+bool CmdControl::notMorning () {
+	if (_sequence.front () == DATA) {
+		string str = _dataInput.front ();
+		if (str.size () == 2 && (str[0] == 'p' || str[0] == 'P') && (str[1] == 'm' || str[1] == 'M')) {
+			_sequence.pop ();
+			_dataInput.pop ();
+			return true;
+		} else if (str.size () == 2 && (str[0] == 'a' || str[0] == 'A') && (str[1] == 'm' || str[1] == 'M')) {
+			_sequence.pop ();
+			_dataInput.pop ();
+			return false;
+		} else;
+	}
+
+	return false;
 }
 
 template <typename data_t>

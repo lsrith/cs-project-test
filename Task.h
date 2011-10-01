@@ -6,7 +6,7 @@
 using namespace std;
 
 enum PriorityLevel {HIGH, IMPORTANT, SIMPLE};
-enum RepeatType {HOUR, DAY, WEEK, FORTNIGHT, MONTH, COSTOM, NONE};
+enum RepeatType {HOUR, DAY, WEEK, FORTNIGHT, MONTH, COSTOM, NOREPEAT};
 
 class Task {
 private:

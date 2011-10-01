@@ -6,13 +6,9 @@
 using namespace std;
 
 class TimePeriod {
-private:
-	Time _start;
-	Time _end;
-
-	static string MSG_START_AFTER_END;
-
 public:
+	enum time_period_cmp {BEFORE, RIGHT_BEFORE, AFTER, RIGHT_AFTER, CLASH};
+
 	TimePeriod ();
 	TimePeriod (Time start_time, Time end_time);
 	
@@ -39,6 +35,11 @@ public:
 	//merge the two timing together, ignore the free duration or clash between
 	int operator- (TimePeriod timePeriod);   
 	//return the free duration (in mins) between the two timings (return -1 if clash)
-};
 
+private:
+	Time _start;
+	Time _end;
+
+	static string MSG_START_AFTER_END;
+};
 #endif

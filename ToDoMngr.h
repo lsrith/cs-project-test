@@ -8,24 +8,24 @@
 #include <string>
 using namespace std;
 
-enum searchType {EXACT, SIMILAR, INDIVIDUAL};
-
 class ToDoMngr {
-private:
-	static string _storageFile;
-	static DataStorage _dataStorage;
-
 public:
+	enum search_t {EXACT, SIMILAR, INDIVIDUAL};
+	enum view_t {DAILY, WEEKLY, MONTHLY};
+
 	ToDoMngr ();
+	list<Task> get_active_list ();
 
 //Ris:
-	string view (Task* task);
+	string view (int taskId);
 	// return a string of the view of the specific task
-	string view (string viewType);
-	// return a string of the view of the specific tasks, by day, by week or by table name
+	string view (view_t viewType, Time time);
+	// return a string of the view by day, by week, or by month
 	// have to consider how to display the clashed tasks
 	// for each task shown, numering them from 1 to the end and save as a vector of address of template
 	// if user enter view 5, we execute view (templateVect[4]); 
+	string view (view_t viewType, TimePeriod period);
+	string view (view_t viewType, string tableName);
 	string reminder ();
 	// return a string of the view of the reminder whenever ToDoMngr is executed;
 	string alert ();
@@ -37,9 +37,6 @@ public:
 	
 	//***Switch User*** function prototype to be completed
 
-	void undo ();
-	void redo ();
-
 //Ben:
 	Task addTask (Task task, bool forceAdd);
 	// add a task to the dataStorage
@@ -49,10 +46,8 @@ public:
 	list<Task> addTask (Task task, RepeatType repeat, bool forceAdd);
 	// add a task to the dataStorage based on repeat type
 
-	void editTask (//argument to be specified//);
-	Task editTask (//argument to be specified//);
-	list<Task> editTask (//argument to be specified//);
-	void eraseTask (//argument to be specified//);
+	list<Task> editTask (int taskId /*--*/)
+	void eraseTask (int taskId);
 	// functions overloading are considerable
 
 	bool newTable (string name, TimePeriod period);
@@ -61,8 +56,8 @@ public:
 	list<Task> addInTable (Task task);
 	// add tasks periodically to the table
 	// return a list of clashed tasks if any
-	void editInTable (//argument to be specified//);
-	void eraseInTable (//argument to be specified//);
+	list<Task> editInTable (int taskId /*--*/);
+	void eraseInTable (int taskId);
 	// function overloading are considerable
 	// edit or erase all task periodically
 	void eraseTable (string name);
@@ -71,5 +66,12 @@ public:
 	// return a list of periods of a similar period if cannot find the table with the time period
 	// return a clear list if be able to erase
 
+	void undo ();
+	void redo ();
+
+private:
+	static string _storageFile;
+	static DataStorage _dataStorage;
+	list<Task> _activeTaskList;
 };
 #endif

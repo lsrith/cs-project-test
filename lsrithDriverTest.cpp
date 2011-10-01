@@ -4,6 +4,13 @@
 using namespace std;
 
 int main () {
+	CmdControl cmdControl;
+	cmdControl.executeCmd ();
+	return 0;
+}
+
+/*
+int main () {
 	string str;
 	try {
 		CmdControl cmdControl;
@@ -23,7 +30,7 @@ int main () {
 	}
 	return 0;
 }
-
+*/
 /*
 int main ()
 {

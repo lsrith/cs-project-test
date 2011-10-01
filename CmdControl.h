@@ -1,5 +1,6 @@
 #ifndef CMDCONTROL_H_
 #define CMDCONTROL_H_
+#include "Task.h"
 #include <string>
 #include <vector>
 #include <queue>
@@ -55,6 +56,7 @@ private:
 
 	input_t _flagError;
 	string _validCmdFile;
+	bool _dateBeforeMonth;
 
 	const string LOST_FILE;
 	const string INV_CMD;
@@ -65,8 +67,17 @@ private:
 	void splitInput ();
 	command translateCmd (string);
 	//return an fresh command and flag the error if command is not valid
-//	int convertToInt (string);
-//	Time convertToTime (string);
+	
+	int get_int ();
+	Time get_time ();
+	Time::date_t get_date ();
+	Time::clk_t get_clock ();
+	//Format (24hrs):: H (0H:00) || HH (HH:00) || HH.MM || HH:MM
+	//Format (12hrs):: H AM || HH AM || HH.MM AM || HH:MM AM || HAM || HHAM || HH.MMAM || HH:MMAM
+	bool notMorning (string);
+	bool notMorning ();
+	void convertToInt (string, int&, int&);
+	
 	command convertToCommand (int);
 	string convertToString (command);
 };

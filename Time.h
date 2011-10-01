@@ -4,14 +4,37 @@
 #include <string>
 using namespace std;
 
-typedef unsigned short int clk_t;		//format: HHMM 
-typedef unsigned int date_t;            //format: DDMMYYYY
-enum time_period_cmp {BEFORE, RIGHT_BEFORE, AFTER, RIGHT_AFTER, CLASH};
-
-bool LeapYear (int year);
-bool isAfter (date_t start_date, date_t end_date);
-
 class Time {                            //class name is to be modified
+public:
+	typedef unsigned short int clk_t;		//format: HHMM 
+	typedef unsigned int date_t;            //format: DDMMYYYY
+
+	Time ();
+	Time (date_t date, clk_t clk);
+
+	void modify_date (date_t new_date);	//throw invalid date if entered date is invalid
+	void modify_time (clk_t new_clk);	//throw invalid time if entered time is invalid
+	void current_time ();				//set _time and _date to current time and date
+	
+	date_t get_date ();
+	clk_t get_clock ();
+	string string_date ();
+	string string_clock ();
+
+	static bool _valid_date (date_t);
+	static bool _valid_clock (clk_t);
+
+	bool operator== (Time time);
+	bool operator> (Time time);
+	bool operator< (Time time);      //return true if the time is after *this, else false
+
+	int operator- (Time time);		//return the difference between the two time in mins
+	Time& operator+ (int mins);		//return the sum
+	Time& operator= (Time time);
+
+	static bool LeapYear (int year);
+	static bool isAfter (date_t start_date, date_t end_date);
+
 private:
 	clk_t _clk;
 	date_t _date;
@@ -30,30 +53,5 @@ private:
 	string display_day (int);
 	string display_month (int);
 	int get_day ();
-
-public:
-	Time ();
-	Time (date_t date, clk_t clk);
-
-	void modify_date (date_t new_date);	//throw invalid date if entered date is invalid
-	void modify_time (clk_t new_clk);	//throw invalid time if entered time is invalid
-	void current_time ();				//set _time and _date to current time and date
-	
-	date_t get_date ();
-	clk_t get_clock ();
-	string string_date ();
-	string string_clock ();
-
-	bool _valid_date (date_t);
-	bool _valid_clock (clk_t);
-
-	bool operator== (Time time);
-	bool operator> (Time time);
-	bool operator< (Time time);      //return true if the time is after *this, else false
-
-	int operator- (Time time);		//return the difference between the two time in mins
-	Time& operator+ (int mins);		//return the sum
-	Time& operator= (Time time);
 };
-
 #endif

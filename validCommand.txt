@@ -1,5 +1,3 @@
-command with '-' sign could be use without '.' if the word is standing alone.
-
 Command:
 (nth)		add
 .a			add
