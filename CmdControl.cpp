@@ -4,13 +4,20 @@
 #include <iostream>
 using namespace std;
 
-string LOST_FILE = "unable to find a file: ";
-string INV_CMD = "unknown command: ";
+string CmdControl::LOST_FILE = "unable to find a file: ";
+string CmdControl::INV_CMD = "unknown command: ";
+string CmdControl::INV_DATA = "invalid data input: ";
+string CmdControl::MSG_CLEAR = "All your tasks have been deleted!";
+string CmdControl::MSG_CLASH = " is clashed with the following:\n";
+string CmdControl::MSG_ERROR = "\n\tERROR!!\n";
 
 CmdControl::CmdControl () {
 	_validCmdFile = "vldCmd.txt";
 	_flagError = NONE;
 	_dayMonth = true;
+	_force = false;
+	_activeListAccessible = false;
+	_search = ToDoMngr::search_t::SEACH;
 
 	try {
 		loadValidCmdList ();
@@ -18,7 +25,7 @@ CmdControl::CmdControl () {
 		throw (message);
 	}
 }
-
+/*
 CmdControl::CmdControl (string validCmdFile) {
 	_validCmdFile = validCmdFile;
 	_flagError = NONE;
@@ -36,7 +43,7 @@ CmdControl::CmdControl (vector<cmd_pair> validCmd) {
 	_flagError = NONE;
 	_dayMonth = true;
 }
-
+*/
 void CmdControl::loadValidCmdList ()
 {
 	ifstream inFile (_validCmdFile);
@@ -138,7 +145,37 @@ CmdControl::command CmdControl::translateCmd (string str) {
 
 	if (!found)
 		_flagError = CMD;
-	
+	else {	
+		//check extension cmd
+		command prev = _cmdInput.back ();
+		bool wrongExt = true;
+		switch (cmd) {
+		case COSTOM:
+			if (prev == VIEW || prev == SEARCH)
+				wrongExt = false;
+			break;
+		case FORCE:
+			if (prev == ADD || prev == EDIT)
+				wrongExt = false;
+			break;
+		case EXACT:
+		case SIMILAR:
+		case EACH:
+			if (prev == SEARCH)
+				wrongExt = false;
+			break;
+		case COMMAND:
+			if (prev == HELP)
+				wrongExt = false;
+			break;
+		default:
+			wrongExt = false;
+			break;
+		}
+
+		if (wrongExt)
+			_flagError = CMD;
+	}
 	return cmd;
 }
 
@@ -238,6 +275,7 @@ CmdControl::command CmdControl::convertToCommand (int indx) {
 }
 
 string CmdControl::executeCmd () {
+	string str;
 /*
 	while (_sequence.empty () == false) {
 		if (_sequence.front () == CMD) {
@@ -252,8 +290,7 @@ string CmdControl::executeCmd () {
 			str += "\nError\n";
 		_sequence.pop ();
 	}
-*/
-	string str;
+*//*
 	do {
 		cin >> str;
 		_sequence.push (DATA);
@@ -267,16 +304,250 @@ string CmdControl::executeCmd () {
 	time = get_time ();
 	cout << time.string_date () << " " << time.string_clock () << endl;
 	cout << _sequence.size () << endl;
+*/
+	return str;
+}
+
+string CmdControl::executeCmd (command cmd) {
+	string str;
+
+	switch (cmd) {
+	case ADD:
+		if (_sequence.front () == CMD && _cmdInput.front () == FORCE) {
+			_cmdInput.pop ();
+			_sequence.pop ();
+			_force = true;
+		}
+		Task task = get_task ();
+		
+		add:
+			*_taskList = _toDoMngr.add (_tableName, task, _force);
+
+		if (!_force && !_taskList->empty ()) {
+			string message = ToDoMngr::view (task) + MSG_CLASH + ToDoMngr::view (taskList);
+			if (promptToContinue (message)) {
+				_force = true;
+				goto add;
+			}
+		} else if (_force && !_taskList->empty ()) {
+			str = MSG_ERROR;
+		} else {
+			str = ToDoMngr::view (task) + MSG_ADDED;
+		}
+
+		_taskList->clear ();
+		break;
+	case DELETE:
+		if (_sequence.front () == DATA) {
+			if (_activeListAccessible) {
+				delID:
+					string data = _dataInput.front ();
+					int taskId = convertToInt (data);
+
+				Task task = _toDoMngr.erase (taskId);
+				if (task.get_index () == 0) {
+					if (promptToGetValidInput (MSG_WRONG_ID))
+						goto delID;
+				} else {
+					str = ToDoMngr::view (task) + MSG_DELETED;
+					_dataInput.pop ();
+					_sequence.pop ();
+				}
+			}
+		} else if (_sequence.front () == CMD) {
+			if (_cmdInput.front () == FROM || _cmdInput.front () == TO) {
+				delPeriod:
+					TimePeriod period = get_period ();
+			
+				if (_flagError != DATA) {
+					_toDoMngr.erase (period);		
+				} else {
+					if (promtToGetValidInput (MSG_WRONG_PERIOD))
+						goto delPeriod;  
+				}
+			} else if (_cmdInput.front () == TABLE) {
+				_cmdInput.pop ();
+				_sequence.pop ();
+
+				while (!getTableName ()) {
+					promptToGetValidInput (MSG_WRONG_TABLE);
+				}
+				_toDoMngr.erase (_tableName);
+			} else;
+		} else;
+		break;
+	case TABLE:
+		_cmdInput.pop ();
+		_sequence.pop ();
+
+		if (_sequence.front () == DATA && !getTableName ()) {
+			string tableName = _dataInput.front ();
+			_dataInput.pop ();
+			_sequence.pop ();
+			
+			if (_sequence.front () == CMD && (_cmdInput.front () == FROM || _cmdInput.front () == TO)) {
+				tabPeriod:
+					TimePeriod period = get_period ();
+			
+				if (_flagError != DATA) {
+					_toDoMngr.newTable (tableName, period);
+					_tableName = tableName;
+				} else {
+					if (promtToGetValidInput (MSG_WRONG_PERIOD))
+						goto tabPeriod;
+				}
+			}
+		} else {
+			str = _toDoMngr.viewTableNames ();
+		}
+		break;
+	case VIEW:
+		ToDoMngr::view_t viewType = DAILY;
+		if (_sequence.front () == CMD) {
+			switch (_cmdInput.front ()) {
+			case DAY:
+				viewType = DAILY;
+				_sequence.pop ();
+				_cmdInput.pop ();
+				break;
+			case WEEK:
+				_sequence.pop ();
+				_cmdInput.pop ();
+				viewType = WEEKLY;	break;
+			case MONTH:
+				_sequence.pop ();
+				_cmdInput.pop ();
+				viewType = MONTHLY;	break;
+			default:
+				break;
+			}
+		}
+
+		if (_sequence.front () == DATA) {
+			if (_activeListAccessible) {
+				viewID:
+					string data = _dataInput.front ();
+					int taskId = convertToInt (data);
+
+				str = _toDoMngr.view (taskId);
+				if (str.empty ()) {
+					if (promptToGetValidInput (MSG_WRONG_ID))
+						goto viewID;
+				} else {
+					_dataInput.pop ();
+					_sequence.pop ();
+				}
+			}
+		} else if (_sequence.front () == CMD) {
+			if (_cmdInput.front () == FROM || _cmdInput.front () == TO) {
+				viewPeriod:
+					TimePeriod period = get_period ();
+			
+				if (_flagError != DATA) {
+					str = _toDoMngr.view (period);		
+				} else {
+					if (promtToGetValidInput (MSG_WRONG_PERIOD))
+						goto viewPeriod;  
+				}
+			} else if (_cmdInput.front () == TIME || _cmdInput.front () == DATE) {
+				_cmdInput.pop ();
+				_sequence.pop ();
+				viewTime:
+					Time time;
+					time.modify_date (get_date ());
+			
+				if (_flagError != DATA) {
+					str = _toDoMngr.view (viewType, time);		
+				} else {
+					if (promtToGetValidInput (MSG_WRONG_PERIOD))
+						goto viewTime;  
+				}
+			} else if (_cmdInput.front () == TABLE) {
+				_cmdInput.pop ();
+				_sequence.pop ();
+
+				while (!getTableName ()) {
+					promptToGetValidInput (MSG_WRONG_TABLE);
+				}
+				
+				str = _toDoMngr.view (viewType, _tableName);
+			} else;
+		} else {
+			if (!_tableName.empty ())
+				str = _toDoMngr.view (viewType, _tableName);
+		}
+		break;
+	case REMINDER:
+		str = _toDoMngr.reminder ();
+	case UNDO:
+		_toDoMngr.undo ();
+		break;
+	case REDO:
+		toDoMngr.redo ();
+		break;
+	case HELP:
+		if (_sequence.front () == CMD && _cmdInput.front () == COMMAND) {
+			_cmdInput.pop ();
+			_sequence.pop ();
+			str = _toDoMngr.help ("cmd");
+		} else {
+			str = _toDoMngr.help ("");
+		}
+/*
+to be updated in the next version:
+		} else if (_sequence.front () == DATA) {
+			str = _toDoMngr.help (_dataInput.front ());
+			_dataInput.pop ();
+			_sequence.pop ();
+		}
+*/
+	case SORT:
+		break;
+	case CLEAR:
+		_toDoMngr.clear ();
+		str = MSG_CLEAR;
+		break;
+	case RESET:
+		reset ();
+		break;
+	case EXIT:
+		if (_sequence.front () == CMD && _cmdInput.front () == TABLE) {
+			_cmdInput.pop ();
+			_sequence.pop ();
+			_tableName.erase ();
+		} else
+			_toDoMngr.exit ();
+		break;
+	default:
+		break;
+	}
+
+	if (cmd == VIEW)
+		_activeListAccessible = true;
+	else
+		_activeListAccessible = false;
 
 	return str;
 }
 
 Time CmdControl::get_time () {
 	Time time;
-	time.modify_date (get_date ());
+	if (_flagError == DATA)
+		_flagError = NONE;
 
-	if (_flagError != DATA)
-		time.modify_clock (get_clock ());
+	time.modify_date (get_date ());
+	time.modify_clock (get_clock ());
+
+	if (_flagError != DATA && time.get_date () == Time::INF_DATE && time.get_clock () != Time::INF_CLOCK) {
+		_flagError = NONE;
+		Time curr;
+		curr.current_time ();
+
+		if (time.get_clock () < curr.get_clock ())
+			curr.modify_date (curr.get_date () + 1000000);
+
+		time.modify_date (curr.get_date ());
+	}
 
 	return time;
 }
@@ -289,6 +560,9 @@ Time::date_t CmdControl::get_date () {
 	int day = -1;
 	int mnth = -1;
 	int year = -1;
+
+	if (_flagError == DATA)
+		_flagError = NONE;
 
 	if (size == 3) {
 		convertToInt (strDate, Day, mnth);
@@ -332,6 +606,7 @@ Time::date_t CmdControl::get_date () {
 		if (year == -1)
 			year = tempYear;
 	}
+	
 	Time currTime;
 	currTime.current_time ();
 	if (Day < 7) {
@@ -418,7 +693,7 @@ Time::date_t CmdControl::get_date () {
 void CmdControl::get_date (int& day, int& mnth, int& year) {
 	string strDate = _dataInput.front ();
 	int size = strDate.size ();
-	int date;
+	Time::date_t date;
 	day = -1;
 	mnth = -1;
 	year = -1;
@@ -588,7 +863,9 @@ Time::clk_t CmdControl::get_clock () {
 	string strClk = _dataInput.front ();
 	int size = strClk.size ();
 	int clock = 0;
-	
+	if (_flagError == DATA)
+		_flagError = NONE;
+
 	switch (size) {
 	case 7:
 	case 5:

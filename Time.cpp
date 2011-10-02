@@ -208,8 +208,26 @@ string Time::display_day (int day)
 string Time::string_clock ()
 {
 	ostringstream str;
-	str << setw(2) << setfill ('0') << _clk / 100 << ":" << setw(2) <<
-		setfill ('0') << _clk % 100;
+	clk_t hour, min;
+	string AMPM;
+
+	min = _clk % 100;
+	if (_clk < 100) {
+		hour = 12;
+		AMPM = "AM";
+	} else if (_clk < 1200) {
+		hour = _clk / 100;
+		AMPM = "AM";
+	} else if (_clk < 1300) {
+		hour = _clk / 100;
+		AMPM = "PM";
+	} else {
+		hour = _clk / 100 - 12;
+		AMPM = "PM";
+	}
+
+	str << setw(2) << setfill ('0') << hour << ":" << setw(2) <<
+		setfill ('0') << min << " " << AMPM;
 	return str.str ();
 }
 
