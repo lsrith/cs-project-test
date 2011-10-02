@@ -10,9 +10,6 @@ template <typename data_t>
 queue<data_t>& operator+= (queue<data_t>& Q1, queue<data_t> Q2);
 
 template <typename data_t>
-void clear (queue<data_t>& Q);
-
-template <typename data_t>
 int binary_find (vector<data_t>&, data_t&);
 
 template <typename data_t>
@@ -20,6 +17,10 @@ int binary_find (vector<data_t>&, data_t&, int, int);
 
 class CmdControl {
 public:
+
+	template <typename data_t>
+	void clear (queue<data_t>& Q);
+
 	typedef unsigned short int indx_t;
 	enum input_t {CMD, DATA, NONE};
 	enum command {	COSTOM, FORCE, EXACT, SIMILAR, EACH, COMMAND,					//extension
@@ -74,15 +75,34 @@ private:
 	static string MSG_CLASH;
 	static string MSG_ADDED;
 	static string MSG_DELETED;
+	static string MSG_NO_NEXT;
+	static string MSG_NO_PREV;
 	static string MSG_WRONG_ID;
+	static string MSG_WRONG_DATE;
 	static string MSG_WRONG_TABLE;
+	static string MSG_WRONG_PERIOD;
 
 	string executeCmd (command);
-	void loadValidCmdList ();
-	void splitInput ();
+	string executeADD ();
+	string executeEDIT ();
+	string executeDELETE ();
+	string executeVIEW ();
+	string executeTABLE ();
+	bool executeNEXT ();
+	bool executePREV ();
+	string executeFunction (void* function (TimePeriod));
+	
+	inline void loadValidCmdList ();
+	inline void splitInput ();
+	inline void push (command);
+	inline void push (string);
+	inline void clear ();
+
+	void pop ();
 	command translateCmd (string);
 	//return an fresh command and flag command error if command is not valid
-	
+	void reset ();
+
 	int get_int ();
 	Task get_task ();
 	TimePeriod get_period ();
