@@ -77,7 +77,7 @@ void Task::invConvert (string& str) {
 			break;
 		case 10:
 			strStream >> tempInt;
-			alert.modify_time (tempInt);
+			alert.modify_clock (tempInt);
 		case 11:
 			strStream >> tempInt;
 			repeat_t = intToRepeat (tempInt);
@@ -88,7 +88,7 @@ void Task::invConvert (string& str) {
 			break;
 		case 13:
 			strStream >> tempInt;
-			repeat.modify_time (tempInt);
+			repeat.modify_clock (tempInt);
 			break;
 		case 14:
 			strStream >> forceAdd;
@@ -109,7 +109,7 @@ void Task::invConvert (string& str) {
 				break;
 			case 3:
 				strStream >> tempInt;
-				_time.modify_time (tempInt);
+				_time.modify_clock (tempInt);
 				break;
 			default:
 				break;
@@ -122,7 +122,7 @@ void Task::invConvert (string& str) {
 				break;
 			case 3:
 				strStream >> tempInt;
-				tempTime.modify_time (tempInt);
+				tempTime.modify_clock (tempInt);
 				_period.modify_start_time (tempTime);
 				break;
 			case 4:
@@ -131,7 +131,7 @@ void Task::invConvert (string& str) {
 				break;
 			case 5:
 				strStream >> tempInt;
-				tempTime.modify_time (tempInt);
+				tempTime.modify_clock (tempInt);
 				_period.modify_end_time (tempTime);
 				break;
 			default:
@@ -228,7 +228,7 @@ int Task::repeatToInt (RepeatType repeat) {
 	case FORTNIGHT:	return 3;
 	case MONTH:		return 4;
 	case COSTOM:	return 5;
-	case NOREPEAT:	return 6;
+	default:		return 6;
 	}
 }
 

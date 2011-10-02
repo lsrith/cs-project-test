@@ -10,7 +10,7 @@ string INV_CMD = "unknown command: ";
 CmdControl::CmdControl () {
 	_validCmdFile = "vldCmd.txt";
 	_flagError = NONE;
-	_dateBeforeMonth = true;
+	_dayMonth = true;
 
 	try {
 		loadValidCmdList ();
@@ -22,7 +22,7 @@ CmdControl::CmdControl () {
 CmdControl::CmdControl (string validCmdFile) {
 	_validCmdFile = validCmdFile;
 	_flagError = NONE;
-	_dateBeforeMonth = true;
+	_dayMonth = true;
 
 	try {
 		loadValidCmdList ();
@@ -34,7 +34,7 @@ CmdControl::CmdControl (string validCmdFile) {
 CmdControl::CmdControl (vector<cmd_pair> validCmd) {
 	_validCmd = validCmd;
 	_flagError = NONE;
-	_dateBeforeMonth = true;
+	_dayMonth = true;
 }
 
 void CmdControl::loadValidCmdList ()
@@ -238,7 +238,6 @@ CmdControl::command CmdControl::convertToCommand (int indx) {
 }
 
 string CmdControl::executeCmd () {
-	string str;
 /*
 	while (_sequence.empty () == false) {
 		if (_sequence.front () == CMD) {
@@ -254,23 +253,291 @@ string CmdControl::executeCmd () {
 		_sequence.pop ();
 	}
 */
-	_sequence.push (DATA);
-	_dataInput.push ("12.00");
-	_sequence.push (DATA);
-	_dataInput.push ("PM");
+	string str;
+	do {
+		cin >> str;
+		_sequence.push (DATA);
+		_dataInput.push (str);
+//		cout << _sequence.size () << endl;
+	} while (str != "end");
 
-	Time::clk_t clock = get_clock ();
-	cout << clock << endl;
+//	Time::clk_t clock = get_clock ();
+//	cout << clock << endl;
+	Time time;
+	time = get_time ();
+	cout << time.string_date () << " " << time.string_clock () << endl;
 	cout << _sequence.size () << endl;
 
 	return str;
 }
 
+Time CmdControl::get_time () {
+	Time time;
+	time.modify_date (get_date ());
+
+	if (_flagError != DATA)
+		time.modify_clock (get_clock ());
+
+	return time;
+}
+
 Time::date_t CmdControl::get_date () {
 	string strDate = _dataInput.front ();
 	int size = strDate.size ();
-	int date = 0;
-	return date;
+	int Day = 7;
+	int tempDay, tempMnth, tempYear;
+	int day = -1;
+	int mnth = -1;
+	int year = -1;
+
+	if (size == 3) {
+		convertToInt (strDate, Day, mnth);
+		if (Day < 7) {
+			_dataInput.pop ();
+			_sequence.pop ();
+		}
+	} else if (size > 3) {
+		convertToInt (strDate.substr (0, 3), Day, mnth);
+		if (Day < 7)
+			_dataInput.front ().erase (0, 3);
+	} else;
+	mnth = -1;
+
+	while (_sequence.front () == DATA && (day == -1 || mnth == -1 || year == -1)) {
+		get_date (tempDay, tempMnth, tempYear);
+		if (tempDay != -1 || tempMnth != -1 || tempYear != -1) {
+			_dataInput.pop ();
+			_sequence.pop ();
+		} else
+			break;
+
+		if (day == -1)
+			day = tempDay;
+		else {
+			if (tempDay != -1 && mnth == -1)
+				mnth = tempDay;
+			
+			if (mnth != -1 && mnth > 12 && day != -1 && day <= 12)
+				_dayMonth = false;
+
+			if (!_dayMonth) {
+				tempDay = day;
+				day = mnth;
+				mnth = tempDay;
+			}
+		}
+
+		if (mnth == -1 && tempMnth != -1)
+			mnth = tempMnth;
+		if (year == -1)
+			year = tempYear;
+	}
+	Time currTime;
+	currTime.current_time ();
+	if (Day < 7) {
+		if (day == -1 && mnth == -1 && year == -1) {
+			int currDay = currTime.get_day ();
+			currTime = currTime + ((Day + 7 - currDay) % 7) * Time::DAY;
+		} else if (day != -1 && mnth == -1 && year == -1) {
+			int currDate = currTime.get_date ();
+			currDate += (day - currDate / 1000000) * 1000000;				//substitute with user's day
+			try {
+				currTime.modify_date (currDate);
+
+				while (currTime.get_day () != Day) {
+					if (!(++currTime)) {
+						_flagError = DATA;
+						break;
+					}
+				}
+			} catch (string msg) {
+				_flagError = DATA;
+			}
+		} else if (day != -1 && mnth != -1 && year == -1) {
+			int currDate = currTime.get_date ();
+			currDate = day * 1000000 + mnth * 10000 + currDate % 10000;	//substitute with user's day and mnth
+			try {
+				currTime.modify_date (currDate);
+				while (currTime.get_day () != Day) {
+					if (currTime.get_date () % 10000 == 0) {
+						_flagError = DATA;
+						break;
+					} else {
+						currDate++;
+						currTime.modify_date (currDate);						//increment by one year
+					}
+				}
+			} catch (string msg) {
+				_flagError = DATA;
+			}
+		} else if (day != -1 && mnth != -1 && year != -1) {
+			try {
+				currTime.modify_date (day * 1000000 + mnth * 10000 + year);
+				
+				if (currTime.get_day () != Day)
+					_flagError = DATA;
+			} catch (string msg) {
+				_flagError = DATA;
+			}
+		} else
+			_flagError = DATA;
+	} else {
+		if (day == -1 && mnth == -1 && year == -1) {
+			_flagError = DATA;
+		} else if (day != -1 && mnth == -1 && year == -1) {
+			int currDate = currTime.get_date ();
+			currDate += (day - currDate / 1000000) * 1000000;				//substitute with user's day
+			try {
+				currTime.modify_date (currDate);
+			} catch (string msg) {
+				_flagError = DATA;
+			}
+		} else if (day != -1 && mnth != -1 && year == -1) {
+			int currDate = currTime.get_date ();
+			currDate = day * 1000000 + mnth * 100000 + currDate % 10000;	//substitute with user's day and mnth
+			try {
+				currTime.modify_date (currDate);
+			} catch (string msg) {
+				_flagError = DATA;
+			}
+		} else if (day != -1 && mnth != -1 && year != -1) {
+			try {
+				currTime.modify_date (day * 1000000 + mnth * 10000 + year);
+			} catch (string msg) {
+				_flagError = DATA;
+			}
+		} else
+			_flagError = DATA;
+	}
+	if (_flagError == DATA)
+		return Time::INF_DATE;
+	else
+		return currTime.get_date ();
+}
+
+void CmdControl::get_date (int& day, int& mnth, int& year) {
+	string strDate = _dataInput.front ();
+	int size = strDate.size ();
+	int date;
+	day = -1;
+	mnth = -1;
+	year = -1;
+
+	switch (size) {
+	case 10:
+		if ((strDate[2] == '.' || strDate[2] == '/' || strDate[2] == '-') &&
+			(strDate[5] == '.' || strDate[5] == '/' || strDate[5] == '-')) {
+				_dataInput.front ().erase (5, 1);
+				_dataInput.front ().erase (2, 1);
+				get_date (day, mnth, year);
+		}
+		break;
+	case 8:
+		if ((strDate[2] == '.' || strDate[2] == '/' || strDate[2] == '-') && 
+			(strDate[5] == '.' || strDate[5] == '/' || strDate[5] == '-')) {
+				_dataInput.front ().erase (5, 1);
+				_dataInput.front ().erase (2, 1);
+				get_date (day, mnth, year);
+		} else {
+			date = convertToInt (strDate);
+			if (date <= Time::INF_DATE) {
+				if (_dayMonth) {
+					day = date / 1000000;
+					mnth = date / 10000 - day * 100;
+					year = date % 10000;					
+				} else {
+					mnth = date / 1000000;
+					day = date / 10000 - mnth * 100;
+					year = date % 10000;
+				}
+			}
+		}
+		break;
+	case 6:
+		date = convertToInt (strDate);
+		if (date <= Time::INF_DATE) {
+			if (_dayMonth) {
+				day = date / 10000;
+				mnth = date / 100 - day * 100;
+			} else {
+				mnth = date / 10000;
+				day = date / 100 - mnth * 100;
+			}
+			
+			year = date % 100;
+			if (year < 70)
+				year += 2000;
+			else
+				year += 1900;
+		}
+		break;
+	case 9:
+		convertToInt (strDate.substr (0, 3), day, mnth);
+		if (mnth != 0) {
+			date = convertToInt (strDate.substr (3));
+			day = date / 10000;
+			year = date % 10000;
+		} else {
+			convertToInt (strDate.substr (2, 3), day, mnth);
+			if (mnth != 0) {
+				day = convertToInt (strDate.substr (0, 2));
+				year = convertToInt (strDate.substr (size - 4));
+			} else {
+				convertToInt (strDate.substr (4, 3), day, mnth);
+				if (mnth != 0) {
+					day = convertToInt (strDate.substr (size - 2));
+					year = convertToInt (strDate.substr (0, 4));
+				} else {
+					day = -1;
+					mnth = -1;
+					year = -1;
+				}
+			}
+		}
+		break;
+	case 4:
+		year = convertToInt (strDate);
+		break;
+	case 3:
+		convertToInt (strDate, day, mnth);
+		day = -1;
+		if (mnth == 0)
+			mnth = -1;
+		break;
+	case 2:
+		day = convertToInt (strDate);
+		break;
+	default:
+		break;
+	}
+
+	switch (size) {
+	case 10:
+	case 8:
+	case 6:
+		if (_flagError != DATA && mnth > 12 && day <= 12) {
+			int temp = mnth;
+			mnth = day;
+			day = temp;
+			_dayMonth = !_dayMonth;
+		}
+	}
+}
+
+int CmdControl::convertToInt (string str) {
+	int num = 0;
+	int size = str.size ();
+
+	for (int i = 0; i < size; i++) {
+		if (str[i] < '0' || str[i] > '9') {
+			num = -1;
+			break;
+		}
+		num *= 10;
+		num += str[i] - '0';
+	}
+
+	return num;
 }
 
 void CmdControl::convertToInt (string str, int& day, int& mnth) {
@@ -331,14 +598,14 @@ Time::clk_t CmdControl::get_clock () {
 		else
 			_flagError = DATA;
 	case 4:
-	case 2:
+//	case 2:
 		if (strClk.substr (0, 2) >= "00" && strClk.substr (0, 2) <= "23")
 			clock += (strClk[0] - '0') * 1000 + (strClk[1] - '0') * 100;
 		else
 			_flagError = DATA;
 		break;
 	case 3:
-	case 1:
+//	case 1:
 		if (strClk[0] >= '0' && strClk[0] <= '9')
 			clock += (strClk[0] - '0') * 100;
 		else
@@ -352,8 +619,8 @@ Time::clk_t CmdControl::get_clock () {
 	if (_flagError != DATA) {
 		switch (size) {
 		case 5:
-		case 2:
-		case 1:
+//		case 2:
+//		case 1:
 			_dataInput.pop ();
 			_sequence.pop ();
 			if (clock <= 1259 && notMorning ()) {
@@ -392,7 +659,7 @@ Time::clk_t CmdControl::get_clock () {
 		_flagError = DATA;
 
 	if (_flagError == DATA)
-		clock = 0;
+		clock = Time::INF_CLOCK;
 
 	return clock;
 }

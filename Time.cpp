@@ -110,7 +110,7 @@ void Time::modify_date (date_t new_date)
 		throw (INVALID_DATE);
 }
 
-void Time::modify_time (clk_t new_clk)
+void Time::modify_clock (clk_t new_clk)
 {
 	if (_valid_clock (new_clk))
 		_clk = new_clk;
@@ -314,6 +314,44 @@ Time& Time::operator= (Time time)
 	this->_date = time._date;
 	this->_clk = time._clk;
 	return *this;
+}
+
+bool Time::operator++ () {
+	int mnth = _date / 10000 - (_date / 1000000) * 100;
+	int year = _date % 10000;
+	int day = _date / 1000000;
+
+	if (mnth == 12) {
+		mnth = 1;
+		year += 1;
+	} else {
+		mnth += 1;
+	}
+
+	if (year <= 9999) {
+		_date = day * 1000000 + mnth * 10000 + year;
+		return true;
+	} else
+		return false;
+}
+
+bool Time::operator-- () {
+	int mnth = _date / 10000 - (_date / 1000000) * 100;
+	int year = _date % 10000;
+	int day = _date / 1000000;
+
+	if (mnth == 1) {
+		mnth = 12;
+		year -= 1;
+	} else {
+		mnth -= 1;
+	}
+
+	if (year >= 0) {
+		_date = day * 1000000 + mnth * 10000 + year;
+		return true;
+	} else
+		return false;
 }
 
 unsigned int Time::convert_to_mins ()

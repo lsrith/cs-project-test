@@ -24,7 +24,7 @@ public:
 	// have to consider how to display the clashed tasks
 	// for each task shown, numering them from 1 to the end and save as a vector of address of template
 	// if user enter view 5, we execute view (templateVect[4]); 
-	string view (view_t viewType, TimePeriod period);
+	string view (TimePeriod period);
 	string view (view_t viewType, string tableName);
 	string reminder ();
 	// return a string of the view of the reminder whenever ToDoMngr is executed;
@@ -38,13 +38,10 @@ public:
 	//***Switch User*** function prototype to be completed
 
 //Ben:
-	Task addTask (Task task, bool forceAdd);
+	list<Task> addTask (Task task, bool forceAdd);
 	// add a task to the dataStorage
-	// if forceAdd is true, just add and return a fresh Template
-	// else return the clashed task
-
-	list<Task> addTask (Task task, RepeatType repeat, bool forceAdd);
-	// add a task to the dataStorage based on repeat type
+	// if forceAdd is true, just add and return a fresh list
+	// else return the clashed tasks
 
 	list<Task> editTask (int taskId /*--*/)
 	void eraseTask (int taskId);

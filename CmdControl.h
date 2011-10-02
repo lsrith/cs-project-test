@@ -56,7 +56,7 @@ private:
 
 	input_t _flagError;
 	string _validCmdFile;
-	bool _dateBeforeMonth;
+	bool _dayMonth;
 
 	const string LOST_FILE;
 	const string INV_CMD;
@@ -76,7 +76,9 @@ private:
 	//Format (12hrs):: H AM || HH AM || HH.MM AM || HH:MM AM || HAM || HHAM || HH.MMAM || HH:MMAM
 	bool notMorning (string);
 	bool notMorning ();
+	void get_date (int&, int&, int&);
 	void convertToInt (string, int&, int&);
+	int convertToInt (string);
 	
 	command convertToCommand (int);
 	string convertToString (command);
