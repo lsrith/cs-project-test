@@ -175,7 +175,7 @@ bool VldCmdCtrl::search_vldCmd (string str, command& cmd) {
 	return found;
 }
 
-bool VldCmdCtrl::search_vldCmd (string str, command& cmd) {
+bool VldCmdCtrl::search_standAloneCmd (string str, command& cmd) {
 	bool found = false;
 	cmd = VOID;
 	for (int i = 0; !found && i < standAloneCmdEndPos; i++) {

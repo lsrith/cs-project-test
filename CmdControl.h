@@ -41,7 +41,7 @@ private:
 	queue<command> _1stCmd;
 	queue<command> _2ndCmd;
 	queue<string> _1stData;
-	queue<command> _2ndData;
+	queue<string> _2ndData;
 	queue<input_t> _1stSeq;
 	queue<input_t> _2ndSeq;
 	queue<command>* _cmdInput;
@@ -72,22 +72,23 @@ private:
 	static string MSG_WRONG_DATE;
 	static string MSG_WRONG_TABLE;
 	static string MSG_WRONG_PERIOD;
-/*
+
 	string executeCmd (command);
 	string executeADD ();
 	string executeEDIT ();
 	string executeDELETE ();
 	string executeVIEW ();
 	string executeTABLE ();
-	string executeMODIFY ();
+	string executeHELP ();
+	string executeEditCmd (int);
+//	string executeFunction (void* function (TimePeriod));
+	void executeSORT ();
 	bool executeNEXT ();
 	bool executePREV ();
-	string executeFunction (void* function (TimePeriod));
-*/
-	string executeEditCmd (int);
 	bool promptToContinue (string);
 	bool promptToGetValidInput (string);
-	
+	bool promptToGetNewInput (string);
+
 	void splitInput ();
 	command translateCmd (string);
 	//return an fresh command and flag command error if command is not valid

@@ -92,29 +92,6 @@ void CmdControl::splitInput () {
 	}
 }
 
-string CmdControl::executeEditCmd (int indx) {
-	command pair;
-	pair.enum_cmd = convertToCommand (indx);
-	string str;
-	promptToGetValidInput (str);
-	str.erase ();
-
-	if (_sequence->front () == DATA) {
-		pair.str_cmd = _dataInput->front ();
-		pop ();
-		str = ">> " + pair.str_cmd + " indicate " + convertToString (pair.enum_cmd);
-		
-		vector<cmd_pair>::iterator iter;
-		bool existed = search_vldCmd (pair.str_cmd, iter);
-		if (!existed) {
-			_validCmd.push_back (pair);
-		} else if (pair.enum_cmd != iter->enum_cmd) {
-				iter->enum_cmd = pair.enum_cmd;
-		} else;
-	}
-	return str;
-}
-
 string CmdControl::executeCmd () {
 	string str;
 
@@ -148,7 +125,7 @@ string CmdControl::executeCmd () {
 */
 	return str;
 }
-/*
+
 string CmdControl::executeCmd (command cmd) {
 	string str;
 
@@ -169,7 +146,8 @@ string CmdControl::executeCmd (command cmd) {
 		str = executeVIEW ();
 		break;
 	case REMINDER:
-		str = _toDoMngr.reminder ();
+//		str = _toDoMngr.reminder ();
+		break;
 	case FIRST:
 		while (executePREV ());
 		break;
@@ -185,38 +163,31 @@ string CmdControl::executeCmd (command cmd) {
 			str = MSG_NO_PREV;
 		break;
 	case UNDO:
-		_toDoMngr.undo ();
+//		_toDoMngr.undo ();
 		break;
 	case REDO:
-		_toDoMngr.redo ();
+//		_toDoMngr.redo ();
 		break;
 	case SORT:
+		executeSORT ();
 		break;
 	case CLEAR:
-		_toDoMngr.clear ();
+//		_toDoMngr.clear ();
 		str = MSG_CLEAR;
 		break;
 	case RESET:
 		reset ();
 		break;
 	case HELP:
-		if (_sequence.front () == CMD && _cmdInput.front () == COMMAND) {
-			pop ();
-			str = _toDoMngr.help ("cmd");
-		} else if (_sequence.front () == DATA) {
-			str = _toDoMngr.help (_dataInput.front ());
-			pop ();
-		} else {
-			str = _toDoMngr.help ("");
-		}
+		str = executeHELP ();
 		break;
 	case EXIT:
-		if (_sequence.front () == CMD && _cmdInput.front () == TABLE) {
+		if (_sequence->front () == CMD && _cmdInput->front () == TABLE) {
 			pop ();
 			_tableName.erase ();
 		} else {
 			update_dayMonth (_dayMonth);
-			_toDoMngr.exit ();
+//			_toDoMngr.exit ();
 		}
 		break;
 	default:
@@ -231,15 +202,56 @@ string CmdControl::executeCmd (command cmd) {
 	return str;
 }
 
+string CmdControl::executeEditCmd (int indx) {
+	cmd_pair pair;
+	pair.enum_cmd = convertToCommand (indx);
+	string str;
+	promptToGetNewInput (str);
+	str.erase ();
+
+	if (_sequence->front () == DATA) {
+		pair.str_cmd = _dataInput->front ();
+		pop ();
+		str = ">> " + pair.str_cmd + " indicate " + convertToString (pair.enum_cmd);
+		
+		vector<cmd_pair>::iterator iter;
+		bool existed = search_vldCmd (pair.str_cmd, iter);
+		if (!existed) {
+			_validCmd.push_back (pair);
+		} else if (pair.enum_cmd != iter->enum_cmd) {
+				iter->enum_cmd = pair.enum_cmd;
+		} else;
+	}
+	return str;
+}
+
+string CmdControl::executeHELP () {
+	string str;
+/*
+	if (_sequence->front () == CMD && _cmdInput->front () == COMMAND) {
+		pop ();
+		str = _toDoMngr.help ("cmd");
+	} else if (_sequence->front () == DATA) {
+		str = _toDoMngr.help (_dataInput->front ());
+		pop ();
+	} else {
+		str = _toDoMngr.help ("");
+	}
+*/
+	return str;
+
+}
+
 string CmdControl::executeTABLE () {
 	string str;
+/*
 	pop ();
 
-	if (_sequence.front () == DATA && !getTableName ()) {
-		string tableName = _dataInput.front ();
+	if (_sequence->front () == DATA && !getTableName ()) {
+		string tableName = _dataInput->front ();
 		pop ();
 
-		if (_sequence.front () == CMD && (_cmdInput.front () == FROM || _cmdInput.front () == TO)) {
+		if (_sequence->front () == CMD && (_cmdInput->front () == FROM || _cmdInput->front () == TO)) {
 			tabPeriod:
 				TimePeriod period = get_period ();
 			
@@ -254,16 +266,18 @@ string CmdControl::executeTABLE () {
 	} else {
 		str = _toDoMngr.viewTableNames ();
 	}
+*/
 	return str;
 }
 
 string CmdControl::executeDELETE () {
 	string str;
-	switch (_sequence.front ()) {
+/*
+	switch (_sequence->front ()) {
 	case DATA:
 		if (_activeListAccessible) {
 			delID:
-				string data = _dataInput.front ();
+				string data = _dataInput->front ();
 				int taskId = convertToInt (data);
 
 			Task task = _toDoMngr.erase (taskId);
@@ -277,7 +291,7 @@ string CmdControl::executeDELETE () {
 		}
 		break;
 	case CMD:
-		switch (_cmdInput.front ()) {
+		switch (_cmdInput->front ()) {
 		case FROM:
 		case TO:
 			str = executeFunction (_toDoMngr.erase);
@@ -295,15 +309,16 @@ string CmdControl::executeDELETE () {
 	default:
 		break;
 	}
+*/
 	return str;
 }
 
 string CmdControl::executeVIEW () {
 	string str;
-
+/*
 	ToDoMngr::view_t viewType = ToDoMngr::view_t::DAILY;
-	if (_sequence.front () == CMD) {
-		switch (_cmdInput.front ()) {
+	if (_sequence->front () == CMD) {
+		switch (_cmdInput->front ()) {
 		case DAY:
 			viewType = ToDoMngr::view_t::DAILY;
 			pop ();
@@ -321,7 +336,7 @@ string CmdControl::executeVIEW () {
 		}
 	}
 
-	switch (_sequence.front ()) {
+	switch (_sequence->front ()) {
 	case DATA:
 		if (_activeListAccessible) {
 			viewID:
@@ -332,14 +347,12 @@ string CmdControl::executeVIEW () {
 			if (str.empty ()) {
 				if (promptToGetValidInput (MSG_WRONG_ID))
 					goto viewID;
-			} else {
-				_dataInput.pop ();
-				_sequence.pop ();
-			}
+			} else
+				pop ();
 		}
 		break;
 	case CMD:
-		switch (_cmdInput.front ()) {
+		switch (_cmdInput->front ()) {
 		case FROM:
 		case TO:
 			str = executeFunction (_toDoMngr.view);
@@ -362,8 +375,7 @@ string CmdControl::executeVIEW () {
 			pop ();
 			while (!getTableName ()) {
 				promptToGetValidInput (MSG_WRONG_TABLE);
-			}
-				
+			}	
 			str = _toDoMngr.view (viewType, _tableName);
 			break;
 		default:
@@ -375,14 +387,14 @@ string CmdControl::executeVIEW () {
 			str = _toDoMngr.view (viewType, _tableName);
 		break;
 	}
-
+*/
 	return str;
 }
 
 string CmdControl::executeADD () {
 	string str;
-
-	if (_sequence.front () == CMD && _cmdInput.front () == FORCE) {
+/*
+	if (_sequence->front () == CMD && _cmdInput->front () == FORCE) {
 		pop ();
 		_force = true;
 	}
@@ -404,22 +416,57 @@ string CmdControl::executeADD () {
 	}
 		
 	_taskList->clear ();
+*/
 	return str;
 }
 
+string CmdControl::executeEDIT () {
+	string str;
+	return str;
+}
+/*
 string CmdControl::executeFunction (void* function (TimePeriod)) {
 	string str;
 	getPeriod:
 		TimePeriod period = get_period ();
 			
 	if (_flagError != DATA) {
-		str = _toDoMngr.view (period);		
+		str = function (period);		
 	} else {
 		if (promptToGetValidInput (MSG_WRONG_PERIOD))
 			goto getPeriod;  
 	}
 }
 */
+void CmdControl::executeSORT () {
+}
+
+bool CmdControl::executeNEXT () {
+	bool notLast = false;
+	return notLast;
+}
+
+bool CmdControl::executePREV () {
+	bool notFirst = false;
+	return notFirst;
+}
+
+bool CmdControl::promptToContinue (string str) {
+	bool correctInput = true;
+	return correctInput;
+}
+
+bool CmdControl::promptToGetValidInput (string str) {
+	bool correctInput = true;
+	return correctInput;
+}
+
+bool CmdControl::promptToGetNewInput (string str) {
+	bool correctInput = true;
+	activate2ndQs ();
+	return correctInput;
+}
+
 Time CmdControl::get_time () {
 	Time time;
 	if (_flagError == DATA)
@@ -589,16 +636,16 @@ void CmdControl::get_date (int& day, int& mnth, int& year) {
 	case 10:
 		if ((strDate[2] == '.' || strDate[2] == '/' || strDate[2] == '-') &&
 			(strDate[5] == '.' || strDate[5] == '/' || strDate[5] == '-')) {
-				_dataInput.front ().erase (5, 1);
-				_dataInput.front ().erase (2, 1);
+				_dataInput->front ().erase (5, 1);
+				_dataInput->front ().erase (2, 1);
 				get_date (day, mnth, year);
 		}
 		break;
 	case 8:
 		if ((strDate[2] == '.' || strDate[2] == '/' || strDate[2] == '-') && 
 			(strDate[5] == '.' || strDate[5] == '/' || strDate[5] == '-')) {
-				_dataInput.front ().erase (5, 1);
-				_dataInput.front ().erase (2, 1);
+				_dataInput->front ().erase (5, 1);
+				_dataInput->front ().erase (2, 1);
 				get_date (day, mnth, year);
 		} else {
 			date = convertToInt (strDate);
@@ -909,7 +956,7 @@ VldCmdCtrl::command CmdControl::translateCmd (string str) {
 		bool vldExt = checkIfVldExtension (cmd, prev);
 
 		if (!vldExt)
-			_flagError = CMD
+			_flagError = CMD;
 	}
 
 	return cmd;
