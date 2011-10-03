@@ -1,37 +1,24 @@
 #ifndef CMDCONTROL_H_
 #define CMDCONTROL_H_
-#include "ToDoMngr.h"
+#include "VldCmdCtrl.h"
+#include "Task.h"
+//#include "ToDoMngr.h"
 #include <string>
 #include <vector>
 #include <queue>
+#include <list>
 using namespace std;
 
 template <typename data_t>
 queue<data_t>& operator+= (queue<data_t>& Q1, queue<data_t> Q2);
 
-template <typename data_t>
-int binary_find (vector<data_t>&, data_t&);
-
-template <typename data_t>
-int binary_find (vector<data_t>&, data_t&, int, int);
-
-class CmdControl {
+class CmdControl: public VldCmdCtrl {
 public:
-
 	template <typename data_t>
 	void clear (queue<data_t>& Q);
 
 	typedef unsigned short int indx_t;
 	enum input_t {CMD, DATA, NONE};
-	enum command {	COSTOM, FORCE, EXACT, SIMILAR, EACH, COMMAND,					//extension
-					TIME, DATE, FROM, TO, NAME, VENUE, NOTE, ALERT, REPEAT,			//marker
-					HIGH, IMPT, NOMAL, DAY, WEEK, MONTH,							//object 
-					ADD, EDIT, DELETE, TABLE, VIEW, REMINDER, NEXT, PREVIOUS,		//command
-					FIRST, LAST, UNDO, REDO, HELP, SORT, SEARCH, CLEAR, RESET, EXIT, VOID};
-	struct cmd_pair {
-		string str_cmd;
-		command enum_cmd;
-	};
 
 	CmdControl ();
 	//Command will load CmdList from built-in file
@@ -51,23 +38,27 @@ public:
 
 private:	
 	string _input;
-	queue<command> _cmdInput;
-	queue<string> _dataInput;
-	queue<input_t> _sequence;
-	vector<cmd_pair> _validCmd;
-
+	queue<command> _1stCmd;
+	queue<command> _2ndCmd;
+	queue<string> _1stData;
+	queue<command> _2ndData;
+	queue<input_t> _1stSeq;
+	queue<input_t> _2ndSeq;
+	queue<command>* _cmdInput;
+	queue<string>* _dataInput;
+	queue<input_t>* _sequence;
+/*
 	ToDoMngr _toDoMngr;
-	string _tableName;
+	ToDoMngr::search_t _search;
+*/
 	list<Task>* _taskList;
+	string _tableName;
 	bool _force;
 	bool _activeListAccessible;
-	ToDoMngr::search_t _search;
 
 	input_t _flagError;
-	string _validCmdFile;
 	bool _dayMonth;
 
-	static string LOST_FILE;
 	static string INV_CMD;
 	static string INV_DATA;
 	static string MSG_ERROR;
@@ -81,27 +72,26 @@ private:
 	static string MSG_WRONG_DATE;
 	static string MSG_WRONG_TABLE;
 	static string MSG_WRONG_PERIOD;
-
+/*
 	string executeCmd (command);
 	string executeADD ();
 	string executeEDIT ();
 	string executeDELETE ();
 	string executeVIEW ();
 	string executeTABLE ();
+	string executeMODIFY ();
 	bool executeNEXT ();
 	bool executePREV ();
 	string executeFunction (void* function (TimePeriod));
+*/
+	string executeEditCmd (int);
+	bool promptToContinue (string);
+	bool promptToGetValidInput (string);
 	
-	inline void loadValidCmdList ();
-	inline void splitInput ();
-	inline void push (command);
-	inline void push (string);
-	inline void clear ();
-
-	void pop ();
+	void splitInput ();
 	command translateCmd (string);
 	//return an fresh command and flag command error if command is not valid
-	void reset ();
+	void checkIfStandAloneCmd ();
 
 	int get_int ();
 	Task get_task ();
@@ -121,9 +111,11 @@ private:
 	void convertToInt (string, int&, int&);
 	int convertToInt (string);	// return -1 if the whole string is not an integer
 
-	bool promptToContinue (string);
-	bool promptToGetValidInput (string);
-	command convertToCommand (int);
-	string convertToString (command);
+	void activate2ndQs ();
+	void deactivate2ndQs ();
+	void push (command);
+	void push (string);
+	void clear ();
+	bool pop ();
 };
 #endif

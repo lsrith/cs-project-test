@@ -2,14 +2,14 @@
 #include <iostream>
 #include <string>
 using namespace std;
-
+/*
 int main () {
 	CmdControl cmdControl;
 	cmdControl.executeCmd ();
 	return 0;
 }
+*/
 
-/*
 int main () {
 	string str;
 	try {
@@ -19,18 +19,18 @@ int main () {
 			getline (cin, str);
 			cout << str << endl;
 			try {
-				cmdControl.addInput (str);
+				cmdControl.updateInput (str);
 				cout << cmdControl.executeCmd () << endl;
 			} catch (string xcpt) {
 				cout << "INV" << endl;
 			}
 		}
 	} catch (string xcpt) {
-		cout << xcpt << endl;
+		cout << "INV" + xcpt << endl;
 	}
 	return 0;
 }
-*/
+
 /*
 int main ()
 {
