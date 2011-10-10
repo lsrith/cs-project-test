@@ -1,3 +1,7 @@
+/*
+*Author Rith
+*/
+
 #ifndef TEMPLATE_H_
 #define TEMPLATE_H_
 #include "Time.h"

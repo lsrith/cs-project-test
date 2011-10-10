@@ -1,4 +1,7 @@
-//TimePeriod.h
+/*
+*Author Rith
+*/
+
 #ifndef TIMEPERIOD_H
 #define TIMEPERIOD_H
 #include "Time.h"

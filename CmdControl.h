@@ -1,3 +1,7 @@
+/*
+*Author Rith
+*/
+
 #ifndef CMDCONTROL_H_
 #define CMDCONTROL_H_
 #include "VldCmdCtrl.h"

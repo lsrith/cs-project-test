@@ -1,3 +1,7 @@
+/*
+*Author Rith
+*/
+
 #ifndef VLDCMDCTRL_H
 #define VLDCMDCTRL_H
 #include <string>
