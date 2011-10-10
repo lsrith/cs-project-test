@@ -162,6 +162,25 @@ string Task::stringConvert () {
 	return str.str ();
 }
 
+void Task::modify_time (Time newTime) {
+	Time dfltTime;
+	if (newTime != dfltTime) {
+		timeTask = true;
+		_time = newTime;
+		TimePeriod period;
+		_period = period;
+	}
+}
+
+void Task::modify_period (TimePeriod newPeriod) {
+	Time dfltTime;
+	if (newPeriod.get_start_time () != dfltTime && newPeriod.get_end_time () != dfltTime) {
+		timeTask = false;
+		_period = newPeriod;
+		_time = dfltTime;
+	}
+}
+
 Time Task::get_time () {
 	return _time;
 }

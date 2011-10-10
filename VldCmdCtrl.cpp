@@ -106,52 +106,50 @@ void VldCmdCtrl::resetDateType () {
 VldCmdCtrl::command VldCmdCtrl::convertToCommand (int indx) {
 	command cmd;
 	switch (indx) {
-	case  0:	cmd = COSTOM;	break;
-	case  1:	cmd = FORCE;	break;
-	case  2:	cmd = EXACT;	break;
-	case  3:	cmd = SIMILAR;	break;
-	case  4:	cmd = EACH;		break;
-	case  5:	cmd = COMMAND;	break;
-	case  6:	cmd = TIME;		break;
-	case  7:	cmd = DATE;		break;
-	case  8:	cmd = FROM;		break;
-	case  9:	cmd = TO;		break;
-	case 10:	cmd = NAME;		break;
-	case 11:	cmd = VENUE;	break;
-	case 12:	cmd = NOTE;		break;
-	case 13:	cmd = ALERT;	break;
-	case 14:	cmd = REPEAT;	break;
-	case 15:	cmd = PRIORITY;	break;
-	case 16:	cmd = HIGH;		break;
-	case 17:	cmd = IMPT;		break;
-	case 18:	cmd = NOMAL;	break;
-	case 19:	cmd = DAY;		break;
-	case 20:	cmd = WEEK;		break;
-	case 21:	cmd = MONTH;	break;
-	case 22:	cmd = ADD;		break;
-	case 23:	cmd = EDIT;		break;
-	case 24:	cmd = DELETE;	break;
-	case 25:	cmd = TABLE;	break;
-	case 26:	cmd = VIEW;		break;
-	case 27:	cmd = REMINDER;	break;
-	case 28:	cmd = NEXT;		break;
-	case 29:	cmd = PREVIOUS;	break;
-	case 30:	cmd = FIRST;	break;
-	case 31:	cmd = LAST;		break;
-	case 32:	cmd = UNDO;		break;
-	case 33:	cmd = REDO;		break;
-	case 34:	cmd = HELP;		break;
-	case 35:	cmd = SORT;		break;
-	case 36:	cmd = SEARCH;	break;
-	case 37:	cmd = CLEAR;	break;
-	case 38:	cmd = RESET;	break;
-	case 39:	cmd = EXIT;		break;
-	default:	cmd = VOID;		break;
+	case  0:	cmd = CCOSTOM;	break;
+	case  1:	cmd = CFORCE;	break;
+	case  2:	cmd = CEXACT;	break;
+	case  3:	cmd = CSIMILAR;	break;
+	case  4:	cmd = CEACH;		break;
+	case  5:	cmd = CCOMMAND;	break;
+	case  6:	cmd = CTIME;		break;
+	case  7:	cmd = CDATE;		break;
+	case  8:	cmd = CFROM;		break;
+	case  9:	cmd = CTO;		break;
+	case 10:	cmd = CNAME;		break;
+	case 11:	cmd = CVENUE;	break;
+	case 12:	cmd = CNOTE;		break;
+	case 13:	cmd = CALERT;	break;
+	case 14:	cmd = CREPEAT;	break;
+	case 15:	cmd = CPRIORITY;	break;
+	case 16:	cmd = CHIGH;		break;
+	case 17:	cmd = CIMPT;		break;
+	case 18:	cmd = CNOMAL;	break;
+	case 19:	cmd = CDAY;		break;
+	case 20:	cmd = CWEEK;		break;
+	case 21:	cmd = CMONTH;	break;
+	case 22:	cmd = CADD;		break;
+	case 23:	cmd = CDELETE;	break;
+	case 25:	cmd = CTABLE;	break;
+	case 26:	cmd = CVIEW;		break;
+	case 27:	cmd = CREMINDER;	break;
+	case 28:	cmd = CNEXT;		break;
+	case 29:	cmd = CPREVIOUS;	break;
+	case 30:	cmd = CFIRST;	break;
+	case 31:	cmd = CLAST;		break;
+	case 32:	cmd = CUNDO;		break;
+	case 33:	cmd = CREDO;		break;
+	case 34:	cmd = CHELP;		break;
+	case 35:	cmd = CSORT;		break;
+	case 36:	cmd = CSEARCH;	break;
+	case 37:	cmd = CCLEAR;	break;
+	case 38:	cmd = CRESET;	break;
+	case 39:	cmd = CEXIT;		break;
+	default:	cmd = CVOID;		break;
 	}
 
 	return cmd;
 }
-
 
 bool VldCmdCtrl::search_vldCmd (string& str, vector<cmd_pair>::iterator iter) {
 	bool found = false;
@@ -165,11 +163,11 @@ bool VldCmdCtrl::search_vldCmd (string& str, vector<cmd_pair>::iterator iter) {
 bool VldCmdCtrl::search_vldCmd (string str, command& cmd) {
 	int size = _validCmd.size ();
 	bool found = false;
-	cmd = VOID;
+	cmd = CVOID;
 	for (int i = standAloneCmdEndPos; !found && i < size; i++) {
 		if (str == _validCmd[i].str_cmd) {
 			found = true;
-			str = _validCmd[i].enum_cmd;
+			cmd = _validCmd[i].enum_cmd;
 		}
 	}
 	return found;
@@ -177,11 +175,11 @@ bool VldCmdCtrl::search_vldCmd (string str, command& cmd) {
 
 bool VldCmdCtrl::search_standAloneCmd (string str, command& cmd) {
 	bool found = false;
-	cmd = VOID;
+	cmd = CVOID;
 	for (int i = 0; !found && i < standAloneCmdEndPos; i++) {
 		if (str == _validCmd[i].str_cmd) {
 			found = true;
-			str = _validCmd[i].enum_cmd;
+			cmd = _validCmd[i].enum_cmd;
 		}
 	}
 	return found;
@@ -191,22 +189,22 @@ bool VldCmdCtrl::checkIfVldExtension (command ext, command cmd) {
 	bool vldExt = false;
 
 	switch (ext) {
-	case COSTOM:
-		if (cmd == VIEW || cmd == SEARCH)
+	case CCOSTOM:
+		if (cmd == CVIEW || cmd == CSEARCH)
 			vldExt = true;
 		break;
-	case FORCE:
-		if (cmd == ADD || cmd == EDIT)
+	case CFORCE:
+		if (cmd == CADD || cmd == CEDIT)
 			vldExt = true;
 		break;
-	case EXACT:
-	case SIMILAR:
-	case EACH:
-		if (cmd == SEARCH)
+	case CEXACT:
+	case CSIMILAR:
+	case CEACH:
+		if (cmd == CSEARCH)
 			vldExt = true;
 		break;
-	case COMMAND:
-		if (cmd == HELP || cmd == RESET)
+	case CCOMMAND:
+		if (cmd == CHELP || cmd == CRESET)
 			vldExt = true;
 		break;
 	default:
@@ -220,46 +218,46 @@ bool VldCmdCtrl::checkIfVldExtension (command ext, command cmd) {
 string VldCmdCtrl::convertToString (command cmd) {
 	string str;
 	switch (cmd) {
-	case (COSTOM):		str = "COSTOM";		break;
-	case (FORCE):		str = "FORCE";		break;
-	case (EXACT):		str = "EXACT";		break;
-	case (SIMILAR):		str = "SIMILAR";	break;
-	case (EACH):		str = "EACH";		break;
-	case (COMMAND):		str = "COMMAND";	break;
-	case (TIME):		str = "TIME";		break;
-	case (DATE):		str = "DATE";		break;
-	case (FROM):		str = "FROM";		break;
-	case (TO):			str = "TO";			break;
-	case (NAME):		str = "NAME";		break;
-	case (VENUE):		str = "VENUE";		break;
-	case (NOTE):		str = "NOTE";		break;
-	case (ALERT):		str = "ALERT";		break;
-	case (REPEAT):		str = "REPEAT";		break;
-	case (PRIORITY):	str = "PRIORITY";	break;
-	case (HIGH):		str = "HIGH";		break;
-	case (IMPT):		str = "IMPT";		break;
-	case (NOMAL):		str = "NOMAL";		break;
-	case (DAY):			str = "DAY";		break;
-	case (WEEK):		str = "WEEK";		break;
-	case (MONTH):		str = "MONTH";		break;
-	case (ADD):			str = "ADD";		break;
-	case (EDIT):		str = "EDIT";		break;
-	case (DELETE):		str = "DELETE";		break;
-	case (TABLE):		str = "TABLE";		break;
-	case (VIEW):		str = "VIEW";		break;
-	case (REMINDER):	str = "REMINDER";	break;
-	case (NEXT):		str = "NEXT";		break;
-	case (PREVIOUS):	str = "PREVIOUS";	break;
-	case (FIRST):		str = "FIRST";		break;
-	case (LAST):		str = "LAST";		break;
-	case (UNDO):		str = "UNDO";		break;
-	case (REDO):		str = "REDO";		break;
-	case (HELP):		str = "HELP";		break;
-	case (SORT):		str = "SORT";		break;
-	case (SEARCH):		str = "SEARCH";		break;
-	case (CLEAR):		str = "CLEAR";		break;
-	case (RESET):		str = "RESET";		break;
-	case (EXIT):		str = "EXIT";		break;
+	case (CCOSTOM):		str = "COSTOM";		break;
+	case (CFORCE):		str = "FORCE";		break;
+	case (CEXACT):		str = "EXACT";		break;
+	case (CSIMILAR):		str = "SIMILAR";	break;
+	case (CEACH):		str = "EACH";		break;
+	case (CCOMMAND):		str = "COMMAND";	break;
+	case (CTIME):		str = "TIME";		break;
+	case (CDATE):		str = "DATE";		break;
+	case (CFROM):		str = "FROM";		break;
+	case (CTO):			str = "TO";			break;
+	case (CNAME):		str = "NAME";		break;
+	case (CVENUE):		str = "VENUE";		break;
+	case (CNOTE):		str = "NOTE";		break;
+	case (CALERT):		str = "ALERT";		break;
+	case (CREPEAT):		str = "REPEAT";		break;
+	case (CPRIORITY):	str = "PRIORITY";	break;
+	case (CHIGH):		str = "HIGH";		break;
+	case (CIMPT):		str = "IMPT";		break;
+	case (CNOMAL):		str = "NOMAL";		break;
+	case (CDAY):			str = "DAY";		break;
+	case (CWEEK):		str = "WEEK";		break;
+	case (CMONTH):		str = "MONTH";		break;
+	case (CADD):			str = "ADD";		break;
+	case (CEDIT):		str = "EDIT";		break;
+	case (CDELETE):		str = "DELETE";		break;
+	case (CTABLE):		str = "TABLE";		break;
+	case (CVIEW):		str = "VIEW";		break;
+	case (CREMINDER):	str = "REMINDER";	break;
+	case (CNEXT):		str = "NEXT";		break;
+	case (CPREVIOUS):	str = "PREVIOUS";	break;
+	case (CFIRST):		str = "FIRST";		break;
+	case (CLAST):		str = "LAST";		break;
+	case (CUNDO):		str = "UNDO";		break;
+	case (CREDO):		str = "REDO";		break;
+	case (CHELP):		str = "HELP";		break;
+	case (CSORT):		str = "SORT";		break;
+	case (CSEARCH):		str = "SEARCH";		break;
+	case (CCLEAR):		str = "CLEAR";		break;
+	case (CRESET):		str = "RESET";		break;
+	case (CEXIT):		str = "EXIT";		break;
 	default:			str = "VOID";		break;
 	}
 	return str;

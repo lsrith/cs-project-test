@@ -6,11 +6,11 @@ using namespace std;
 
 class VldCmdCtrl {
 public:
-	enum command {	COSTOM, FORCE, EXACT, SIMILAR, EACH, COMMAND,						//extension
-					TIME, DATE, FROM, TO, NAME, VENUE, NOTE, ALERT, REPEAT,	PRIORITY,	//marker
-					HIGH, IMPT, NOMAL, DAY, WEEK, MONTH,								//object 
-					ADD, EDIT, DELETE, TABLE, VIEW, REMINDER, NEXT, PREVIOUS,			//command
-					FIRST, LAST, UNDO, REDO, HELP, SORT, SEARCH, CLEAR, RESET, EXIT, VOID};
+	enum command {	CCOSTOM, CFORCE, CEXACT, CSIMILAR, CEACH, CCOMMAND,						//extension
+					CTIME, CDATE, CFROM, CTO, CNAME, CVENUE, CNOTE, CALERT, CREPEAT, CPRIORITY,	//marker
+					CHIGH, CIMPT, CNOMAL, CDAY, CWEEK, CMONTH,								//object 
+					CADD, CEDIT, CDELETE, CTABLE, CVIEW, CREMINDER, CNEXT, CPREVIOUS,			//command
+					CFIRST, CLAST, CUNDO, CREDO, CHELP, CSORT, CSEARCH, CCLEAR, CRESET, CEXIT, CVOID};
 	struct cmd_pair {
 		string str_cmd;
 		command enum_cmd;

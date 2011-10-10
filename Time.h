@@ -29,6 +29,7 @@ public:
 	static bool _valid_clock (clk_t);
 
 	bool operator== (Time time);
+	bool operator!= (Time time);
 	bool operator> (Time time);
 	bool operator< (Time time);      //return true if the time is after *this, else false
 

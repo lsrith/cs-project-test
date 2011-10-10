@@ -80,8 +80,9 @@ private:
 	string executeVIEW ();
 	string executeTABLE ();
 	string executeHELP ();
+	string checkAlert ();
 	string executeEditCmd (int);
-//	string executeFunction (void* function (TimePeriod));
+	string executeFunction (string (*function) (TimePeriod));
 	void executeSORT ();
 	bool executeNEXT ();
 	bool executePREV ();
@@ -111,6 +112,7 @@ private:
 	void get_date (int&, int&, int&);
 	void convertToInt (string, int&, int&);
 	int convertToInt (string);	// return -1 if the whole string is not an integer
+	string mergeStringInput ();
 
 	void activate2ndQs ();
 	void deactivate2ndQs ();

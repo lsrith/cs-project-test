@@ -23,6 +23,8 @@ public:
 
 	bool operator== (TimePeriod timePeriod);  //return true if the timings clash, else false
 	bool operator== (Time time);
+	bool operator!= (TimePeriod timePeriod);
+	bool operator!= (Time time);
 	bool operator< (TimePeriod timePeriod);   //return true if the timing is after *this, else false
 	bool operator< (Time time);
 	bool operator> (TimePeriod timePeriod);   //return true if the timing is before *this, else false

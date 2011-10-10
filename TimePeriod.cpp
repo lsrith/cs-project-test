@@ -77,6 +77,20 @@ bool TimePeriod::operator== (Time time)
 		return false;
 }
 
+bool TimePeriod::operator!= (TimePeriod timePeriod) {
+	if (this->operator== (timePeriod))
+		return false;
+	else
+		return true;
+}
+
+bool TimePeriod::operator!= (Time time) {
+	if (this->operator== (time))
+		return false;
+	else
+		return true;
+}
+
 bool TimePeriod::operator< (TimePeriod timePeriod)
 {
 	if (this->_end < timePeriod._start)

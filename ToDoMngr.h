@@ -10,7 +10,7 @@ using namespace std;
 
 class ToDoMngr {
 public:
-	enum search_t {SEXACT, SSIMILAR, SEACH};
+	enum search_t {EXACT, SIMILAR, EACH};
 	enum view_t {DAILY, WEEKLY, MONTHLY};
 
 	ToDoMngr ();
@@ -37,7 +37,10 @@ public:
 	// return a string of the view of the reminder whenever ToDoMngr is executed;
 	string alert ();
 	// return a string to pop up whenever a task is set to be alert at any specified time
-	
+	void deactivateAlert ();
+	static bool ifAlertActive ();
+	void snoozeAlert(int mins);
+
 	string help (string command);
 	// view help based on specific command, view full help if command == NULL;
 	// for V0.1, suppose that the command is only NULL or command;
@@ -79,5 +82,6 @@ private:
 	static string _storageFile;
 	static DataStorage _dataStorage;
 	list<Task> _activeTaskList;
+	bool _alert;
 };
 #endif

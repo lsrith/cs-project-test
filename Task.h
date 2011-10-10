@@ -45,6 +45,9 @@ public:
 	void invConvert (string&);
 	string stringConvert ();	//convert the whole Template to string
 
+	void modify_time (Time);
+	void modify_period (TimePeriod);
+
 	Time get_time ();
 	TimePeriod get_period ();
 	unsigned int get_index ();

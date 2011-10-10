@@ -286,6 +286,13 @@ bool Time::operator== (Time time)
 	return isEqual;
 }
 
+bool Time::operator!= (Time time) {
+	if (this->operator== (time))
+		return false;
+	else
+		return true;
+}
+
 bool Time::operator< (Time time)
 {
 	bool isSmall;
