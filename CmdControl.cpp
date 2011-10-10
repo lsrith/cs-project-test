@@ -112,8 +112,8 @@ string CmdControl::executeCmd () {
 			str += "\nError\n";
 		_sequence->pop ();
 	}
-
 */
+
 	Task task;
 	task = get_task ();
 	cout << task.stringConvert () << endl;
@@ -125,7 +125,11 @@ string CmdControl::executeCmd () {
 	cout << "Note: " << task.note << endl;
 	cout << "Alert: " << task.alert.string_date () << " " << task.alert.string_date () << endl;
 	cout << _sequence->size () << endl;
-
+/*
+	TimePeriod period;
+	period = get_period ();
+	cout << period.string_time_period () << endl;
+*/	
 	return str;
 }
 
@@ -495,14 +499,12 @@ bool CmdControl::promptToGetNewInput (string str) {
 Task CmdControl::get_task () {
 	Task task;
 	TimePeriod period;
-	
 	task.note = mergeStringInput ();
-cout << "start loop" << endl;	
 	bool reachExeCmd = false;
 	while (!reachExeCmd && _flagError == NONE && _sequence->empty () == false && _sequence->front () == CMD) {
 		Time time;
 		TimePeriod period;
-cout << convertToString (_cmdInput->front ()) << endl;
+
 		switch (_cmdInput->front ()) {
 		case CTIME:
 			pop ();
@@ -514,6 +516,7 @@ cout << convertToString (_cmdInput->front ()) << endl;
 			period = get_period ();
 			if (_flagError == NONE)
 				task.modify_period (period);
+			break;
 		case CNAME:
 			pop ();
 			task.name = mergeStringInput ();
@@ -603,7 +606,7 @@ cout << convertToString (_cmdInput->front ()) << endl;
 string CmdControl::mergeStringInput () {
 	string str;
 	while (_sequence->empty () == false && _sequence->front () == DATA) {
-		str += _dataInput->front ();
+		str += _dataInput->front () + " ";
 		pop ();
 	}
 	return str;
@@ -639,13 +642,13 @@ TimePeriod CmdControl::get_period () {
 
 Time CmdControl::get_time () {
 	Time time;
+	Time dfltTime;
 	if (_flagError == DATA)
 		_flagError = NONE;
 
 	time.modify_date (get_date ());
 	if (_flagError == DATA)
 		_flagError = NONE;
-
 	time.modify_clock (get_clock ());
 	if (_flagError == DATA)
 		_flagError = NONE;
@@ -783,7 +786,7 @@ Time::date_t CmdControl::get_date () {
 			}
 		} else if (day != -1 && mnth != -1 && year == -1) {
 			int currDate = currTime.get_date ();
-			currDate = day * 1000000 + mnth * 100000 + currDate % 10000;	//substitute with user's day and mnth
+			currDate = day * 1000000 + mnth * 10000 + currDate % 10000;	//substitute with user's day and mnth
 			try {
 				currTime.modify_date (currDate);
 			} catch (string msg) {
