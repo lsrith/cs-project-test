@@ -1,0 +1,24 @@
+|?| TASKCAL Help Viewer 
+
+About Help Tool
+In-product Help is available through the Help menu.To access the help
+viewer the user can either type a specific command to view its usage or if
+wanted the entire help sheet, the user can enter 0.
+
+Task Manager --->
+
+->Adding,Deleting and Editing a Task.
+
+->Viewing and Searching a Task.
+
+->Setting up Venue and Time.
+
+->Creating your own template.
+
+->Save and Undo
+
+->Full Command List
+
+
+
+ 
