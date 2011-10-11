@@ -26,7 +26,7 @@ public:
         // return a null string if taskId is invalidD
         static string view (Task& taskId);
         // return a string of the view of the specific task
-        static string view (list<Task>* taskList);
+        static string view (list<Task> taskList);
         // return a string of the view of all these task
         string view (view_t viewType, Time time);
         // return a string of the view by day, by week, or by month
