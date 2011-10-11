@@ -83,6 +83,6 @@ private:
         static string _storageFile;
         static DataStorage _dataStorage;
         list<Task> _activeTaskList;
-  list<Task> _clashList
+        list<Task> _clashList;
 };
 #endif
