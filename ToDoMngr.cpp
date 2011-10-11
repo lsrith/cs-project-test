@@ -32,12 +32,12 @@ string ToDoMngr:: view(list<Task> tasklist){
         for(l =taskl.begin (); l !=taskl.end (); l++)
                 {   
                         if(l->get_time()==obj){
-                                oss<<l->get_period().string_time_period()<<l->get_index()<<"."
+                                oss<<l->get_period().string_time_period()<<"\n"<<l->get_index()<<"."
                                 <<" "<<l->note<<" "<<l->venue<<endl;
                         }
                         else
                         {
-                                oss<<l->get_time().get_clock()<<l->get_index()<<"."
+                                oss<<l->get_time().get_clock()<<"\n"<<l->get_index()<<"."
                                 <<" "<<l->note<<" "<<l->venue<<endl;
 
                         }
@@ -109,8 +109,10 @@ string ToDoMngr::view(view_t viewType, Time time){
                  
         else if(viewType=WEEKLY){
       Task _day;
-        for(int i=0;i<7;i++){
-                if(_day.get_time().display_day(i)==days[i]){
+         int day;
+	for(int i=0;i<7;i++){
+		day=_day.get_time().get_day();
+		if(_day.get_time().display_day(day)==days[i]){
                          _index=i+1;
                         break;
                 }
