@@ -1,4 +1,3 @@
-#include "DataStorage.h"
 #include "Task.h"
 #include "Time.h"
 #include <iostream>
@@ -179,61 +178,6 @@ void DataStorage::write_to_file(list<Task> todolist)
 	
 }
 
-list<Task> DataStorage::load (TimePeriod period)
-{
-	int largestIndex;
-	string str;
-	ifstream readFile(_storageFile);
-
-	readFile >> largestIndex;
-	while(getline(readFile, str))
-	{
-		if(period.get_start_time().get_date() == str)
-
-	}
-}
-
-
-	
-/*	list<Template> sortedList;
-	Template obj;
-	Time tm;
-	TimePeriod tp;
-	typedef unsigned int date_t; 
-	date_t date;
-	list<Template>::iterator iter;
-	list<Template>:: iterator ptr;
-	iter=toDoList.begin();
-	string task;
-	ifstream readFile(_storageFile);
-	ofstream writeFile(_storageFile);
-
-	ptr=iter;
-	for(iter = toDoList.begin(); iter != toDoList.end(); iter++)
-	{
-		task = iter -> stringConvert();
-		if(iter->get_time() == tm)
-		{
-			date = iter->get_period().get_start_time().get_date();
-			ptr++;
-			if(ptr->get_time() == tm)
-			{
-				if(date > ptr->get_period().get_start_time().get_date())
-				{
-
-			}
-		}
-		else
-			iter++;
-		
-		if(obj._forceAdd==true)
-		{
-			
-		}
-		writeFile << task;
-		obj._index++;  
-	*/
-	
 list<Task> DataStorage::load (TimePeriod period)
 {
 	int largestIndex;
