@@ -71,7 +71,7 @@ void CmdControl::splitInput () {
 	checkIfStandAloneCmd ();
 	while (!_input.empty ()) {
 		if (_input[0] == '.' || _input[0] == '-') {
-			end_pos = _input.find_first_of (" .-", 1);
+			end_pos = (int) _input.find_first_of (" .-", 1);
 			temp = _input.substr (0, end_pos);
 			command cmd = translateCmd (temp);
 			if (_flagError != CMD) {
@@ -83,9 +83,9 @@ void CmdControl::splitInput () {
 			} else
 				throw (INV_CMD);
 		} else {
-			end_pos = _input.find_first_of (" .\n");
+			end_pos = (int) _input.find_first_of (" .\n");
 			while (end_pos != string::npos && _input[end_pos] == '.' && _input[end_pos - 1] != ' ')
-				end_pos = _input.find_first_of (" .\n", end_pos + 1);
+				end_pos = (int) _input.find_first_of (" .\n", end_pos + 1);
 			temp = _input.substr (0, end_pos);
 			push (temp);
 			if (end_pos != string::npos)
