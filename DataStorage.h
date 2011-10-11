@@ -18,6 +18,10 @@ private:
 	int reIndexingTemplates ();
 	// when to do it is based on your decision
 	// return the largest index
+	list<Task> sort_by_date(list<Task> toDoList);
+	void swap_element(list<Task> *ptr, list<Task> *ptr1);
+	void write_to_file(list<Task> todolist);
+
 public:
 	DataStorage (string storageFile);
 	void save (list<Task> toDoList);
@@ -41,9 +45,7 @@ public:
 	// type to indicate exact match or similar match
 	string costomSearch (/*arguments to be modify*/);
 	// search based on some criteria
-	list<Task> sort_by_date(list<Task> toDoList);
-	void swap_element(list<Task> *ptr, list<Task> *ptr1);
-	void write_to_file(list<Task> todolist);
+
 
 };
 #endif
