@@ -25,8 +25,7 @@ private:
 public:
 	DataStorage ();
 	void save (list<Task> toDoList);
-	// save the templates to the storageFile by overwriting any overlapping TimePeriod
-	// unless forceAdd == true for any particular template
+	// save the templates to the storageFile by overwriting any overlapping index
 	// give an idex to each templates if it's not given
 	list<Task> load (TimePeriod period);
 	// return a list of templates within a time period input :) get it from our storageFile
