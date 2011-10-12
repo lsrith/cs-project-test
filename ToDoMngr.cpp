@@ -249,18 +249,22 @@ list<Task> ToDoMngr::add(Task task, bool forceAdd)
   else
  {
   // check for clash
-  if (_dataStorage.load(task.get_period()) == NULL)
-  {
-   _dataStorage.save(task);
-   list<Task> emptyList;
-   return emptyList;
-  }
+  list<TimePeriod> clashedTimeList;
+  clashedTimeList =_dataStorage.load(task.get_period()) ;
   
+  if(clashedTimeList.size() == 0)
+  {
+   list<Task> addList;
+   addList.push_back(task);
+   _dataStorage.save(addList);
+   return addList;
+  }
   else
   {
    _clashList.push_back(task);
    return _clashList;
   }
+ }
 }
 
 
@@ -268,7 +272,7 @@ list<Task> ToDoMngr::add(Task task, bool forceAdd)
 
 
 
-bool ToDoMngr::newTable(string name, TimePeriod period)
+bool ToDoMngr::newTable (string name, TimePeriod period)
 {
  bool clashed;
  list<string> existedTableName;  
@@ -277,14 +281,14 @@ bool ToDoMngr::newTable(string name, TimePeriod period)
  existedTableName = _dataStorage.load_table_name();
  
  //check for clashes of name with existing table names
- list<string>:: iterator tableNameIter = _existedTableName.begin();
- for(int i=1; i<=_existedTableName.size(); i++)
+ list<string>:: iterator tableNameIter = existedTableName.begin();
+ for(int i=1; i<=existedTableName.size(); i++)
  {
-  if(*li == name)
+  if(*tableNameIter == name)
   {
    clashed = true;
   }
-  li++;
+  tableNameIter++;
  }
  
  // if there is not clash of name 
@@ -310,18 +314,20 @@ void ToDoMngr::erase(TimePeriod period)
  list<int> deletedIdx;
  
  int size = deleteList.size();
+ Task activeTask;
  
  for(int i=1; i<=size;i++)
  {
-  deletedIdx.push_back(*di.get_index());
-  di++;
+  activeTask = deleteList.begin();
+  deletedIdx.push_back(activeTask.get_index());
+  deleteList.pop_front();
  }
  
  //delete from dataStorage the tasks with the id in the list
  _dataStorage.erase(deletedIdx); 
 } 
 
-void ToDoMngr::erase(string name)
+/* void ToDoMngr::erase(string name)
 {
  // load back the list of task in the timetable
  // get the idx of the tasks in the list
@@ -333,7 +339,7 @@ void ToDoMngr::erase(string name)
  list<int> deletedIdx;
  
  int size = deleteList.size();
- for(int i=1; i<deleteList;i++)
+ for(int i=1; i<size;i++)
  {
   deletedIdx.push_back(*di.get_index());
   di++;
@@ -342,21 +348,23 @@ void ToDoMngr::erase(string name)
  // delete from dataStorage
  _dataStorage.erase(deleteIdx); 
 }
-
+*/
 
 Task ToDoMngr::erase(int taskId)
 {
- list<task>::iterator di = _activeList.begin();
- 
+ list<Task>::iterator di = _activeTaskList.begin();
+
  Task deletetask;
  
  // find the task with the taskId from _activeList and delete it
- for(int i = 1; i<_activeList.size(); i++)
+ for(int i = 1; i<_activeTaskList.size(); i++)
  {
-  if( *di.get_index() == taskId)
+  Task activeTask = *di;
+  if( activeTask.get_index() == taskId)
   {
-   deletetask = *dl;
-   _activeList.erase(dl);
+   deletetask = activeTask;
+   _activeTaskList.erase(di);
+   di++;
   }
  }
   
@@ -373,7 +381,7 @@ Task ToDoMngr::erase(int taskId)
 
 
 
-list<Task> ToDoMngr::add(string tableName, Task task, bool forceAdd)
+list<Task> ToDoMngr::add(string tableName, Task task, bool forceAdd);
 {
  //create a list and push task into list and add to dataStorage when tableName == NULL
  list<Task> addList;
@@ -391,4 +399,5 @@ list<Task> ToDoMngr::add(string tableName, Task task, bool forceAdd)
   taskIdList.push_back(task.get_index());
   _dataStorage.save(tableName, task.get_period(), taskIdList);
  }
+}
 }
