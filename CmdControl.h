@@ -6,7 +6,7 @@
 #define CMDCONTROL_H_
 #include "VldCmdCtrl.h"
 #include "Task.h"
-//#include "ToDoMngr.h"
+#include "ToDoMngr.h"
 #include <string>
 #include <vector>
 #include <queue>
@@ -51,10 +51,10 @@ private:
 	queue<command>* _cmdInput;
 	queue<string>* _dataInput;
 	queue<input_t>* _sequence;
-/*
+
 	ToDoMngr _toDoMngr;
-	ToDoMngr::search_t _search;
-*/
+//	ToDoMngr::search_t _search;
+
 	list<Task>* _taskList;
 	string _tableName;
 	bool _force;

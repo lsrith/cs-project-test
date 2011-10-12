@@ -29,9 +29,6 @@ public:
 	string string_date ();
 	string string_clock ();
 
-	static bool _valid_date (date_t);
-	static bool _valid_clock (clk_t);
-
 	bool operator== (Time time);
 	bool operator!= (Time time);
 	bool operator> (Time time);
@@ -43,8 +40,13 @@ public:
 	bool operator++ ();				//increment by one month, return true if it's possible
 	bool operator-- ();				//decrement by one month, return true if it's possible
 
+	static bool _valid_date (date_t);
+	static bool _valid_clock (clk_t);
 	static bool LeapYear (int year);
 	static bool isAfter (date_t start_date, date_t end_date);
+
+	static string display_day (int);
+	static string display_month (int);
 
 private:
 	clk_t _clk;
@@ -58,7 +60,5 @@ private:
 	unsigned int convert_to_mins ();				//count number of mins since 01/01/1970 at 00:00
 	void convert_from_mins (unsigned int);				//inverse of convert_to_mins ()
 	int days_in_month (int, int);
-	string display_day (int);
-	string display_month (int);
 };
 #endif

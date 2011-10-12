@@ -1,7 +1,43 @@
-#include "CmdControl.h"
+//#include "CmdControl.h"
+#include "DataStorage.h"
 #include <iostream>
 #include <string>
 using namespace std;
+
+int main () {
+
+	list<Task> tasks;
+	Task temp;
+	Time time (25022005, 1200);
+	Time time1 (31102006, 530);
+	TimePeriod period;
+	Time startTime = time;
+
+	for (int i = 0; i < 20; i++) {
+		temp.note = 'A' + i;
+		temp.venue = '9' + i;
+		period.modify_start_time (time);
+		period.modify_end_time (time1);
+		temp.modify_period (period);
+		++time;
+		++time1;
+		tasks.push_back (temp);
+	}
+
+	DataStorage _dataStorage;
+cout << "start saving" << endl;
+	_dataStorage.save (tasks);
+	TimePeriod Period (startTime, time1);
+cout << "start loading" << endl;
+	tasks = _dataStorage.load (Period);
+cout << "start viewing" << endl;	
+	list<Task>::iterator iter;
+	for (iter = tasks.begin (); iter != tasks.end (); iter++)
+		cout << iter->stringConvert () << endl;
+
+	return 0;
+}
+
 /*
 int main () {
 	CmdControl cmdControl;
@@ -9,7 +45,7 @@ int main () {
 	return 0;
 }
 */
-
+/*
 int main () {
 	string str;
 	try {
@@ -30,7 +66,7 @@ int main () {
 	}
 	return 0;
 }
-
+*/
 /*
 int main ()
 {

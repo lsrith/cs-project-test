@@ -164,7 +164,7 @@ string CmdControl::executeCmd (command cmd) {
 		str = executeVIEW ();
 		break;
 	case CREMINDER:
-//		str = _toDoMngr.reminder ();
+		str = _toDoMngr.reminder ();
 		break;
 	case CFIRST:
 		while (executePREV ());
@@ -365,8 +365,8 @@ str = "_toDoMngr.erase (_tableName)";
 
 string CmdControl::executeVIEW () {
 	string str;
-/*
-	ToDoMngr::view_t viewType = DAILY;
+
+	view_t viewType = DAILY;
 	if (_sequence->front () == CMD) {
 		switch (_cmdInput->front ()) {
 		case CDAY:
@@ -385,8 +385,9 @@ string CmdControl::executeVIEW () {
 			break;
 		}
 	}
-*/
+
 	Time time;
+	TimePeriod period;
 	switch (_sequence->front ()) {
 	case DATA:
 		if (_activeListAccessible) {
@@ -408,8 +409,13 @@ str = "_toDoMngr.view (taskId)";
 		switch (_cmdInput->front ()) {
 		case CFROM:
 		case CTO:
+			period = get_period ();
+			
+			if (_flagError != DATA) {
+			str = _toDoMngr.view (period);
+			}
 //			str = executeFunction (_toDoMngr.view);
-			str = "executeFunction (_toDoMngr.view)";
+//			str = "executeFunction (_toDoMngr.view)";
 			break;
 		case CTIME:
 		case CDATE:
@@ -418,8 +424,8 @@ str = "_toDoMngr.view (taskId)";
 				time.modify_date (get_date ());
 			
 			if (_flagError != DATA) {
-//				str = _toDoMngr.view (viewType, time);		
-str = "_toDoMngr.view (viewType, time)";		
+				str = _toDoMngr.view (viewType, time);		
+//str = "_toDoMngr.view (viewType, time)";		
 			} else {
 				if (promptToGetValidInput (MSG_WRONG_DATE))
 					goto viewTime;  
@@ -450,17 +456,20 @@ str = "_toDoMngr.view (viewType, _tableName)";
 string CmdControl::executeADD () {
 	string str;
 
+	_force = true;
+
 	if (_sequence->front () == CMD && _cmdInput->front () == CFORCE) {
 		pop ();
 		_force = true;
 	}
 	Task task = get_task ();
+str += ToDoMngr::view (task) + "\n";
 /*		
 	add:
-		_taskList = &(_toDoMngr.add (_tableName, task, _force));
-
+		_taskList = &(_toDoMngr.add (task, _force));
+//		_taskList = &(_toDoMngr.add (_tableName, task, _force));
 	if (!_force && !_taskList->empty ()) {
-		string message = ToDoMngr::view (task) + MSG_CLASH + ToDoMngr::view (taskList);
+		string message = ToDoMngr::view (task) + MSG_CLASH + ToDoMngr::view (*_taskList);
 		if (promptToContinue (message)) {
 			_force = true;
 			goto add;
@@ -468,13 +477,15 @@ string CmdControl::executeADD () {
 	} else if (_force && !_taskList->empty ()) {
 		str = MSG_ERROR;
 	} else {
-//		str = ToDoMngr::view (task) + MSG_ADDED;
-str = "ToDoMngr::view (task) + MSG_ADDED";
+cout << ToDoMngr::view (task) << endl;
+		str = MSG_ADDED;
+//str = "ToDoMngr::view (task) + MSG_ADDED";
 	}
-*/		
-//	_taskList->clear ();
-str += "_taskList->clear ()";
-
+		
+	_taskList->clear ();
+//str += "_taskList->clear ()";
+cout << "ready to return string" << endl;
+*/
 	return str;
 }
 

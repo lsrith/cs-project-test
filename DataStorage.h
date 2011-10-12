@@ -7,28 +7,45 @@
 #include "Time.h"
 #include "Task.h"
 #include <list>
+#include <vector>
 using namespace std;
+
+template <typename data_t>
+bool isFound (list<data_t> dataList, data_t data);
 
 class DataStorage {
 
 private: 
-	string _storageFile;
+	//string _storageFile;
 	int _largestIndex;
+	vector<list<int>> arrangedTask;
+	vector<Time::date_t> dates;
+	vector<Task> tasks;
 	
-	int reIndexingTemplates ();
-	// when to do it is based on your decision
-	// return the largest index
+	void updateDates (list<Time::date_t>);
+	int getDateIndex (Time::date_t);
+	int getSimDateIndex (Time::date_t);
+
+/*	int reIndexingTemplates ();
+	 when to do it is based on your decision
+	 return the largest index
 	list<Task> sort_by_date(list<Task> toDoList);
 	void swap_element(list<Task> *ptr, list<Task> *ptr1);
-	void write_to_file(list<Task> todolist);
+	void write_to_file(list<Task> todolist);*/
 
 public:
 	DataStorage ();
+
+	static void sort (list<Task>* taskList);
+
 	void save (list<Task> toDoList);
 	// save the templates to the storageFile by overwriting any overlapping index
 	// give an idex to each templates if it's not given
+
 	list<Task> load (TimePeriod period);
 	// return a list of templates within a time period input :) get it from our storageFile
+	// this load function takes care of the dates only.. no clock involved!!
+/*
 	void erase (list<int> templateIndex);
 	// erase any template with the specified index from the file
 
@@ -38,7 +55,7 @@ public:
 	// return a list of templates of the timetable
 	list<string> load_table_name ();
 	// return a list of names of existing timetable
-
+*/
 //	string search (string searchedWord, searchType type);
 	// search based on any specified word.. return a string to be displayed
 	// type to indicate exact match or similar match

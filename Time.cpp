@@ -353,6 +353,10 @@ bool Time::operator++ () {
 		mnth += 1;
 	}
 
+	int max_day = days_in_month (mnth, year);
+	if (day > max_day)
+		day = max_day;
+
 	if (year <= 9999) {
 		_date = day * 1000000 + mnth * 10000 + year;
 		return true;
@@ -371,6 +375,10 @@ bool Time::operator-- () {
 	} else {
 		mnth -= 1;
 	}
+
+	int max_day = days_in_month (mnth, year);
+	if (day > max_day)
+		day = max_day;
 
 	if (year >= 0) {
 		_date = day * 1000000 + mnth * 10000 + year;

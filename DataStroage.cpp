@@ -1,194 +1,191 @@
 #include "DataStorage.h"
 #include "Task.h"
 #include "Time.h"
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <map>
-#include <algorithm>
+#include <vector>
 
 using namespace std;
 
 DataStorage::DataStorage ()
 {
-	_storageFile = "DataStorage";
-
-	ifstream inputFile;
-	inputFile.open (_storageFile);
-/*
-	stringstream strStream;
-	string str;
-	_largestIndex = 0;
-	getline (inputFile, str);
-	strStream << str;
-	strStream >> _largestIndex;
-*/
-	_largestIndex = 0;
-	inputFile >> _largestIndex;
+	_largestIndex = 1;
+	Task task;
+	tasks.push_back (task);
 }
 
-void DataStorage::save(list<Task> toDoList)
-{
-	list<Task> templist;
-	list<Task> todolist;
-	Time::date_t date;
-	list<Task>::iterator iter = toDoList.begin();
-	string task;
-	int ctr=0;
-	unsigned int index = 1;
+void DataStorage::sort (list<Task>* taskList) {
+	if (taskList->empty ()) return;
 
-	while(iter != toDoList.end())
-	{
-		iter->_index = index;
-		task = iter->stringConvert();
-		todolist.push_back(task);
-		iter++;
-		index++;
-	}
+	list<Task>::iterator currIter, prevIter;
+	list<Task>::iterator endIter = taskList->end ();
+	Time prev, curr;
+	Task temp;
+	int i, size = taskList->size ();
 
-	templist = sort_by_date(toDoList);
-	write_to_file(templist);
-	
-	
-}	
+	for (i = 0; i < size; i++) {
+		bool is_sorted = true;
+		for (currIter = ++(taskList->begin ()); currIter != endIter; currIter++) {
+			prevIter = --currIter;
+			currIter++;
 
-bool isEmpty(std::ifstream& pFile)
-{
-	return pFile.peek() == std::ifstream::traits_type::eof();
-}
-
-		
-//use bubble to sort the task by date and return a sorted list of task
-list<Task> DataStorage::sort_by_date(list<Task> toDoList)
-{
-	Time tm;
-	list<Task>::iterator iter;
-	list<Task>::iterator ptr;
-	list<Task> templist;
-	Time::date_t date, date1;
-	int i=-1;
-
-	for(iter = toDoList.begin(); iter != toDoList.end(); iter++)
-	{
-		i++;
-		for(ptr = toDoList.begin()+1+i; ptr != toDoList.end(); ptr++)
-		{
-			//check whether the task is one-day type or have certain timeperiod
-			if(iter->get_time() == tm)
-			{
-				if(ptr->get_time() == tm)
-				{
-					date = iter->get_period().get_start_time().get_date();
-					date1 = ptr->get_period().get_start_time().get_date();
-					if(date > date1)
-					{
-						iter_swap(iter, ptr);
-					}
-				}
-				else
-				{
-					date= iter->get_period().get_start_time().get_date();
-					date1 = ptr->get_time().get_date();
-					if(date > date1)
-					{
-						iter_swap(iter, ptr);
-					}
-					
-				}	
-			}
-			else if(ptr->get_time() == tm)
-			{
-				date = iter->get_time().get_date();
-				date1 = ptr->get_period().get_start_time().get_date();
-				if(date > date1)
-				{
-					iter_swap(iter, ptr);
-				}
-			}
+			if (prevIter->timeTask)
+				prev = prevIter->get_time ();
 			else
-			{
-				date = iter->get_time().get_date();
-				date1 = ptr->get_time().get_date();
-				if(date > date1)
-				{
-					iter_swap(iter, ptr);
-				}
+				prev = prevIter->get_period ().get_start_time ();
+
+			if (currIter->timeTask)
+				curr = currIter->get_time ();
+			else
+				curr = currIter->get_period ().get_start_time ();
+
+			if (prev > curr) {
+				temp = *prevIter;
+				*prevIter = *currIter;
+				*currIter = temp;
+
+				is_sorted = false;
 			}
 		}
+		endIter--;
+		if (is_sorted) return;
 	}
-	return templist = toDoList;
 }
 
-//swapping algorithm
-/*void DataStorage::swap_element(list<Task> *ptr, list<Task> *ptr1)
+void DataStorage::save(list<Task> taskList)
 {
-	list<Task> temp;
-	temp = *ptr;
-	*ptr = *ptr1;
-	*ptr1 = temp;
-}*/
-
-//write the sorted list of task to a file, no idea how to carry on :( 
-void DataStorage::write_to_file(list<Task> todolist)
-{
-	list<Task>::iterator iter = todolist.begin();
-	list<Task>::iterator ptr = iter++;
-	Time::date_t date, date1;
-	ifstream readFile(_storageFile);
-	ofstream writeToFile(_storageFile);
-	string str;
-
-	if(isEmpty(readFile))		//is this correct??
+	list<Task>::iterator iter;
+	list<Time::date_t> dateList;	
+	for(iter = taskList.begin(); iter != taskList.end(); iter++)
 	{
-	while(ptr != todolist.end())
-	{
-		date = iter->get_time().get_date();
-		if(iter->timeTask == true)
+		if (iter->timeTask == true) {
+			dateList.push_back (iter->get_time ().get_date ());
+		} else {
+			Time time;
+			TimePeriod period = iter->get_period ();
+			for (time = period.get_start_time (); time.get_date () != period.get_end_time ().get_date (); time = time + Time::DAY) {
+				dateList.push_back (time.get_date ());
+			}
+			dateList.push_back (time.get_date ());
+		}
+	}
+	updateDates (dateList);
+
+//timePeriod related change
+//for now, assume time and timePeriod wont be modified
+	int dateIndex;
+	for(iter = taskList.begin(); iter != taskList.end(); iter++)
+	{	
+		if (iter->_index == 0)
 		{
-			if(ptr->timeTask == true)
-			{
-				if(ptr->get_time().get_date() == date)
-					ptr++;
-				else
-				{
-					writeToFile << date << endl;
-					while(iter != ptr)
-					{
-						writeToFile << iter->stringConvert() << endl;
-						iter++;
-					}
+			iter->_index = _largestIndex;
+			_largestIndex++;
+			tasks.push_back (*iter);
+
+			if (iter->timeTask == true) {
+				dateIndex = getDateIndex (iter->get_time ().get_date ());
+				arrangedTask[dateIndex].push_back (iter->_index);
+			} else {
+				TimePeriod period = iter->get_period ();
+				int startIndex = getDateIndex (iter->get_period ().get_start_time ().get_date ());
+				int endIndex = getDateIndex (iter->get_period ().get_end_time ().get_date ());
+				for (dateIndex = startIndex; dateIndex <= endIndex; dateIndex++) {
+					arrangedTask[dateIndex].push_back (iter->_index);
 				}
 			}
 		}
 		else
 		{
-			if(ptr->get_period().get_start_time().get_date() == date)
-				ptr++;
-			else
-			{
-				writeToFile << date << endl;
-				while(iter != ptr)
-				{
-					writeToFile << iter->stringConvert() << endl;
-					iter++;
-				}
-			}
+			tasks[iter->_index] = *iter;
 		}
 	}
+}
+
+void DataStorage::updateDates (list<Time::date_t> dateList) 
+{
+	int dateIndex;
+	list<Time::date_t>::iterator iter;
+	vector<Time::date_t>::iterator dateIter;
+	vector<list<int>>::iterator taskDateIter;
+	list<int> temp;
+
+	for (iter = dateList.begin (); iter != dateList.end (); iter++)
+	{
+		dateIndex = getDateIndex (*iter);
+		if (dateIndex == -1)
+		{
+			for (dateIter = dates.begin (), taskDateIter = arrangedTask.begin (); dateIter != dates.end (); dateIter++, taskDateIter++)
+			{
+				if (Time::isAfter (*iter, *dateIter))
+					break;
+			}
+
+			dates.insert (dateIter, *iter);
+			arrangedTask.insert (taskDateIter, temp);
+		}
 	}
+}
+
+int DataStorage::getDateIndex (Time::date_t date)
+{
+	int index, size = dates.size ();
+	for (index = 0; index < size; index++) {
+		if (dates[index] == date)
+			break;
+	}
+
+	if (index == size)
+		index = -1;
 	
+	return index;
+}
+
+int DataStorage::getSimDateIndex (Time::date_t date) 
+{
+	int index, size = dates.size ();
+	for (index = 0; index < size; index++) {
+		if (Time::isAfter (date, dates[index]))
+			break;
+		else if (date == dates[index])
+			break;
+		else;
+	}
+
+	if (index == size)
+		index = size - 1;
+
+	return index;
 }
 
 list<Task> DataStorage::load (TimePeriod period)
 {
-	int largestIndex;
-	string str;
-	ifstream readFile(_storageFile);
+	int startIndex = getSimDateIndex (period.get_start_time ().get_date ());
+	int endIndex = getSimDateIndex (period.get_end_time ().get_date ());
+	
+	list<Task> taskList;
+	list<int> taskIndex;
+	list<int>::iterator iter;
 
-	readFile >> largestIndex;
-	while(getline(readFile, str))
+	for (int i = startIndex; i <= endIndex; i++) 
 	{
-		if(period.get_start_time().get_date() == str)
-
+		for (iter = arrangedTask[i].begin (); iter != arrangedTask[i].end (); iter++)
+		{
+			if (!isFound (taskIndex, *iter)) {
+				taskList.push_back (tasks[*iter]);
+				taskIndex.push_back (*iter);
+			}
+		}
 	}
+
+	sort (&taskList);
+	return taskList;
+}
+
+template <typename data_t>
+bool isFound (list<data_t> dataList, data_t data) {
+	list<data_t>::iterator iter;
+	
+	for (iter = dataList.begin (); iter != dataList.end (); iter++)
+		if (*iter == data)
+			return true;
+
+	return false;
 }
