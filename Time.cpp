@@ -41,7 +41,7 @@ bool Time::_valid_date (date_t date)
 	mth = (date % 1000000) / 10000;
 	year = (date % 10000);
 
-	if (day >= 1 && (mth >= 1 && mth <= 12) && (year >= 1950 && year <= 2100))
+	if (day >= 1 && (mth >= 1 && mth <= 12) && (year >= 1970 && year <= 2100))
 	{
 		switch (mth)
 		{

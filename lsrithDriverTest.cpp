@@ -1,4 +1,4 @@
-//#include "CmdControl.h"
+#include "CmdControl.h"
 #include "DataStorage.h"
 #include <iostream>
 #include <string>
@@ -9,24 +9,38 @@ int main () {
 
 	list<Task> tasks;
 	Task temp;
-	Time time2 (25022005, 1200);
-	Time time1 (31102006, 530);
+	Time time2 (5022005, 100);
+	Time time1 (5022005, 530);
 	TimePeriod period;
 	Time startTime, endTime;
-	startTime = time1 + 10 * Time::DAY;
+	startTime = time2;
 	endTime = startTime + 10 * Time::DAY;
-
-	for (int i = 0; i < 20; i++) {
-		temp.note = 'A' + i;
-		temp.venue = '9' + i;
+	ToDoMngr _toDoMngr;
+	bool force = true;
+	for (int i = 0; i < 10; i++) {
+		temp.note = i + 1;
+		temp.venue = 20 + i;
 		period.modify_start_time (time2);
 		period.modify_end_time (time1);
 		temp.modify_period (period);
-		++time2;
-		++time1;
+		time2 = time2 + 800;
+		time1 = time1 + 900;
 		tasks.push_back (temp);
+		_toDoMngr.add (temp, force);
 	}
-
+	string str;
+	period.modify_start_time (startTime);
+	period.modify_end_time (endTime);
+	TimePeriod Period;
+	view_t viewType = MONTHLY;
+//	cout << Period.string_time_period () << endl;
+	str = _toDoMngr.view (Period);
+	cout << str << endl;
+	cout << _toDoMngr.view (_toDoMngr.get_active_list ());
+//	cout << _toDoMngr.view (7) << endl;
+//	cout << _toDoMngr.view (10) << endl;
+//	cout << _toDoMngr.view (11) << endl;
+/*
 	DataStorage _dataStorage;
 	int start, end;
 	start = time (NULL);
@@ -46,7 +60,7 @@ cout << "finished loading " << end - start << endl;
 		cout << iter->stringConvert () << endl;
 	end = time (NULL);
 cout << "finished viewing " << end - start << endl;
-
+*/
 	return 0;
 }
 

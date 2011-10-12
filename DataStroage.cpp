@@ -86,6 +86,9 @@ void DataStorage::clear () {
 	arrangedTask.clear ();
 	dates.clear ();
 	tasks.clear ();
+	_largestIndex = 1;
+	Task task;
+	tasks.push_back (task);
 }
 
 void DataStorage::sort (list<Task>* taskList) {
@@ -286,9 +289,16 @@ int DataStorage::getSimDateIndex (Time::date_t date)
 
 list<Task> DataStorage::load (TimePeriod period)
 {
-	int startIndex = getSimDateIndex (period.get_start_time ().get_date ());
-	int endIndex = getSimDateIndex (period.get_end_time ().get_date ());
-	
+	int startIndex, endIndex;
+	Time dfltTime;
+	if (period.get_start_time () == dfltTime && period.get_end_time () == dfltTime) {
+		startIndex = 0;
+		endIndex = dates.size () - 1;
+	} else {
+		startIndex = getSimDateIndex (period.get_start_time ().get_date ());
+		endIndex = getSimDateIndex (period.get_end_time ().get_date ());
+	}
+
 	list<Task> taskList;
 	list<int> taskIndex;
 	list<int>::iterator iter;

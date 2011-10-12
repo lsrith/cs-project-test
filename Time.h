@@ -56,8 +56,8 @@ private:
 	static string INVALID_TIME;
 	friend class TimePeriod;
    
-	int count_days ();					//count number of days since 01/01/1970
-	unsigned int convert_to_mins ();				//count number of mins since 01/01/1970 at 00:00
+	int count_days ();									//count number of days since 01/01/1970
+	unsigned int convert_to_mins ();					//count number of mins since 01/01/1970 at 00:00
 	void convert_from_mins (unsigned int);				//inverse of convert_to_mins ()
 	int days_in_month (int, int);
 };

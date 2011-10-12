@@ -239,9 +239,7 @@ list<Task> ToDoMngr::add(Task task, bool forceAdd)
   // forceAdd is true, save to dataStorage
   list<Task> addList;
   addList.push_back(task);
-cout << "start saving" << endl;
-  _dataStorage.save(addList); 
-cout << "finish saving" << endl;  
+  _dataStorage.save(addList);   
   addList.clear();
   
   // return empty list
@@ -268,10 +266,7 @@ cout << "finish saving" << endl;
  }
 }
 
-
-
 /*
-
 bool ToDoMngr::newTable (string name, TimePeriod period)
 {
  bool clashed;
@@ -327,7 +322,7 @@ void ToDoMngr::erase(TimePeriod period)
  _dataStorage.erase(deletedIdx); 
 } 
 
-/* void ToDoMngr::erase(string name)
+ void ToDoMngr::erase(string name)
 {
  // load back the list of task in the timetable
  // get the idx of the tasks in the list
@@ -348,7 +343,7 @@ void ToDoMngr::erase(TimePeriod period)
  // delete from dataStorage
  _dataStorage.erase(deletedIdx); 
 }
-*/
+
 
 Task ToDoMngr::erase(int taskId)
 {
@@ -360,7 +355,7 @@ Task ToDoMngr::erase(int taskId)
  for(int i = 1; i<_activeTaskList.size(); i++)
  {
   if( di->get_index() == taskId)
-  if( activeTask.get_index() == taskId)
+  if( _activeTaskList.get_index() == taskId)
   {
    deletetask = *di;
    _activeTaskList.erase(di);
@@ -369,8 +364,8 @@ Task ToDoMngr::erase(int taskId)
  }
   
  // delete it from dataStorage
- list<Task> deleteList; 
- deleteList.push_back(deletetask);
+ list<int> deleteList; 
+ deleteList.push_back(deletetask.get_index ());
  _dataStorage.erase(deleteList);
  
  // return deleted task
