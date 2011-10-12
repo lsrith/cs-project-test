@@ -2,38 +2,50 @@
 #include "DataStorage.h"
 #include <iostream>
 #include <string>
+#include <ctime>
 using namespace std;
 
 int main () {
 
 	list<Task> tasks;
 	Task temp;
-	Time time (25022005, 1200);
+	Time time2 (25022005, 1200);
 	Time time1 (31102006, 530);
 	TimePeriod period;
-	Time startTime = time;
+	Time startTime, endTime;
+	startTime = time1 + 10 * Time::DAY;
+	endTime = startTime + 10 * Time::DAY;
 
 	for (int i = 0; i < 20; i++) {
 		temp.note = 'A' + i;
 		temp.venue = '9' + i;
-		period.modify_start_time (time);
+		period.modify_start_time (time2);
 		period.modify_end_time (time1);
 		temp.modify_period (period);
-		++time;
+		++time2;
 		++time1;
 		tasks.push_back (temp);
 	}
 
 	DataStorage _dataStorage;
-cout << "start saving" << endl;
+	int start, end;
+	start = time (NULL);
 	_dataStorage.save (tasks);
-	TimePeriod Period (startTime, time1);
-cout << "start loading" << endl;
+	end = time (NULL);
+cout << "finished saving " << end - start << endl;
+cout << startTime.string_date () << endl;
+cout << endTime.string_date () << endl;
+	TimePeriod Period (startTime, endTime);
+	start = time (NULL);
 	tasks = _dataStorage.load (Period);
-cout << "start viewing" << endl;	
+	end = time (NULL);
+cout << "finished loading " << end - start << endl;
 	list<Task>::iterator iter;
+	start = time (NULL);
 	for (iter = tasks.begin (); iter != tasks.end (); iter++)
 		cout << iter->stringConvert () << endl;
+	end = time (NULL);
+cout << "finished viewing " << end - start << endl;
 
 	return 0;
 }
