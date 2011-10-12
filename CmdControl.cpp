@@ -71,7 +71,7 @@ void CmdControl::splitInput () {
 	checkIfStandAloneCmd ();
 	while (!_input.empty ()) {
 		if (_input[0] == '.' || _input[0] == '-') {
-			end_pos = (int) _input.find_first_of (" .-", 1);
+			end_pos = _input.find_first_of (" .-", 1);
 			temp = _input.substr (0, end_pos);
 			command cmd = translateCmd (temp);
 			if (_flagError != CMD) {
@@ -83,9 +83,9 @@ void CmdControl::splitInput () {
 			} else
 				throw (INV_CMD);
 		} else {
-			end_pos = (int) _input.find_first_of (" .\n");
+			end_pos = _input.find_first_of (" .\n");
 			while (end_pos != string::npos && _input[end_pos] == '.' && _input[end_pos - 1] != ' ')
-				end_pos = (int) _input.find_first_of (" .\n", end_pos + 1);
+				end_pos = _input.find_first_of (" .\n", end_pos + 1);
 			temp = _input.substr (0, end_pos);
 			push (temp);
 			if (end_pos != string::npos)
@@ -98,6 +98,13 @@ void CmdControl::splitInput () {
 
 string CmdControl::executeCmd () {
 	string str;
+	command cmd;
+	while (_sequence->empty () == false && _sequence->front () == CMD) {
+		cmd  = _cmdInput->front ();
+		pop ();
+		str = executeCmd (cmd);
+cout << "seqSize = " << _sequence->size () << endl;
+	}
 /*
 	while (_sequence->empty () == false) {
 		if (_sequence->front () == CMD) {
@@ -113,9 +120,12 @@ string CmdControl::executeCmd () {
 		_sequence->pop ();
 	}
 */
-
+/*
 	Task task;
 	task = get_task ();
+	cout << "test view" << endl;
+	cout << ToDoMngr::view (task) << endl;
+
 	cout << task.stringConvert () << endl;
 	cout << task.get_index () << endl;
 	cout << "Time: " << task.get_time ().string_date () << " " << task.get_time ().string_clock () << endl;
@@ -125,6 +135,7 @@ string CmdControl::executeCmd () {
 	cout << "Note: " << task.note << endl;
 	cout << "Alert: " << task.alert.string_date () << " " << task.alert.string_date () << endl;
 	cout << _sequence->size () << endl;
+*/
 /*
 	TimePeriod period;
 	period = get_period ();
@@ -171,9 +182,11 @@ string CmdControl::executeCmd (command cmd) {
 		break;
 	case CUNDO:
 //		_toDoMngr.undo ();
+str = "_toDoMngr.undo ()";
 		break;
 	case CREDO:
 //		_toDoMngr.redo ();
+str = "_toDoMngr.redo ()";
 		break;
 	case CSORT:
 		executeSORT ();
@@ -189,12 +202,13 @@ string CmdControl::executeCmd (command cmd) {
 		str = executeHELP ();
 		break;
 	case CEXIT:
-		if (_sequence->front () == CMD && _cmdInput->front () == CTABLE) {
+		if (_sequence->empty () == false && _sequence->front () == CMD && _cmdInput->front () == CTABLE) {
 			pop ();
 			_tableName.erase ();
 		} else {
 			update_dayMonth (_dayMonth);
 //			_toDoMngr.exit ();
+str = "_toDoMngr.exit ()";
 		}
 		break;
 	default:
@@ -253,36 +267,39 @@ string CmdControl::checkAlert () {
 
 string CmdControl::executeHELP () {
 	string str;
-/*
-	if (_sequence->front () == CMD && _cmdInput->front () == COMMAND) {
+
+	if (_sequence->empty () == false && _sequence->front () == CMD && _cmdInput->front () == CCOMMAND) {
 		pop ();
-		str = _toDoMngr.help ("cmd");
-	} else if (_sequence->front () == DATA) {
-		str = _toDoMngr.help (_dataInput->front ());
+//		str = _toDoMngr.help ("cmd");
+str = "_toDoMngr.help (cmd)";
+	} else if (_sequence->empty () == false && _sequence->front () == DATA) {
+//		str = _toDoMngr.help (_dataInput->front ());
+str = "_toDoMngr.help (_dataInput->front ())";
 		pop ();
 	} else {
-		str = _toDoMngr.help ("");
+//		str = _toDoMngr.help ("");
+str = "_toDoMngr.help ()";
 	}
-*/
-	return str;
 
+	return str;
 }
 
 string CmdControl::executeTABLE () {
 	string str;
-/*
+
 	pop ();
 
-	if (_sequence->front () == DATA && !getTableName ()) {
+	if (_sequence->empty () == false && _sequence->front () == DATA && !getTableName ()) {
 		string tableName = _dataInput->front ();
 		pop ();
 
-		if (_sequence->front () == CMD && (_cmdInput->front () == FROM || _cmdInput->front () == TO)) {
+		if (_sequence->front () == CMD && (_cmdInput->front () == CFROM || _cmdInput->front () == CTO)) {
 			tabPeriod:
 				TimePeriod period = get_period ();
 			
 			if (_flagError != DATA) {
-				_toDoMngr.newTable (tableName, period);
+//				_toDoMngr.newTable (tableName, period);
+str += "_toDoMngr.newTable (tableName, period)";
 				_tableName = tableName;
 			} else {
 				if (promptToGetValidInput (MSG_WRONG_PERIOD))
@@ -290,86 +307,96 @@ string CmdControl::executeTABLE () {
 			}
 		}
 	} else {
-		str = _toDoMngr.viewTableNames ();
+//		str = _toDoMngr.viewTableNames ();
+str = "_toDoMngr.viewTableNames ()";
 	}
-*/
+
 	return str;
 }
 
 string CmdControl::executeDELETE () {
 	string str;
-/*
-	switch (_sequence->front ()) {
-	case DATA:
-		if (_activeListAccessible) {
-			delID:
-				string data = _dataInput->front ();
-				int taskId = convertToInt (data);
+	Task task;
+	int taskId;
 
-			Task task = _toDoMngr.erase (taskId);
-			if (task.get_index () == 0) {
-				if (promptToGetValidInput (MSG_WRONG_ID))
-					goto delID;
-			} else {
-				str = ToDoMngr::view (task) + MSG_DELETED;
-				pop ();
+	if (_sequence->empty () == false) {
+		switch (_sequence->front ()) {
+		case DATA:
+			if (_activeListAccessible) {
+				delID:
+					string data = _dataInput->front ();
+					taskId = convertToInt (data);
+//				task = _toDoMngr.erase (taskId);
+str = "_toDoMngr.erase (taskId)";
+				if (task.get_index () == 0) {
+					if (promptToGetValidInput (MSG_WRONG_ID))
+						goto delID;
+				} else {
+//					str = ToDoMngr::view (task) + MSG_DELETED;
+str = "ToDoMngr::view (task) + MSG_DELETED";
+					pop ();
+				}
 			}
-		}
-		break;
-	case CMD:
-		switch (_cmdInput->front ()) {
-		case FROM:
-		case TO:
-			str = executeFunction (_toDoMngr.erase);
 			break;
-		case TABLE:
-			pop ();
-			while (!getTableName ())
-				promptToGetValidInput (MSG_WRONG_TABLE);
+		case CMD:
+			switch (_cmdInput->front ()) {
+			case CFROM:
+			case CTO:
+//				str = executeFunction (_toDoMngr.erase);
+str = "executeFunction (_toDoMngr.erase)";
+				break;
+			case CTABLE:
+				pop ();
+				while (!getTableName ())
+					promptToGetValidInput (MSG_WRONG_TABLE);
 			
-			_toDoMngr.erase (_tableName);
-			break;
+//				_toDoMngr.erase (_tableName);
+str = "_toDoMngr.erase (_tableName)";
+				break;
+			default:
+				break;
+			}
 		default:
 			break;
 		}
-	default:
-		break;
 	}
-*/
 	return str;
 }
 
 string CmdControl::executeVIEW () {
 	string str;
 /*
-	ToDoMngr::view_t viewType = ToDoMngr::view_t::DAILY;
+	ToDoMngr::view_t viewType = DAILY;
 	if (_sequence->front () == CMD) {
 		switch (_cmdInput->front ()) {
-		case DAY:
-			viewType = ToDoMngr::view_t::DAILY;
+		case CDAY:
+			viewType = DAILY;
 			pop ();
 			break;
-		case WEEK:
-			viewType = ToDoMngr::view_t::WEEKLY;	
+		case CWEEK:
+			viewType = WEEKLY;	
 			pop ();
 			break;
-		case MONTH:
-			viewType = ToDoMngr::view_t::MONTHLY;
+		case CMONTH:
+			viewType = MONTHLY;
 			pop ();
 			break;
 		default:
 			break;
 		}
 	}
-
+*/
+	Time time;
 	switch (_sequence->front ()) {
 	case DATA:
 		if (_activeListAccessible) {
 			viewID:
-				string data = _dataInput.front ();
+				string data = _dataInput->front ();
 				int taskId = convertToInt (data);
 
-			str = _toDoMngr.view (taskId);
+//			str = _toDoMngr.view (taskId);
+str = "_toDoMngr.view (taskId)";
+
 			if (str.empty ()) {
 				if (promptToGetValidInput (MSG_WRONG_ID))
 					goto viewID;
@@ -379,30 +406,32 @@ string CmdControl::executeVIEW () {
 		break;
 	case CMD:
 		switch (_cmdInput->front ()) {
-		case FROM:
-		case TO:
-			str = executeFunction (_toDoMngr.view);
+		case CFROM:
+		case CTO:
+//			str = executeFunction (_toDoMngr.view);
+			str = "executeFunction (_toDoMngr.view)";
 			break;
-		case TIME:
-		case DATE:
+		case CTIME:
+		case CDATE:
 			pop ();
 			viewTime:
-				Time time;
 				time.modify_date (get_date ());
 			
 			if (_flagError != DATA) {
-				str = _toDoMngr.view (viewType, time);		
+//				str = _toDoMngr.view (viewType, time);		
+str = "_toDoMngr.view (viewType, time)";		
 			} else {
 				if (promptToGetValidInput (MSG_WRONG_DATE))
 					goto viewTime;  
 			}
 			break;
-		case TABLE:
+		case CTABLE:
 			pop ();
 			while (!getTableName ()) {
 				promptToGetValidInput (MSG_WRONG_TABLE);
 			}	
-			str = _toDoMngr.view (viewType, _tableName);
+//			str = _toDoMngr.view (viewType, _tableName);
+str = "_toDoMngr.view (viewType, _tableName)";
 			break;
 		default:
 			break;
@@ -410,24 +439,25 @@ string CmdControl::executeVIEW () {
 		break;
 	default:
 		if (!_tableName.empty ())
-			str = _toDoMngr.view (viewType, _tableName);
+//			str = _toDoMngr.view (viewType, _tableName);
+str = "_toDoMngr.view (viewType, _tableName)";
 		break;
 	}
-*/
+
 	return str;
 }
 
 string CmdControl::executeADD () {
 	string str;
-/*
-	if (_sequence->front () == CMD && _cmdInput->front () == FORCE) {
+
+	if (_sequence->front () == CMD && _cmdInput->front () == CFORCE) {
 		pop ();
 		_force = true;
 	}
 	Task task = get_task ();
-		
+/*		
 	add:
-		*_taskList = _toDoMngr.add (_tableName, task, _force);
+		_taskList = &(_toDoMngr.add (_tableName, task, _force));
 
 	if (!_force && !_taskList->empty ()) {
 		string message = ToDoMngr::view (task) + MSG_CLASH + ToDoMngr::view (taskList);
@@ -438,16 +468,19 @@ string CmdControl::executeADD () {
 	} else if (_force && !_taskList->empty ()) {
 		str = MSG_ERROR;
 	} else {
-		str = ToDoMngr::view (task) + MSG_ADDED;
+//		str = ToDoMngr::view (task) + MSG_ADDED;
+str = "ToDoMngr::view (task) + MSG_ADDED";
 	}
-		
-	_taskList->clear ();
-*/
+*/		
+//	_taskList->clear ();
+str += "_taskList->clear ()";
+
 	return str;
 }
 
 string CmdControl::executeEDIT () {
-	string str;
+//	string str;
+string str = "exeEDIT";
 	return str;
 }
 
@@ -458,7 +491,8 @@ string CmdControl::executeFunction (string (*function) (TimePeriod)) {
 		TimePeriod period = get_period ();
 			
 	if (_flagError != DATA) {
-		str = function (period);		
+//		str = function (period);
+str = "function (period)";
 	} else {
 		if (promptToGetValidInput (MSG_WRONG_PERIOD))
 			goto getPeriod;  
@@ -468,32 +502,42 @@ string CmdControl::executeFunction (string (*function) (TimePeriod)) {
 }
 
 void CmdControl::executeSORT () {
+cout << "exeSort" << endl;
 }
 
 bool CmdControl::executeNEXT () {
 	bool notLast = false;
+cout << boolalpha << notLast << endl;
 	return notLast;
 }
 
 bool CmdControl::executePREV () {
 	bool notFirst = false;
+cout << boolalpha << notFirst << endl;
 	return notFirst;
 }
 
 bool CmdControl::promptToContinue (string str) {
-	bool correctInput = true;
+	bool correctInput = false;
+cout << boolalpha << correctInput << endl;
 	return correctInput;
 }
 
 bool CmdControl::promptToGetValidInput (string str) {
-	bool correctInput = true;
+	bool correctInput = false;
+cout << boolalpha << correctInput << endl;
 	return correctInput;
 }
 
 bool CmdControl::promptToGetNewInput (string str) {
-	bool correctInput = true;
-	activate2ndQs ();
+	bool correctInput = false;
+//	activate2ndQs ();
+cout << boolalpha << correctInput << endl;
 	return correctInput;
+}
+
+bool CmdControl::getTableName () {
+	return false;
 }
 
 Task CmdControl::get_task () {
