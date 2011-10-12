@@ -1,3 +1,4 @@
+#include "DataStorage.h"
 #include "Task.h"
 #include "Time.h"
 #include <iostream>
@@ -8,9 +9,9 @@
 
 using namespace std;
 
-DataStorage::DataStorage(string storageFile)
+DataStorage::DataStorage ()
 {
-	_storageFile = storageFile;
+	_storageFile = "DataStorage";
 
 	ifstream inputFile;
 	inputFile.open (_storageFile);

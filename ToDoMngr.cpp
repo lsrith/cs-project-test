@@ -11,9 +11,12 @@
 #include <iomanip>
 using namespace std;
 
+ToDoMngr::ToDoMngr () {
+}
 
-
-list<Task> get_active_list ();
+list<Task> ToDoMngr::get_active_list () {
+	return _activeTaskList;
+}
 
  string ToDoMngr::view(Task& taskId){
 
@@ -180,22 +183,23 @@ return view(_activeTaskList);
 
 }
 
-void ToDoMngr::help (string command){
+string ToDoMngr::help (string command){
 
         ifstream myhelpfile;
         myhelpfile.open("HELP.txt");
         string HELP_LINE;
+		istringstream str;
 
         if(isNULL(command)){
                 while(getline(myhelpfile, HELP_LINE))
                 {
-                        cout<<HELP_LINE<<endl;
+                        str<<HELP_LINE<<endl;
                 }
 
 
         }
 
-
+		return str.str ();
 }
 bool isNULL(string command)
 {
@@ -228,7 +232,7 @@ string ToDoMngr::reminder(){
 
 
 
-list<TASK> add(Task task, bool forceAdd)
+list<Task> ToDoMngr::add(Task task, bool forceAdd)
 {
  if(forceAdd == true)
  { 
@@ -264,7 +268,7 @@ list<TASK> add(Task task, bool forceAdd)
 
 
 
-bool newTable(string name, TimePeriod period)
+bool ToDoMngr::newTable(string name, TimePeriod period)
 {
  bool clashed;
  list<string> existedTableName;  
@@ -297,10 +301,10 @@ bool newTable(string name, TimePeriod period)
  }
 }
 
-void erase(TimePeriod period)
+void ToDoMngr::erase(TimePeriod period)
 {
  //get id of task in that period
- list<task> deleteList;
+ list<Task> deleteList;
  deleteList = _dataStorage.load(period);
  list<Task>::iterator di = deleteList.begin();
  list<int> deletedIdx;
@@ -317,7 +321,7 @@ void erase(TimePeriod period)
  _dataStorage.erase(deletedIdx); 
 } 
 
-void erase(string name)
+void ToDoMngr::erase(string name)
 {
  // load back the list of task in the timetable
  // get the idx of the tasks in the list
@@ -340,7 +344,7 @@ void erase(string name)
 }
 
 
-Task erase(int taskId)
+Task ToDoMngr::erase(int taskId)
 {
  list<task>::iterator di = _activeList.begin();
  
@@ -369,7 +373,7 @@ Task erase(int taskId)
 
 
 
-list<Task> add(string tableName, Task task, bool forceAdd)
+list<Task> ToDoMngr::add(string tableName, Task task, bool forceAdd)
 {
  //create a list and push task into list and add to dataStorage when tableName == NULL
  list<Task> addList;

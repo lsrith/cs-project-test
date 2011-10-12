@@ -23,7 +23,7 @@ private:
 	void write_to_file(list<Task> todolist);
 
 public:
-	DataStorage (string storageFile);
+	DataStorage ();
 	void save (list<Task> toDoList);
 	// save the templates to the storageFile by overwriting any overlapping TimePeriod
 	// unless forceAdd == true for any particular template
@@ -40,10 +40,10 @@ public:
 	list<string> load_table_name ();
 	// return a list of names of existing timetable
 
-	string search (string searchedWord, searchType type);
+//	string search (string searchedWord, searchType type);
 	// search based on any specified word.. return a string to be displayed
 	// type to indicate exact match or similar match
-	string costomSearch (/*arguments to be modify*/);
+//	string costomSearch (/*arguments to be modify*/);
 	// search based on some criteria
 
 

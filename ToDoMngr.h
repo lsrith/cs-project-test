@@ -50,8 +50,8 @@ public:
         static list<string> tableNames ();
         // return all the names of the existing timetable
 
-        void exit ();
-        void clear ();
+//        void exit ();
+//        void clear ();
         //delete everything in the dataStorage
 //Ben:
         list<Task> add (Task task, bool forceAdd);
@@ -59,7 +59,7 @@ public:
         // if forceAdd is true, just add and return a fresh list
         // else return the clashed tasks
 
-        list<Task> edit (int taskId /*--*/);
+//        list<Task> edit (int taskId);
         Task erase (int taskId);
         // return an erased task
         // if taskId is incorrect, return a default Task
@@ -73,15 +73,13 @@ public:
         // if tableName is NULL, simply add the task
         // add tasks periodically to the table
         // return a list of clashed tasks if any
-        void erase (string name);
+//        void erase (string name);
         // erase the timetable with the name specified
 
-        void undo ();
-        void redo ();
-
+//        void undo ();
+//        void redo ();
 private:
-        static string _storageFile;
-        static DataStorage _dataStorage;
+        DataStorage _dataStorage;
         list<Task> _activeTaskList;
         list<Task> _clashList;
 };
