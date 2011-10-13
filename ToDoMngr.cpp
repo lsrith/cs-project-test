@@ -247,97 +247,115 @@ string ToDoMngr::reminder(){
 
 }
 
-list<Task> ToDoMngr::add(Task task, bool forceAdd)
+list<Task> ToDoMngr::add(Task task, bool forceAdd)                                                                      
 {
- if(forceAdd == true)
- { 
-  // forceAdd is true, save to dataStorage
-  list<Task> addList;
-  addList.push_back(task);
-  _dataStorage.save(addList);   
-  addList.clear();
+ if(forceAdd == true || task.timeTask == true)
+{ 
+  // forceAdd is true or it is a time task, save to dataStorage
+  _addList.push_back(task);
+  _dataStorage.save(_addList); 
   
-  // return empty list
-  return addList;
- }
-  else
+  // and return empty list
+  _addList.clear();
+  return _addList;
+}
+
+// forceAdd is false and it is a period task
+ else
  {
-  // check for clash
-  list<Task> clashedTimeList;
-  clashedTimeList = _dataStorage.load(task.get_period()) ;
+  bool clash = false;
+  //check for if there are any existing task in dataStorage on the date of the task
+  list<Task> checkClashList = _dataStorage.load(task.get_period());  
   
-  if(clashedTimeList.size() == 0)
+  //no existing task
+  if(checkClashList.size() == 0)
   {
-   list<Task> addList;
-   addList.push_back(task);
-   _dataStorage.save(addList);
-   return addList;
+   clash == false;
   }
-  else
+
+  else //check for clashes of time 
   {
-   _clashList.push_back(task);
-   return _clashList;
+   list<Task>::iterator checkClash = checkClashList.begin();
+    for(int i=1; i<checkClashList.size();i++)
+    {
+     if(checkClash->get_period() == task.get_period() || checkClash->timeTask == true)
+     {
+      clash == false; 
+     }
+     else 
+     {
+      clash == true;
+     }
+     checkClash++;
+    }
+
+   if(clash == true) // clashes present, add to Clashlist and return                   
+   {
+    _clashList.push_back(task);
+    return _clashList;
+   }
+   else // no clashes, add to dataStorage and return empty list
+   {
+     _addList.push_back(task);
+     _dataStorage.save(_addList);
+    _addList.clear();
+    return _addList;
+   }
   }
  }
 }
 
-/*
-bool ToDoMngr::newTable (string name, TimePeriod period)
+
+
+
+
+bool ToDoMngr::newTable(string name, TimePeriod period)
 {
- bool clashed;
- list<string> existedTableName;  
+ bool clashName;
+ vector<string> existedTableName;  
 
  //load existing table name
- existedTableName = _dataStorage.load_table_name();
+ existedTableName = _dataStorage.load_table_name();                                                                    
  
  //check for clashes of name with existing table names
- list<string>:: iterator tableNameIter = existedTableName.begin();
  for(int i=1; i<=existedTableName.size(); i++)
  {
-  if(*tableNameIter == name)
+  if(existedTableName[i] == name)
   {
-   clashed = true;
+   clashName= true;
   }
-  tableNameIter++;
  }
  
- // if there is not clash of name 
- // save to dataStorage with a empty list of taskId
- if(clashed == true)
+ if(clashName == true) // got clash return false
  {
   return false;
  }
- else 
+ else // no clash return true and save to dataStorage with empty taskIdxList
  {
   list<int> taskIdxList;
-  _dataStorage.save(name, period, taskIdxList);
+  _dataStorage.save(name, period, taskIdxList);            
   return true;
  }
 }
 
 void ToDoMngr::erase(TimePeriod period)
 {
- //get id of task in that period
+ //get the id of tasks in that period
  list<Task> deleteList;
  deleteList = _dataStorage.load(period);
- list<Task>::iterator di = deleteList.begin();
  list<int> deletedIdx;
+ list<Task>::iterator di = deleteList.begin();
  
- int size = deleteList.size();
- Task activeTask;
- 
- for(int i=1; i<=size;i++)
+ for(int i=1; i<=deleteList.size(); i++)
  {
   deletedIdx.push_back(di->get_index());
-  deletedIdx.push_back(activeTask.get_index());
-  deleteList.pop_front();
  }
  
  //delete from dataStorage the tasks with the id in the list
  _dataStorage.erase(deletedIdx); 
 } 
 
- void ToDoMngr::erase(string name)
+void ToDoMngr::erase(string name)
 {
  // load back the list of task in the timetable
  // get the idx of the tasks in the list
@@ -348,7 +366,6 @@ void ToDoMngr::erase(TimePeriod period)
  list<Task>::iterator di = deleteList.begin();
  list<int> deletedIdx;
  
- int size = deleteList.size();
  for(int i=1; i<deleteList.size();i++)
  {
   deletedIdx.push_back(di->get_index());
@@ -360,55 +377,37 @@ void ToDoMngr::erase(TimePeriod period)
 }
 
 
+// delete from dataStorage given the taskId from _activeTaskList
 Task ToDoMngr::erase(int taskId)
 {
  list<Task>::iterator di = _activeTaskList.begin();
-
- Task deletetask;
  
- // find the task with the taskId from _activeList and delete it
- for(int i = 1; i<_activeTaskList.size(); i++)
+ for(int i=1; i<= taskId;i++)
  {
-  if( di->get_index() == taskId)
-  if( _activeTaskList.get_index() == taskId)
-  {
-   deletetask = *di;
-   _activeTaskList.erase(di);
-   di++;
-  }
- }
-  
- // delete it from dataStorage
- list<int> deleteList; 
- deleteList.push_back(deletetask.get_index ());
- _dataStorage.erase(deleteList);
+  di++;
+ }     
  
- // return deleted task
+ Task deletetask = *di;
+ _activeTaskList.erase(di);                                                           
+ 
  return deletetask;  
 }
 
 
 
-
-
-list<Task> ToDoMngr::add(string tableName, Task task, bool forceAdd);
+list<Task> ToDoMngr::add(string tableName, Task task, bool forceAdd)
 {
  //create a list and push task into list and add to dataStorage when tableName == NULL
- list<Task> addList;
+ if(tableName.size() == 0)
+ {
+  list<Task> blankList;
+  blankList = add(task, forceAdd);
+  return blankList;
+ }
  
- if(tableName.empty())
+ else
  {
-  addList.push_back(task);
-  add(addList,forceAdd);
- }
-
- else 
- {
-  
-  list<int> taskIdList;
-  taskIdList.push_back(task.get_index());
-  _dataStorage.save(tableName, task.get_period(), taskIdList);
+  list<int> IdxList;
+  _dataStorage.save(tableName,task.get_period(), IdxList);
  }
 }
-}
-*/
