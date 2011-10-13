@@ -167,7 +167,7 @@ string ToDoMngr::view(view_t viewType, Time time){
                 Time start(atoi((start_date.str()).c_str()),000);
                         
                  newEndDate=newStartDate+6;
-                 end_date<<std::setfill('0') << std::setw(2)<<newStartDate;
+                 end_date<<std::setfill('0') << std::setw(2)<<newEndDate;
                  end_date<<std::setfill('0') << std::setw(2)<<newMonth;
              end_date<<Year;
              Time end(atoi((end_date.str()).c_str()),2359);
