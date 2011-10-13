@@ -252,14 +252,12 @@ int DataStorage::getSimDateIndex (Time::date_t date)
 		else;
 	}
 
-	if (index == size)
-		index = size - 1;
-
 	return index;
 }
 
 list<Task> DataStorage::load (TimePeriod period)
 {
+	list<Task> taskList;
 	int startIndex, endIndex;
 	Time dfltTime;
 	if (period.get_start_time () == dfltTime && period.get_end_time () == dfltTime) {
@@ -268,12 +266,16 @@ list<Task> DataStorage::load (TimePeriod period)
 	} else {
 		startIndex = getSimDateIndex (period.get_start_time ().get_date ());
 		endIndex = getSimDateIndex (period.get_end_time ().get_date ());
+		
+		if (startIndex == dates.size ())
+			return taskList;
+		else if (endIndex == dates.size ())
+			endIndex--;
+		else;
 	}
 
-	list<Task> taskList;
 	list<int> taskIndex;
 	list<int>::iterator iter;
-
 	for (int i = startIndex; i <= endIndex; i++) 
 	{
 		for (iter = arrangedTask[i].begin (); iter != arrangedTask[i].end (); iter++)
