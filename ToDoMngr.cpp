@@ -377,7 +377,7 @@ void ToDoMngr::erase(string name)
 }
 
 
-// delete from dataStorage given the taskId from _activeTaskList
+// delete from dataStorage given the taskId
 Task ToDoMngr::erase(int taskId)
 {
  list<Task>::iterator di = _activeTaskList.begin();
@@ -387,10 +387,18 @@ Task ToDoMngr::erase(int taskId)
   di++;
  }     
  
- Task deletetask = *di;
- _activeTaskList.erase(di);                                                           
+ Task deleteTask = *di;
+ _activeTaskList.erase(di);     
  
- return deletetask;  
+ int deleteTaskIdx;
+ deleteTaskIdx = deleteTask.get_index(); 
+ 
+ list<int> deleteIdx;
+ deleteIdx.push_back(deleteTaskIdx);
+ 
+ _dataStorage.erase(deleteIdx);
+ 
+ return deleteTask;  
 }
 
 
