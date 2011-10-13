@@ -273,19 +273,18 @@ list<Task> ToDoMngr::add(Task task, bool forceAdd)
      }
      checkClash++;
     }
-
-   if(clash == true) // clashes present, add to Clashlist and return                   
+  }
+  if(clash == true) // clashes present, add to Clashlist and return                   
    {
     _clashList.push_back(task);
     return _clashList;
    }
-   else // no clashes, add to dataStorage and return empty list
-   {
-     _addList.push_back(task);
-     _dataStorage.save(_addList);
-    _addList.clear();
-    return _addList;
-   }
+  else // no clashes, add to dataStorage and return empty list
+  {
+   _addList.push_back(task);
+   _dataStorage.save(_addList);
+   _addList.clear();
+   return _addList;
   }
  }
 }
