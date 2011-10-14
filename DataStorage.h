@@ -16,7 +16,7 @@ bool isFound (list<data_t> dataList, data_t data);
 class DataStorage {
 
 private: 
-	//string _storageFile;
+	string _storageFile;
 	int _largestIndex;
 	vector<list<int>> arrangedTask;
 	vector<Time::date_t> dates;
@@ -29,6 +29,7 @@ private:
 	int getDateIndex (Time::date_t);
 	int getTableIndex (string);
 	int getSimDateIndex (Time::date_t);
+	void writeToFile(string storageFile);
 
 /*	int reIndexingTemplates ();
 	 when to do it is based on your decision
