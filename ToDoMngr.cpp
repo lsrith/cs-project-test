@@ -142,7 +142,7 @@ string ToDoMngr::view(view_t viewType, Time time){
 	for(int i=0;i<7;i++){
 		day=_day.get_time().get_day();
 		if(_day.get_time().display_day(day)==days[i]){
-                         _index=i+1;
+                         _index=i;
                         break;
                 }
         }
@@ -151,13 +151,13 @@ string ToDoMngr::view(view_t viewType, Time time){
         newMonth=atoi(Month.c_str());
         
         if(atoi(Year.c_str())%400 ==0 || (atoi(Year.c_str())%100 != 0 && atoi(Year.c_str())%4 == 0)     ){ 
-            if((Month=="02"&&newStartDate+6>29)||((Month=="01"||Month=="03"||Month=="05"||Month=="07"||Month=="08"||Month=="10"||Month=="12")
-                        &&newStartDate+6>31)||((Month=="04"||Month=="06"||Month=="09"||Month=="11")&&newStartDate+6>30))
+            if((Month=="02"&&newStartDate+5>29)||((Month=="01"||Month=="03"||Month=="05"||Month=="07"||Month=="08"||Month=="10"||Month=="12")
+                        &&newStartDate+5>31)||((Month=="04"||Month=="06"||Month=="09"||Month=="11")&&newStartDate+5>30))
                         newMonth=atoi(Month.c_str())+1;
         }
                 else {
-                         if((Month=="02"&&newStartDate+6>28)||((Month=="01"||Month=="03"||Month=="05"||Month=="07"||Month=="08"||Month=="10"||Month=="12")
-                        &&newStartDate+6>31)||((Month=="04"||Month=="06"||Month=="09"||Month=="11")&&newStartDate+6>30))
+                         if((Month=="02"&&newStartDate+5>28)||((Month=="01"||Month=="03"||Month=="05"||Month=="07"||Month=="08"||Month=="10"||Month=="12")
+                        &&newStartDate+5>31)||((Month=="04"||Month=="06"||Month=="09"||Month=="11")&&newStartDate+5>30))
                         newMonth=atoi(Month.c_str())+1;
                 }
 
@@ -166,7 +166,7 @@ string ToDoMngr::view(view_t viewType, Time time){
                 start_date<<Year;
                 Time start(atoi((start_date.str()).c_str()),000);
                         
-                 newEndDate=newStartDate+6;
+                 newEndDate=newStartDate+5;
                  end_date<<std::setfill('0') << std::setw(2)<<newEndDate;
                  end_date<<std::setfill('0') << std::setw(2)<<newMonth;
              end_date<<Year;
