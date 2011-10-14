@@ -40,9 +40,10 @@ int main () {
 //	cout << _toDoMngr.view (7) << endl;
 //	cout << _toDoMngr.view (10) << endl;
 //	cout << _toDoMngr.view (11) << endl;
-/*
+
 	DataStorage _dataStorage;
-	int start, end;
+	_dataStorage.save(tasks);
+	/*int start, end;
 	start = time (NULL);
 	_dataStorage.save (tasks);
 	end = time (NULL);
@@ -59,8 +60,8 @@ cout << "finished loading " << end - start << endl;
 	for (iter = tasks.begin (); iter != tasks.end (); iter++)
 		cout << iter->stringConvert () << endl;
 	end = time (NULL);
-cout << "finished viewing " << end - start << endl;
-*/
+cout << "finished viewing " << end - start << endl;*/
+
 	return 0;
 }
 

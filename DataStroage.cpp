@@ -2,6 +2,7 @@
 #include "Task.h"
 #include "Time.h"
 #include <vector>
+#include <fstream>
 
 using namespace std;
 
@@ -193,6 +194,7 @@ void DataStorage::save (list<Task>* taskList)
    
   erase (timePeriodModifiedIndex);
   save (&timePeriodModifiedTasks); 
+  writeToFile("test.txt");
 }
 
 void DataStorage::save(list<Task> taskList)
@@ -200,6 +202,7 @@ void DataStorage::save(list<Task> taskList)
   list<Task>* taskListPtr;
   taskListPtr = &taskList;
   save (taskListPtr);
+  writeToFile("test.txt");
 }
 
 void DataStorage::updateDates (list<Time::date_t> dateList) 
@@ -301,3 +304,26 @@ bool isFound (list<data_t> dataList, data_t data) {
 
 	return false;
 }
+
+void DataStorage::writeToFile(string storageFile)
+{
+	list<int>::iterator taskIndexIter;
+	vector<Time::date_t>::iterator dateiter;
+	_storageFile = storageFile;
+	ofstream writeFile(_storageFile);
+
+	for(dateiter = dates.begin(); dateiter != dates.end(); dateiter++)
+	{
+		writeFile << endl << *dateiter << endl;
+		for(int i=0; i<arrangedTask.size(); i++)
+		{
+			for(taskIndexIter = arrangedTask[i].begin(); taskIndexIter != arrangedTask[i].end(); taskIndexIter++)
+			{
+				Task obj = tasks[*taskIndexIter-1];
+				writeFile << obj.stringConvert() << endl;
+			}
+		}
+	}
+}
+
+
