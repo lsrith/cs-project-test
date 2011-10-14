@@ -65,38 +65,38 @@ string ToDoMngr:: view(list<Task> tasklist){
 }
 
 string ToDoMngr::view (int taskId){
-        
             Time obj;
 			ToDoMngr todo;
         std::ostringstream tsk;
         int i=1;
               // list<Task> _activeTasklist;
-		list<Task>::iterator _taskpointer;
+	       list<Task>::iterator _taskpointer;
+		   _taskpointer=_activeTaskList.begin();
 
-				for(_taskpointer=todo.get_active_list().begin();_taskpointer!=todo.get_active_list().end();_taskpointer++)
+				/*for(_taskpointer=todo.get_active_list().begin();_taskpointer!=todo.get_active_list().end();_taskpointer++)
 				{
 					if(i<taskId){
 						i++;
 						continue;
 					}
 					else
-						break;
+						break;*/
 					
                 
-                /*for(int i=1;i<taskId;i++){
-					if(_taskpointer!=todo.get_active_list().end())
-				     ++_taskpointer;*/
+                for(int i=1;i<taskId;i++){
+					if(_taskpointer!=_activeTaskList.end())
+				     _taskpointer++;
                 }
                 
                         if(_taskpointer->get_time()==obj){
                 
         tsk<<_taskpointer->get_period().string_time_period ()<<
-                                " "<<_taskpointer->note<<" "<<_taskpointer->venue<<endl;
+                                " "<<"\n"<<_taskpointer->note<<" "<<"Venue:"<<" "<<_taskpointer->venue<<endl;
                         }
                         else
                         {
 							tsk<<_taskpointer->get_time().string_date()<<_taskpointer->get_time().string_clock()
-                                <<" "<<_taskpointer->note<<" "<<_taskpointer->venue<<endl;
+                                <<" "<<"\n"<<_taskpointer->note<<" "<<"Venue:"<<" "<<_taskpointer->venue<<endl;
                         }
 
                          return tsk.str();
@@ -107,7 +107,7 @@ string ToDoMngr::view(view_t viewType, Time time){
         
         string  DATE;
         std::ostringstream start_date,end_date,check;
-        list<Task> _activeTaskList;
+    
         list<Task> l;
         check<<time.get_date();
         DATE=check.str();
@@ -201,7 +201,7 @@ string ToDoMngr::view(view_t viewType, Time time){
 } // return a string of the view by day, by week, or by month
        
 string ToDoMngr::view (TimePeriod period){
-list<Task> _activeTaskList;
+
 
 _activeTaskList= _dataStorage.load(period);
  
