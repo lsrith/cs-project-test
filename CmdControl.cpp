@@ -103,7 +103,7 @@ string CmdControl::executeCmd () {
 		cmd  = _cmdInput->front ();
 		pop ();
 		str = executeCmd (cmd);
-cout << "seqSize = " << _sequence->size () << endl;
+//cout << "seqSize = " << _sequence->size () << endl;
 	}
 /*
 	while (_sequence->empty () == false) {
@@ -207,8 +207,9 @@ str = "_toDoMngr.redo ()";
 			_tableName.erase ();
 		} else {
 			update_dayMonth (_dayMonth);
+			exit (true);
 //			_toDoMngr.exit ();
-str = "_toDoMngr.exit ()";
+//str = "_toDoMngr.exit ()";
 		}
 		break;
 	default:
@@ -293,22 +294,20 @@ string CmdControl::executeTABLE () {
 		string tableName = _dataInput->front ();
 		pop ();
 
-		if (_sequence->front () == CMD && (_cmdInput->front () == CFROM || _cmdInput->front () == CTO)) {
-			tabPeriod:
-				TimePeriod period = get_period ();
+		if (_sequence->empty () == false && _sequence->front () == CMD && (_cmdInput->front () == CFROM || _cmdInput->front () == CTO)) {
+			TimePeriod period = get_period ();
 			
 			if (_flagError != DATA) {
-//				_toDoMngr.newTable (tableName, period);
-str += "_toDoMngr.newTable (tableName, period)";
+				_toDoMngr.newTable (tableName, period);
+//str += "_toDoMngr.newTable (tableName, period)";
 				_tableName = tableName;
-			} else {
-				if (promptToGetValidInput (MSG_WRONG_PERIOD))
-					goto tabPeriod;
 			}
+		} else {
+			_tableName = tableName;
 		}
 	} else {
 //		str = _toDoMngr.viewTableNames ();
-str = "_toDoMngr.viewTableNames ()";
+//str = "_toDoMngr.viewTableNames ()";
 	}
 
 	return str;
@@ -317,23 +316,21 @@ str = "_toDoMngr.viewTableNames ()";
 string CmdControl::executeDELETE () {
 	string str;
 	Task task;
+	TimePeriod period;
 	int taskId;
 
 	if (_sequence->empty () == false) {
 		switch (_sequence->front ()) {
 		case DATA:
 			if (_activeListAccessible) {
-				delID:
-					string data = _dataInput->front ();
-					taskId = convertToInt (data);
-//				task = _toDoMngr.erase (taskId);
-str = "_toDoMngr.erase (taskId)";
-				if (task.get_index () == 0) {
-					if (promptToGetValidInput (MSG_WRONG_ID))
-						goto delID;
-				} else {
-//					str = ToDoMngr::view (task) + MSG_DELETED;
-str = "ToDoMngr::view (task) + MSG_DELETED";
+				string data = _dataInput->front ();
+				taskId = convertToInt (data);
+//cout << "taskId = " << taskId << endl;
+				task = _toDoMngr.erase (taskId);
+//str = "_toDoMngr.erase (taskId)";
+				if (task.get_index () != 0) {
+					str = ToDoMngr::view (task) + MSG_DELETED;
+//str = "ToDoMngr::view (task) + MSG_DELETED";
 					pop ();
 				}
 			}
@@ -342,16 +339,15 @@ str = "ToDoMngr::view (task) + MSG_DELETED";
 			switch (_cmdInput->front ()) {
 			case CFROM:
 			case CTO:
-//				str = executeFunction (_toDoMngr.erase);
-str = "executeFunction (_toDoMngr.erase)";
+				period = get_period ();
+				if (_flagError == NONE)
+					_toDoMngr.erase (period);
+//str = "executeFunction (_toDoMngr.erase)";
 				break;
 			case CTABLE:
 				pop ();
-				while (!getTableName ())
-					promptToGetValidInput (MSG_WRONG_TABLE);
-			
-//				_toDoMngr.erase (_tableName);
-str = "_toDoMngr.erase (_tableName)";
+				_toDoMngr.erase (_tableName);
+//str = "_toDoMngr.erase (_tableName)";
 				break;
 			default:
 				break;
@@ -367,7 +363,7 @@ string CmdControl::executeVIEW () {
 	string str;
 
 	view_t viewType = DAILY;
-	if (_sequence->front () == CMD) {
+	if (!_sequence->empty () && _sequence->front () == CMD) {
 		switch (_cmdInput->front ()) {
 		case CDAY:
 			viewType = DAILY;
@@ -388,20 +384,19 @@ string CmdControl::executeVIEW () {
 
 	Time time;
 	TimePeriod period;
+
+	if (_sequence->empty ())
+		return _toDoMngr.view (period);
+
 	switch (_sequence->front ()) {
 	case DATA:
 		if (_activeListAccessible) {
-			viewID:
-				string data = _dataInput->front ();
-				int taskId = convertToInt (data);
-
-//			str = _toDoMngr.view (taskId);
+			string data = _dataInput->front ();
+			int taskId = convertToInt (data);
+			str = _toDoMngr.view (taskId);
 str = "_toDoMngr.view (taskId)";
 
-			if (str.empty ()) {
-				if (promptToGetValidInput (MSG_WRONG_ID))
-					goto viewID;
-			} else
+			if (!str.empty ())
 				pop ();
 		}
 		break;
@@ -420,15 +415,10 @@ str = "_toDoMngr.view (taskId)";
 		case CTIME:
 		case CDATE:
 			pop ();
-			viewTime:
-				time.modify_date (get_date ());
-			
+			time.modify_date (get_date ());
 			if (_flagError != DATA) {
 				str = _toDoMngr.view (viewType, time);		
 //str = "_toDoMngr.view (viewType, time)";		
-			} else {
-				if (promptToGetValidInput (MSG_WRONG_DATE))
-					goto viewTime;  
 			}
 			break;
 		case CTABLE:
@@ -437,7 +427,7 @@ str = "_toDoMngr.view (taskId)";
 				promptToGetValidInput (MSG_WRONG_TABLE);
 			}	
 //			str = _toDoMngr.view (viewType, _tableName);
-str = "_toDoMngr.view (viewType, _tableName)";
+//str = "_toDoMngr.view (viewType, _tableName)";
 			break;
 		default:
 			break;
@@ -446,7 +436,7 @@ str = "_toDoMngr.view (viewType, _tableName)";
 	default:
 		if (!_tableName.empty ())
 //			str = _toDoMngr.view (viewType, _tableName);
-str = "_toDoMngr.view (viewType, _tableName)";
+//str = "_toDoMngr.view (viewType, _tableName)";
 		break;
 	}
 
@@ -463,29 +453,23 @@ string CmdControl::executeADD () {
 		_force = true;
 	}
 	Task task = get_task ();
-str += ToDoMngr::view (task) + "\n";
-/*		
-	add:
-		_taskList = &(_toDoMngr.add (task, _force));
-//		_taskList = &(_toDoMngr.add (_tableName, task, _force));
+//cout << ToDoMngr::view (task) << endl;
+		
+	_taskList = &(_toDoMngr.add (task, _force));
 	if (!_force && !_taskList->empty ()) {
-		string message = ToDoMngr::view (task) + MSG_CLASH + ToDoMngr::view (*_taskList);
-		if (promptToContinue (message)) {
-			_force = true;
-			goto add;
-		}
+		str = ToDoMngr::view (task) + MSG_CLASH + ToDoMngr::view (*_taskList);
 	} else if (_force && !_taskList->empty ()) {
 		str = MSG_ERROR;
 	} else {
-cout << ToDoMngr::view (task) << endl;
-		str = MSG_ADDED;
+		str = ToDoMngr::view (task) + MSG_ADDED;
 //str = "ToDoMngr::view (task) + MSG_ADDED";
 	}
-		
-	_taskList->clear ();
+	
+	if (!_taskList->empty ())
+		_taskList->clear ();
 //str += "_taskList->clear ()";
-cout << "ready to return string" << endl;
-*/
+//cout << "ready to return string" << endl;
+
 	return str;
 }
 

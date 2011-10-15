@@ -22,7 +22,7 @@ public:
         list<Task> get_active_list ();
 
 //Ris:
-        static string view (Task& taskId);
+        static string view (Task taskId);
         // return a string of the view of the specific task
         static string view (list<Task> taskList);
 
@@ -60,14 +60,15 @@ public:
         // add a task to the dataStorage
         // if forceAdd is true, just add and return a fresh list
         // else return the clashed tasks
-/*
+
 //        list<Task> edit (int taskId);
         Task erase (int taskId);
         // return an erased task
         // if taskId is incorrect, return a default Task
         void erase (TimePeriod period);
         // do not erase any Tasks in any timetable
-        bool newTable (string name, TimePeriod period);
+
+		bool newTable (string name, TimePeriod period);
         // create a new timetable, save it with this name
         // return false if the name is already exist
         list<Task> add (string tableName, Task task, bool forceAdd);
@@ -76,7 +77,7 @@ public:
         // return a list of clashed tasks if any
         void erase (string name);
         // erase the timetable with the name specified
-*/
+
 //        void undo ();
 //        void redo ();
 

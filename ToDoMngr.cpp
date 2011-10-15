@@ -1,8 +1,4 @@
-#include <iostream>
-#include "ToDoMngr.h"
-#include "TimePeriod.h"
-#include "Task.h"
-#include "DataStorage.h"
+﻿#include "ToDoMngr.h"
 #include <list>
 #include <queue>
 #include <string>
@@ -10,6 +6,7 @@
 #include <fstream>
 #include <ctime>
 #include <iomanip>
+#include <iostream>
 using namespace std;
 
 ToDoMngr::ToDoMngr () {	
@@ -19,19 +16,19 @@ list<Task> ToDoMngr::get_active_list () {
 	return _activeTaskList;
 }
 
- string ToDoMngr::view(Task& taskId){
-	    Time _time;
-		 std::ostringstream tsk;
+string ToDoMngr::view(Task taskId){
+            Time _time;
+                 std::ostringstream tsk;
 
-		if(taskId.get_time()==_time)
-		{
-			tsk<<taskId.get_period().string_time_period()<<" "<<" "<<taskId.note<<" "<<taskId.venue;
-		}
-		else
-		{
+                if(taskId.get_time()==_time)
+                {
+                        tsk<<taskId.get_period().string_time_period()<<" "<<" "<<taskId.note<<" "<<taskId.venue;
+                }
+                else
+                {
     
-		tsk<<taskId.get_time().string_date()<<" "<<taskId.get_time().string_clock()<<" "<<taskId.note<<" "<<taskId.venue;
-		}
+                tsk<<taskId.get_time().string_date()<<" "<<taskId.get_time().string_clock()<<" "<<taskId.note<<" "<<taskId.venue;
+                }
         return tsk.str();
 }
 
@@ -40,10 +37,10 @@ string ToDoMngr:: view(list<Task> tasklist){
         std::ostringstream oss;
         list<Task> taskl=tasklist;
     list<Task>::iterator l;
-	int index=1;
-	if(tasklist.empty())
-		oss<<" ";
-	else{
+        int index=1;
+        if(tasklist.empty())
+                oss<<" ";
+        else{
 
         for(l =taskl.begin (); l !=taskl.end (); l++)
                 {   
@@ -53,50 +50,50 @@ string ToDoMngr:: view(list<Task> tasklist){
                         }
                         else
                         {
-							oss<<l->get_time().string_date() << " at " <<l->get_time().string_clock()<<"\n"<<index<<"."
+                                                        oss<<l->get_time().string_date() << " at " <<l->get_time().string_clock()<<"\n"<<index<<"."
                                 <<" "<<l->note<<" "<<l->venue<<endl;
 
                         }
-						index++;
+                                                index++;
         }
-	}
+        }
    return oss.str();
-	
+        
 }
 
 string ToDoMngr::view (int taskId){
-        
             Time obj;
-			ToDoMngr todo;
+                        ToDoMngr todo;
         std::ostringstream tsk;
         int i=1;
               // list<Task> _activeTasklist;
-		list<Task>::iterator _taskpointer;
+               list<Task>::iterator _taskpointer;
+                   _taskpointer=_activeTaskList.begin();
 
-				for(_taskpointer=todo.get_active_list().begin();_taskpointer!=todo.get_active_list().end();_taskpointer++)
-				{
-					if(i<taskId){
-						i++;
-						continue;
-					}
-					else
-						break;
-					
+                                /*for(_taskpointer=todo.get_active_list().begin();_taskpointer!=todo.get_active_list().end();_taskpointer++)
+                                {
+                                        if(i<taskId){
+                                                i++;
+                                                continue;
+                                        }
+                                        else
+                                                break;*/
+                                        
                 
-                /*for(int i=1;i<taskId;i++){
-					if(_taskpointer!=todo.get_active_list().end())
-				     ++_taskpointer;*/
+                for(int i=1;i<taskId;i++){
+                                        if(_taskpointer!=_activeTaskList.end())
+                                     _taskpointer++;
                 }
                 
                         if(_taskpointer->get_time()==obj){
                 
         tsk<<_taskpointer->get_period().string_time_period ()<<
-                                " "<<_taskpointer->note<<" "<<_taskpointer->venue<<endl;
+                                " "<<"\n"<<_taskpointer->note<<" "<<"Venue:"<<" "<<_taskpointer->venue<<endl;
                         }
                         else
                         {
-							tsk<<_taskpointer->get_time().string_date()<<_taskpointer->get_time().string_clock()
-                                <<" "<<_taskpointer->note<<" "<<_taskpointer->venue<<endl;
+                                                        tsk<<_taskpointer->get_time().string_date()<<_taskpointer->get_time().string_clock()
+                                <<" "<<"\n"<<_taskpointer->note<<" "<<"Venue:"<<" "<<_taskpointer->venue<<endl;
                         }
 
                          return tsk.str();
@@ -107,7 +104,7 @@ string ToDoMngr::view(view_t viewType, Time time){
         
         string  DATE;
         std::ostringstream start_date,end_date,check;
-        list<Task> _activeTaskList;
+    
         list<Task> l;
         check<<time.get_date();
         DATE=check.str();
@@ -139,10 +136,10 @@ string ToDoMngr::view(view_t viewType, Time time){
         else if(viewType=WEEKLY){
       Task _day;
          int day;
-	for(int i=0;i<7;i++){
-		day=_day.get_time().get_day();
-		if(_day.get_time().display_day(day)==days[i]){
-                         _index=i+1;
+        for(int i=0;i<7;i++){
+                day=_day.get_time().get_day();
+                if(_day.get_time().display_day(day)==days[i]){
+                         _index=i;
                         break;
                 }
         }
@@ -151,13 +148,13 @@ string ToDoMngr::view(view_t viewType, Time time){
         newMonth=atoi(Month.c_str());
         
         if(atoi(Year.c_str())%400 ==0 || (atoi(Year.c_str())%100 != 0 && atoi(Year.c_str())%4 == 0)     ){ 
-            if((Month=="02"&&newStartDate+6>29)||((Month=="01"||Month=="03"||Month=="05"||Month=="07"||Month=="08"||Month=="10"||Month=="12")
-                        &&newStartDate+6>31)||((Month=="04"||Month=="06"||Month=="09"||Month=="11")&&newStartDate+6>30))
+            if((Month=="02"&&newStartDate+5>29)||((Month=="01"||Month=="03"||Month=="05"||Month=="07"||Month=="08"||Month=="10"||Month=="12")
+                        &&newStartDate+5>31)||((Month=="04"||Month=="06"||Month=="09"||Month=="11")&&newStartDate+5>30))
                         newMonth=atoi(Month.c_str())+1;
         }
                 else {
-                         if((Month=="02"&&newStartDate+6>28)||((Month=="01"||Month=="03"||Month=="05"||Month=="07"||Month=="08"||Month=="10"||Month=="12")
-                        &&newStartDate+6>31)||((Month=="04"||Month=="06"||Month=="09"||Month=="11")&&newStartDate+6>30))
+                         if((Month=="02"&&newStartDate+5>28)||((Month=="01"||Month=="03"||Month=="05"||Month=="07"||Month=="08"||Month=="10"||Month=="12")
+                        &&newStartDate+5>31)||((Month=="04"||Month=="06"||Month=="09"||Month=="11")&&newStartDate+5>30))
                         newMonth=atoi(Month.c_str())+1;
                 }
 
@@ -166,7 +163,7 @@ string ToDoMngr::view(view_t viewType, Time time){
                 start_date<<Year;
                 Time start(atoi((start_date.str()).c_str()),000);
                         
-                 newEndDate=newStartDate+6;
+                 newEndDate=newStartDate+5;
                  end_date<<std::setfill('0') << std::setw(2)<<newEndDate;
                  end_date<<std::setfill('0') << std::setw(2)<<newMonth;
              end_date<<Year;
@@ -201,7 +198,7 @@ string ToDoMngr::view(view_t viewType, Time time){
 } // return a string of the view by day, by week, or by month
        
 string ToDoMngr::view (TimePeriod period){
-list<Task> _activeTaskList;
+
 
 _activeTaskList= _dataStorage.load(period);
  
@@ -214,7 +211,7 @@ string ToDoMngr::help (string command){
         ifstream myhelpfile;
         myhelpfile.open("HELP.txt");
         string HELP_LINE;
-		ostringstream str;
+                ostringstream str;
 
         if(command.empty ()){
                 while(getline(myhelpfile, HELP_LINE))
@@ -223,7 +220,7 @@ string ToDoMngr::help (string command){
                 }
         }
 
-		return str.str ();
+                return str.str ();
 }
 
 string ToDoMngr::reminder(){
@@ -247,8 +244,10 @@ string ToDoMngr::reminder(){
 
 }
 
+
 list<Task> ToDoMngr::add(Task task, bool forceAdd)                                                                      
 {
+	list<Task> _addList;
  if(forceAdd == true || task.timeTask == true)
 { 
   // forceAdd is true or it is a time task, save to dataStorage
@@ -306,9 +305,6 @@ list<Task> ToDoMngr::add(Task task, bool forceAdd)
 }
 
 
-
-
-
 bool ToDoMngr::newTable(string name, TimePeriod period)
 {
  bool clashName;
@@ -338,23 +334,6 @@ bool ToDoMngr::newTable(string name, TimePeriod period)
  }
 }
 
-void ToDoMngr::erase(TimePeriod period)
-{
- //get the id of tasks in that period
- list<Task> deleteList;
- deleteList = _dataStorage.load(period);
- list<int> deletedIdx;
- list<Task>::iterator di = deleteList.begin();
- 
- for(int i=1; i<=deleteList.size(); i++)
- {
-  deletedIdx.push_back(di->get_index());
- }
- 
- //delete from dataStorage the tasks with the id in the list
- _dataStorage.erase(deletedIdx); 
-} 
-
 void ToDoMngr::erase(string name)
 {
  // load back the list of task in the timetable
@@ -377,6 +356,23 @@ void ToDoMngr::erase(string name)
 }
 
 
+void ToDoMngr::erase(TimePeriod period)
+{
+ //get the id of tasks in that period
+ list<Task> deleteList;
+ deleteList = _dataStorage.load(period);
+ list<int> deletedIdx;
+ list<Task>::iterator di = deleteList.begin();
+ 
+ for(int i=1; i<deleteList.size(); i++)
+ {
+  deletedIdx.push_back(di->get_index());
+ }
+ 
+ //delete from dataStorage the tasks with the id in the list
+ _dataStorage.erase(deletedIdx); 
+} 
+
 // delete from dataStorage given the taskId from _activeTaskList
 Task ToDoMngr::erase(int taskId)
 {
@@ -392,7 +388,6 @@ Task ToDoMngr::erase(int taskId)
  
  return deletetask;  
 }
-
 
 
 list<Task> ToDoMngr::add(string tableName, Task task, bool forceAdd)

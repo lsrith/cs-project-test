@@ -2,7 +2,7 @@
 #include "Task.h"
 #include "Time.h"
 #include <vector>
-
+#include <iostream>
 using namespace std;
 
 DataStorage::DataStorage ()
@@ -74,12 +74,12 @@ vector<string> DataStorage::load_table_name ()
 	
 
 void DataStorage::erase (list<int> taskIndex) {
+	if (taskIndex.empty ()) return;
 	list<int>::iterator iter;
-	for (iter = taskIndex.begin (); iter != taskIndex.end (); iter++) {
+	for (iter = taskIndex.begin (); iter != taskIndex.end (); iter++)
 		for (int i = 0; i < arrangedTask.size (); i++) {
 			arrangedTask[i].remove (*iter);
 		}
-	}
 }
 
 void DataStorage::clear () {
@@ -132,10 +132,10 @@ void DataStorage::sort (list<Task>* taskList) {
 void DataStorage::save (list<Task>* taskList)
 {
 	if (taskList->empty ()) return;
-
-  Task* taskPtr;
-  list<Task> timePeriodModifiedTasks;
-  list<int> timePeriodModifiedIndex;
+	 
+	Task* taskPtr;
+	list<Task> timePeriodModifiedTasks;
+	list<int> timePeriodModifiedIndex;
 	list<Task>::iterator iter;
 	list<Time::date_t> dateList;	
 	for(iter = taskList->begin(); iter != taskList->end(); iter++)
@@ -153,8 +153,6 @@ void DataStorage::save (list<Task>* taskList)
 	}
 	updateDates (dateList);
 
-//timePeriod related change
-//for now, time and timePeriod can be modified
 	int dateIndex;
 	for(iter = taskList->begin(); iter != taskList->end(); iter++)
 	{	
@@ -178,28 +176,26 @@ void DataStorage::save (list<Task>* taskList)
 		}
 		else
 		{
-      //check if time or period is modified
-      taskPtr = &tasks[iter->_index];
-      if (taskPtr->get_time () == iter->get_time () && taskPtr->get_period ().get_start_time () == iter->get_period ().get_start_time ()
-        && taskPtr->get_period ().get_end_time () == iter->get_period ().get_end_time ()) {
-        *taskPtr = *iter;
-      } else {
-        iter->_index = 0;
-        timePeriodModifiedTasks.push_back (*iter);
-        timePeriodModifiedIndex.push_back (taskPtr->_index);
+			//check if time or period is modified
+			taskPtr = &tasks[iter->_index];
+			if (taskPtr->get_time () == iter->get_time () && taskPtr->get_period ().get_start_time () == iter->get_period ().get_start_time ()
+				&& taskPtr->get_period ().get_end_time () == iter->get_period ().get_end_time ()) {
+				*taskPtr = *iter;
+			} else {
+				iter->_index = 0;
+				timePeriodModifiedTasks.push_back (*iter);
+				timePeriodModifiedIndex.push_back (taskPtr->_index);
       }
   	}
 	}
-   
-  erase (timePeriodModifiedIndex);
-  save (&timePeriodModifiedTasks); 
+	
+	erase (timePeriodModifiedIndex);
+	save (&timePeriodModifiedTasks); 
 }
 
 void DataStorage::save(list<Task> taskList)
 {
-  list<Task>* taskListPtr;
-  taskListPtr = &taskList;
-  save (taskListPtr);
+	save (&taskList);
 }
 
 void DataStorage::updateDates (list<Time::date_t> dateList) 

@@ -129,7 +129,8 @@ VldCmdCtrl::command VldCmdCtrl::convertToCommand (int indx) {
 	case 20:	cmd = CWEEK;		break;
 	case 21:	cmd = CMONTH;	break;
 	case 22:	cmd = CADD;		break;
-	case 23:	cmd = CDELETE;	break;
+	case 23:	cmd = CEDIT;	break;
+	case 24:	cmd = CDELETE;	break;
 	case 25:	cmd = CTABLE;	break;
 	case 26:	cmd = CVIEW;		break;
 	case 27:	cmd = CREMINDER;	break;
