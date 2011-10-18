@@ -92,10 +92,10 @@ private:
          list <Task> _taskList;
          bool _forceAdd;
          TimePeriod _period;
-         string _tableName;}
+         string _tableName;};
 
-Stack <userTask> undoStack;
-Stack <userTask> redoStack;
+stack<userTask> undoStack;
+stack<userTask> redoStack;
 
 };
 #endif
