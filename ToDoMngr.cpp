@@ -500,6 +500,7 @@ string ToDoMngr::reminder(){
 
 list<Task> ToDoMngr::add(Task task, bool forceAdd)                                                                      
 {
+	list<Task> _addList;
  if(forceAdd == true || task.timeTask == true)
 { 
   // forceAdd is true or it is a time task, save to dataStorage
