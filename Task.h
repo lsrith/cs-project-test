@@ -13,22 +13,6 @@ enum PriorityLevel {HIGH, IMPORTANT, SIMPLE};
 enum RepeatType {HOUR, DAY, WEEK, FORTNIGHT, MONTH, COSTOM, NOREPEAT};
 
 class Task {
-private:
-	Time _time;
-	TimePeriod _period;
-	unsigned int _index;		//each template is to be given a unique index
-								//default index == 0
-
-	friend class DataStorage;
-
-	static string spaceMarker;
-
-	RepeatType intToRepeat (int);
-	PriorityLevel intToPriority (int);
-	int repeatToInt (RepeatType);
-	int priorityToInt (PriorityLevel);
-	int findPosition (string, string, int);
-
 public:
 	string name;
 	string venue;
@@ -55,5 +39,21 @@ public:
 	Time get_time ();
 	TimePeriod get_period ();
 	unsigned int get_index ();
+
+private:
+	Time _time;
+	TimePeriod _period;
+	unsigned int _index;		//each template is to be given a unique index
+								//default index == 0
+
+	friend class DataStorage;
+
+	static string spaceMarker;
+
+	RepeatType intToRepeat (int);
+	PriorityLevel intToPriority (int);
+	int repeatToInt (RepeatType);
+	int priorityToInt (PriorityLevel);
+	int findPosition (string, string, int);
 };
 #endif

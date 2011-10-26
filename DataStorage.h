@@ -47,6 +47,7 @@ public:
 	void save (list<Task>* taskList);
 	// save the templates to the storageFile by overwriting any overlapping index
 	// give an idex to each templates if it's not given
+	void save (list<int> taskIdex);
 
 	list<Task> load (TimePeriod period);
 	// return a list of templates within a time period input :) get it from our storageFile
@@ -70,7 +71,5 @@ public:
 	// type to indicate exact match or similar match
 //	string costomSearch (/*arguments to be modify*/);
 	// search based on some criteria
-
-
 };
 #endif
