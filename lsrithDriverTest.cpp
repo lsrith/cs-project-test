@@ -1,10 +1,10 @@
 #include "CmdControl.h"
-#include "DataStorage.h"
+//#include "DataStorage.h"
 #include <iostream>
 #include <string>
 #include <ctime>
 using namespace std;
-
+/*
 int main () {
 
 	list<Task> tasks;
@@ -12,12 +12,13 @@ int main () {
 	Time time2 (5022005, 100);
 	Time time1 (5022005, 530);
 	TimePeriod period;
-	Time startTime, endTime;
-	startTime = time2;
-	endTime = startTime + 10 * Time::DAY;
+	Time startTime (16022005, 0);
+	Time endTime (27052005, 0);
+//	startTime = time2;
+//	endTime = startTime + 10 * Time::DAY;
 	ToDoMngr _toDoMngr;
 	bool force = true;
-	for (int i = 0; i < 10; i++) {
+	for (int i = 0; i < 300; i++) {
 		temp.note = i + 1;
 		temp.venue = 20 + i;
 		period.modify_start_time (time2);
@@ -34,9 +35,12 @@ int main () {
 	TimePeriod Period;
 	view_t viewType = MONTHLY;
 //	cout << Period.string_time_period () << endl;
-	str = _toDoMngr.view (Period);
+	cout << "view the week of " << startTime.string_date () << "\n\n" << endl;
+	str = _toDoMngr.view (WEEKLY, startTime);
 	cout << str << endl;
-	cout << _toDoMngr.view (_toDoMngr.get_active_list ());
+	_toDoMngr.erase (period);
+	cout << _toDoMngr.view (WEEKLY, startTime);
+//	cout << _toDoMngr.view (_toDoMngr.get_active_list ());
 //	cout << _toDoMngr.view (7) << endl;
 //	cout << _toDoMngr.view (10) << endl;
 //	cout << _toDoMngr.view (11) << endl;
@@ -64,7 +68,7 @@ cout << "finished viewing " << end - start << endl;*/
 
 	return 0;
 }
-
+*/
 /*
 int main () {
 	CmdControl cmdControl;
@@ -72,18 +76,37 @@ int main () {
 	return 0;
 }
 */
-/*
+
 int main () {
 	string str;
+	bool dotCmd;
+	cout << "dotCmd = ";
+	cin >> dotCmd;
 	try {
-		CmdControl cmdControl;
-		while (str != ".exit") {
+		CmdControl cmdControl (dotCmd);
+		while (str != "exit") {
 			cout << "command: ";
 			getline (cin, str);
-			cout << str << endl;
+//			cout << str << endl;
 			try {
 				cmdControl.updateInput (str);
 				cout << cmdControl.executeCmd () << endl;
+
+				switch (cmdControl.getPromptFlag () ) {
+				case 0:
+					while (true) {
+						cout << "Do you still want to continue? (Y/N): ";
+						getline (cin, str);
+						if (str == "Y" || str == "y") {
+							cmdControl.activatePrompt ();
+							break;
+						} else if (str == "N" || str == "n") {
+							break;
+						} else;
+					}
+				default:
+					break;
+				}
 			} catch (string xcpt) {
 				cout << "INV" << endl;
 			}
@@ -93,7 +116,7 @@ int main () {
 	}
 	return 0;
 }
-*/
+
 /*
 int main ()
 {

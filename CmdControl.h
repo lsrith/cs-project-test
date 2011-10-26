@@ -18,20 +18,18 @@ queue<data_t>& operator+= (queue<data_t>& Q1, queue<data_t> Q2);
 
 class CmdControl: public VldCmdCtrl {
 public:
+	enum prompt_t {ADDCLASHED, CONTINUE, VLDINPUT, NEWINPUT, NOPROMPT};
+	
 	template <typename data_t>
 	void clear (queue<data_t>& Q);
 
 	typedef unsigned short int indx_t;
 	enum input_t {CMD, DATA, NONE};
 
-	CmdControl ();
+	CmdControl (bool);
 	//Command will load CmdList from built-in file
-/*
-	CmdControl (string validCmdFile);
-	//Command will load CmdList from specified file
-	CmdControl (vector<cmd_pair> validCmd);
-	//Command will use the cmdList given
-*/	
+	//true if the user wants the '.' command
+	//false if the user wants the literal command
 	void updateInput (string& input);
 	void addInput (string& input);
 
@@ -39,6 +37,8 @@ public:
 	//return a string of input that could not be able to access
 	string executeCmd ();
 	input_t getErrorFlag ();
+	prompt_t getPromptFlag ();
+	string activatePrompt ();
 
 private:	
 	string _input;
@@ -55,14 +55,19 @@ private:
 	ToDoMngr _toDoMngr;
 //	ToDoMngr::search_t _search;
 
+	vector<bool> _taskElement;
+	bool _taskElemCleared;
+	Task _task;
 	list<Task>* _taskList;
 	string _tableName;
 	bool _force;
 	bool _activeListAccessible;
 
 	input_t _flagError;
+	prompt_t _flagPrompt;
 	bool _dayMonth;
 
+	static int TASKELEMENTS;
 	static string INV_CMD;
 	static string INV_DATA;
 	static string MSG_ERROR;
@@ -90,9 +95,6 @@ private:
 	void executeSORT ();
 	bool executeNEXT ();
 	bool executePREV ();
-	bool promptToContinue (string);
-	bool promptToGetValidInput (string);
-	bool promptToGetNewInput (string);
 
 	void splitInput ();
 	command translateCmd (string);
@@ -101,6 +103,7 @@ private:
 
 	int get_int ();
 	Task get_task ();
+	void update_task (Task*);
 	TimePeriod get_period ();
 	Time get_time ();
 	Time::date_t get_date ();
@@ -117,6 +120,7 @@ private:
 	void convertToInt (string, int&, int&);
 	int convertToInt (string);	// return -1 if the whole string is not an integer
 	string mergeStringInput ();
+	void clearTaskElement ();
 
 	void activate2ndQs ();
 	void deactivate2ndQs ();

@@ -12,7 +12,7 @@ class VldCmdCtrl {
 public:
 	enum command {	CCOSTOM, CFORCE, CEXACT, CSIMILAR, CEACH, CCOMMAND,						//extension
 					CTIME, CDATE, CFROM, CTO, CNAME, CVENUE, CNOTE, CALERT, CREPEAT, CPRIORITY,	//marker
-					CHIGH, CIMPT, CNOMAL, CDAY, CWEEK, CMONTH,								//object 
+					CHIGH, CIMPT, CNOMAL, CDAY, CWEEK, CMONTH, CNOW, CTODAY, CTMR,				//object 
 					CADD, CEDIT, CDELETE, CTABLE, CVIEW, CREMINDER, CNEXT, CPREVIOUS,			//command
 					CFIRST, CLAST, CUNDO, CREDO, CHELP, CSORT, CSEARCH, CCLEAR, CRESET, CEXIT, CVOID};
 	struct cmd_pair {
@@ -34,6 +34,7 @@ public:
 	bool search_standAloneCmd (string, command&);
 
 protected:
+	bool _dotCmd;
 	string _validCmdFile;
 	string _dfltCmdFile;
 	string _validDayMnth;
