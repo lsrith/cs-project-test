@@ -81,7 +81,6 @@ void DataStorage::erase (list<int> taskIndex) {
 		for (int i = 0; i < arrangedTask.size (); i++) {
 			arrangedTask[i].remove (*iter);
 		}
-	}
 }
 
 void DataStorage::clear () {

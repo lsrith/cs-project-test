@@ -1,5 +1,5 @@
 #include "CmdControl.h"
-//#include "DataStorage.h"
+#include "DataStorage.h"
 #include <iostream>
 #include <string>
 #include <ctime>
@@ -64,7 +64,7 @@ cout << "finished loading " << end - start << endl;
 	for (iter = tasks.begin (); iter != tasks.end (); iter++)
 		cout << iter->stringConvert () << endl;
 	end = time (NULL);
-cout << "finished viewing " << end - start << endl;*/
+cout << "finished viewing " << end - start << endl;
 
 	return 0;
 }
