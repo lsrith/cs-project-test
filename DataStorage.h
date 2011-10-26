@@ -16,7 +16,10 @@ bool isFound (list<data_t> dataList, data_t data);
 class DataStorage {
 
 private: 
-	string _storageFile;
+	string _taskFile;
+	string _tableIdxFile;
+	string _taskIdxFile;
+
 	int _largestIndex;
 	vector<list<int>> arrangedTask;
 	vector<Time::date_t> dates;
@@ -29,18 +32,18 @@ private:
 	int getDateIndex (Time::date_t);
 	int getTableIndex (string);
 	int getSimDateIndex (Time::date_t);
-	void writeToFile(string storageFile);
+	void reIndexing ();
 
-/*	int reIndexingTemplates ();
-	 when to do it is based on your decision
-	 return the largest index
-	list<Task> sort_by_date(list<Task> toDoList);
-	void swap_element(list<Task> *ptr, list<Task> *ptr1);
-	void write_to_file(list<Task> todolist);*/
+	inline void loadFromFile ();
+	inline void writeTaskToFile ();
+	inline void writeTaskIdxToFile ();
+	inline void writeTableIdxToFile ();
 
 public:
 	DataStorage ();
 
+	void updateStorageName (string storageName);
+	
 	static void sort (list<Task>* taskList);
 
 	void save (list<Task> taskList);
@@ -53,9 +56,10 @@ public:
 	// return a list of templates within a time period input :) get it from our storageFile
 	// this load function takes care of the dates only.. no clock involved!!
 
-	void erase (list<int> templateIndex);
+	void erase (list<int> taskIndex);
 	// erase any template with the specified index from the file
 	void clear ();
+	void exit ();
 
 	void save (string tableName, TimePeriod period, list<int> templateIndex);
 	// save the timetable with the name and period so that you can load back all tasks

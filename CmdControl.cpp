@@ -845,7 +845,7 @@ Time::date_t CmdControl::get_date () {
 		if (year == -1)
 			year = tempYear;
 	}
-	
+
 	if (Day < 7) {
 		if (day == -1 && mnth == -1 && year == -1) {
 			int currDay = currTime.get_day ();
