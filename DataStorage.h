@@ -14,32 +14,9 @@ template <typename data_t>
 bool isFound (list<data_t> dataList, data_t data);
 
 class DataStorage {
-
-private: 
-	string _taskFile;
-	string _tableIdxFile;
-	string _taskIdxFile;
-
-	int _largestIndex;
-	vector<list<int>> arrangedTask;
-	vector<Time::date_t> dates;
-	vector<Task> tasks;
-	vector<string> tableNames;
-	vector<list<int>> tableTasks;
-	vector<TimePeriod> tablePeriod;
-	
-	void updateDates (list<Time::date_t>);
-	int getDateIndex (Time::date_t);
-	int getTableIndex (string);
-	int getSimDateIndex (Time::date_t);
-	void reIndexing ();
-
-	inline void loadFromFile ();
-	inline void writeTaskToFile ();
-	inline void writeTaskIdxToFile ();
-	inline void writeTableIdxToFile ();
-
 public:
+	enum search_t {SEXACT, SSIMILAR, SEACH};
+	
 	DataStorage ();
 
 	void updateStorageName (string storageName);
@@ -70,10 +47,40 @@ public:
 	vector<string> load_table_name ();
 	// return a list of names of existing timetable
 
-//	string search (string searchedWord, searchType type);
+	list<Task> search (string searchedWord, search_t type);
 	// search based on any specified word.. return a string to be displayed
 	// type to indicate exact match or similar match
 //	string costomSearch (/*arguments to be modify*/);
 	// search based on some criteria
+
+private: 
+	string _taskFile;
+	string _tableIdxFile;
+	string _taskIdxFile;
+
+	int _largestIndex;
+	vector<list<int>> arrangedTask;
+	vector<Time::date_t> dates;
+	vector<Task> tasks;
+	vector<bool> activeTasks;
+	vector<string> tableNames;
+	vector<list<int>> tableTasks;
+	vector<TimePeriod> tablePeriod;
+	
+	void updateDates (list<Time::date_t>);
+	int getDateIndex (Time::date_t);
+	int getTableIndex (string);
+	int getSimDateIndex (Time::date_t);
+	void reIndexing ();
+
+	inline void loadFromFile ();
+	inline void writeTaskToFile ();
+	inline void writeTaskIdxToFile ();
+	inline void writeTableIdxToFile ();
+
+	list<Task> exactSearch (string);
+	list<Task> similarSearch (string);
+	list<Task> eachSearch (string);
+	void checkTaskList (list<Task>*);
 };
 #endif

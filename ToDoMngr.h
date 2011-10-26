@@ -16,7 +16,6 @@ enum view_t {DAILY, WEEKLY, MONTHLY};
 
 class ToDoMngr {
 public:
-        enum search_t {SEXACT, SSIMILAR, SEACH};
 		enum TaskElement {TTIME = 0, TPERIOD, TNAME, TVENUE, TNOTE, TALERT, TREPEAT_T, TREPEAT, TPRIORITY};
 
         ToDoMngr ();

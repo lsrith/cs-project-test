@@ -5,6 +5,7 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <iostream>
 using namespace std;
 
 DataStorage::DataStorage ()
@@ -12,6 +13,7 @@ DataStorage::DataStorage ()
 	_largestIndex = 1;
 	Task task;
 	tasks.push_back (task);
+	activeTasks.push_back (false);
 	_taskFile = "dflt.txt";
 	_tableIdxFile = "dflttt.txt";
 	_taskIdxFile = "dflttk.txt";
@@ -22,9 +24,11 @@ void DataStorage::updateStorageName (string storageName) {
 	arrangedTask.clear ();
 	dates.clear ();
 	tasks.clear ();
+	activeTasks.clear ();
 	_largestIndex = 1;
 	Task task;
 	tasks.push_back (task);
+	activeTasks.push_back (false);
 
 	_taskFile = storageName + ".txt";
 	_tableIdxFile = storageName + "tt.txt";
@@ -99,6 +103,7 @@ void DataStorage::erase (list<int> taskIndex) {
 	
 	list<int>::iterator iter;
 	for (iter = taskIndex.begin (); iter != taskIndex.end (); iter++) {
+		activeTasks[*iter] = false;
 		for (int i = 0; i < arrangedTask.size (); i++)
 			arrangedTask[i].remove (*iter);
 
@@ -198,6 +203,7 @@ void DataStorage::save (list<Task>* taskList)
 			iter->_index = _largestIndex;
 			_largestIndex++;
 			tasks.push_back (*iter);
+			activeTasks.push_back (true);
 
 			if (iter->timeTask == true) {
 				dateIndex = getDateIndex (iter->get_time ().get_date ());
@@ -404,6 +410,7 @@ void DataStorage::loadFromFile () {
 			Task task (str);
 			if (task._index == _largestIndex) {
 				tasks.push_back (task);
+				activeTasks.push_back (true);
 				_largestIndex++;
 			} else if (task._index < _largestIndex) {
 				tasks[task._index] = task;
@@ -420,7 +427,7 @@ void DataStorage::loadFromFile () {
 	list<int> intList;
 	ifstream taskIdxFile (_taskIdxFile);
 	if (taskIdxFile.is_open ()) {
-		while (getline (taskFile, str)) {
+		while (getline (taskIdxFile, str)) {
 			strStream << str;
 			strStream >> date;
 			dates.push_back (date);
@@ -504,4 +511,82 @@ void DataStorage::writeTableIdxToFile () {
 	}
 
 	tableIdxFile.close ();
+}
+
+list<Task> DataStorage::search (string searchedWord, search_t type) {
+	list<Task> taskList;
+
+	switch (type) {
+	case SEACH:
+		taskList = eachSearch (searchedWord);
+		break;
+	case SEXACT:
+		taskList = exactSearch (searchedWord);
+		break;
+	case SSIMILAR:
+		taskList = similarSearch (searchedWord);
+		break;
+	default:
+		break;
+	}
+
+	checkTaskList (&taskList);
+	return taskList;
+}
+
+list<Task> DataStorage::exactSearch (string searchedWord) {
+	list<Task> taskList;
+
+	string str;
+	ifstream taskFile (_taskFile);
+	int pos;
+	if (taskFile.is_open ()) {
+		while (getline (taskFile, str)) {
+			pos = str.find (searchedWord);
+			if (pos != string::npos) {
+				Task task (str);
+				taskList.push_back (task);
+			}
+		}
+
+		taskFile.close ();
+	}
+
+	return taskList;
+}
+
+list<Task> DataStorage::similarSearch (string searchedWord) {
+	list<Task> taskList;
+	return taskList;
+}
+
+list<Task> DataStorage::eachSearch (string searchedWord) {
+	list<Task> taskList;
+	list<string> keyWords;
+	string str;
+	int end_pos;
+
+	while (!searchedWord.empty ()) {
+		end_pos = searchedWord.find_first_of (" ", 0);
+		str = searchedWord.substr (0, end_pos - 1);
+		keyWords.push_back (str);
+		searchedWord.erase (0, end_pos);
+cout << str << endl;
+	}
+
+	while (!keyWords.empty ()) {
+		taskList.splice (taskList.end (), exactSearch (keyWords.front ()));
+		keyWords.pop_front ();
+	}
+
+	return taskList;
+}
+
+void DataStorage::checkTaskList (list<Task>* taskList) {
+	list<Task>::iterator iter;
+	sort (taskList);
+	for (iter = taskList->begin (); iter != taskList->end (); iter++) {
+		if (!activeTasks[iter->_index])
+			taskList->erase (iter);
+	}
 }
