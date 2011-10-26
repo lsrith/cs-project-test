@@ -634,7 +634,7 @@ Task ToDoMngr::erase(int taskId)
 {
  list<Task>::iterator di = _activeTaskList.begin();
  
- for(int i=1; i<= taskId;i++)
+ for(int i=1; i< taskId;i++)
  {
   di++;
  }     
