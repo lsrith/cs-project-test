@@ -28,6 +28,7 @@ public:
 	clk_t get_clock ();
 	string string_date ();
 	string string_clock ();
+	string string_clock_24 ();
 
 	bool operator== (Time time);
 	bool operator!= (Time time);

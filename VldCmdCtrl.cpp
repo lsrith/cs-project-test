@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <iostream>
 using namespace std;
 
 string VldCmdCtrl::LOST_FILE = "unable to find a file: ";
@@ -40,11 +41,18 @@ vector<VldCmdCtrl::cmd_pair> VldCmdCtrl::get_vldCmdList (string cmdFile, int& en
 	if (inFile.is_open ()) {
 		cmd_pair cmd;
 		int cmdIndx;
-		while (inFile >> cmdIndx && inFile >> cmd.str_cmd) {
-			cmd.enum_cmd = convertToCommand (cmdIndx);
-			validCmd.push_back (cmd);
-			if (cmd.str_cmd[0] != '-' && cmd.str_cmd[0] != '.')
-				endPos++;
+		if (_dotCmd) {
+			while (inFile >> cmdIndx && inFile >> cmd.str_cmd) {
+				cmd.enum_cmd = convertToCommand (cmdIndx);
+				validCmd.push_back (cmd);
+				if (cmd.str_cmd[0] != '-' && cmd.str_cmd[0] != '.')
+					endPos++;
+			}
+		} else {
+			while (inFile >> cmdIndx && inFile >> cmd.str_cmd) {
+				cmd.enum_cmd = convertToCommand (cmdIndx);
+				validCmd.push_back (cmd);
+			}
 		}
 	} else
 		throw (LOST_FILE + cmdFile);
@@ -106,47 +114,50 @@ void VldCmdCtrl::resetDateType () {
 VldCmdCtrl::command VldCmdCtrl::convertToCommand (int indx) {
 	command cmd;
 	switch (indx) {
-	case  0:	cmd = CCOSTOM;	break;
-	case  1:	cmd = CFORCE;	break;
-	case  2:	cmd = CEXACT;	break;
-	case  3:	cmd = CSIMILAR;	break;
-	case  4:	cmd = CEACH;		break;
-	case  5:	cmd = CCOMMAND;	break;
-	case  6:	cmd = CTIME;		break;
-	case  7:	cmd = CDATE;		break;
-	case  8:	cmd = CFROM;		break;
-	case  9:	cmd = CTO;		break;
-	case 10:	cmd = CNAME;		break;
-	case 11:	cmd = CVENUE;	break;
-	case 12:	cmd = CNOTE;		break;
-	case 13:	cmd = CALERT;	break;
-	case 14:	cmd = CREPEAT;	break;
-	case 15:	cmd = CPRIORITY;	break;
-	case 16:	cmd = CHIGH;		break;
-	case 17:	cmd = CIMPT;		break;
-	case 18:	cmd = CNOMAL;	break;
-	case 19:	cmd = CDAY;		break;
-	case 20:	cmd = CWEEK;		break;
-	case 21:	cmd = CMONTH;	break;
-	case 22:	cmd = CADD;		break;
-	case 23:	cmd = CEDIT;	break;
-	case 24:	cmd = CDELETE;	break;
-	case 25:	cmd = CTABLE;	break;
-	case 26:	cmd = CVIEW;		break;
-	case 27:	cmd = CREMINDER;	break;
-	case 28:	cmd = CNEXT;		break;
-	case 29:	cmd = CPREVIOUS;	break;
-	case 30:	cmd = CFIRST;	break;
-	case 31:	cmd = CLAST;		break;
-	case 32:	cmd = CUNDO;		break;
-	case 33:	cmd = CREDO;		break;
-	case 34:	cmd = CHELP;		break;
-	case 35:	cmd = CSORT;		break;
-	case 36:	cmd = CSEARCH;	break;
-	case 37:	cmd = CCLEAR;	break;
-	case 38:	cmd = CRESET;	break;
-	case 39:	cmd = CEXIT;		break;
-	default:	cmd = CVOID;		break;
+		case 0:		cmd = CCOSTOM;		break;
+		case 1:		cmd = CFORCE;		break;
+		case 2:		cmd = CEXACT;		break;
+		case 3:		cmd = CSIMILAR;		break;
+		case 4:		cmd = CEACH;		break;
+		case 5:		cmd = CCOMMAND;		break;
+		case 6:		cmd = CTIME;		break;
+		case 7:		cmd = CDATE;		break;
+		case 8:		cmd = CFROM;		break;
+		case 9:		cmd = CTO;			break;
+		case 10:	cmd = CNAME;		break;
+		case 11:	cmd = CVENUE;		break;
+		case 12:	cmd = CNOTE;		break;
+		case 13:	cmd = CALERT;		break;
+		case 14:	cmd = CREPEAT;		break;
+		case 15:	cmd = CPRIORITY;	break;
+		case 16:	cmd = CHIGH;		break;
+		case 17:	cmd = CIMPT;		break;
+		case 18:	cmd = CNOMAL;		break;
+		case 19:	cmd = CDAY;			break;
+		case 20:	cmd = CWEEK;		break;
+		case 21:	cmd = CMONTH;		break;
+		case 22:	cmd = CNOW;			break;
+		case 23:	cmd = CTODAY;		break;
+		case 24:	cmd = CTMR;			break;
+		case 25:	cmd = CADD;			break;
+		case 26:	cmd = CEDIT;		break;
+		case 27:	cmd = CDELETE;		break;
+		case 28:	cmd = CTABLE;		break;
+		case 29:	cmd = CVIEW;		break;
+		case 30:	cmd = CREMINDER;	break;
+		case 31:	cmd = CNEXT;		break;
+		case 32:	cmd = CPREVIOUS;	break;
+		case 33:	cmd = CFIRST;		break;
+		case 34:	cmd = CLAST;		break;
+		case 35:	cmd = CUNDO;		break;
+		case 36:	cmd = CREDO;		break;
+		case 37:	cmd = CHELP;		break;
+		case 38:	cmd = CSORT;		break;
+		case 39:	cmd = CSEARCH;		break;
+		case 40:	cmd = CCLEAR;		break;
+		case 41:	cmd = CRESET;		break;
+		case 42:	cmd = CEXIT;		break;
+		default:	cmd = CVOID;		break;
 	}
 
 	return cmd;
@@ -222,9 +233,9 @@ string VldCmdCtrl::convertToString (command cmd) {
 	case (CCOSTOM):		str = "COSTOM";		break;
 	case (CFORCE):		str = "FORCE";		break;
 	case (CEXACT):		str = "EXACT";		break;
-	case (CSIMILAR):		str = "SIMILAR";	break;
+	case (CSIMILAR):	str = "SIMILAR";	break;
 	case (CEACH):		str = "EACH";		break;
-	case (CCOMMAND):		str = "COMMAND";	break;
+	case (CCOMMAND):	str = "COMMAND";	break;
 	case (CTIME):		str = "TIME";		break;
 	case (CDATE):		str = "DATE";		break;
 	case (CFROM):		str = "FROM";		break;
@@ -238,10 +249,13 @@ string VldCmdCtrl::convertToString (command cmd) {
 	case (CHIGH):		str = "HIGH";		break;
 	case (CIMPT):		str = "IMPT";		break;
 	case (CNOMAL):		str = "NOMAL";		break;
-	case (CDAY):			str = "DAY";		break;
+	case (CDAY):		str = "DAY";		break;
 	case (CWEEK):		str = "WEEK";		break;
 	case (CMONTH):		str = "MONTH";		break;
-	case (CADD):			str = "ADD";		break;
+	case (CNOW):		str = "NOW";		break;
+	case (CTODAY):		str = "TODAY";		break;
+	case (CTMR):		str = "TOMORROW";	break;
+	case (CADD):		str = "ADD";		break;
 	case (CEDIT):		str = "EDIT";		break;
 	case (CDELETE):		str = "DELETE";		break;
 	case (CTABLE):		str = "TABLE";		break;

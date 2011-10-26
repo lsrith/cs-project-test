@@ -78,15 +78,34 @@ int main () {
 
 int main () {
 	string str;
+	bool dotCmd;
+	cout << "dotCmd = ";
+	cin >> dotCmd;
 	try {
-		CmdControl cmdControl;
-		while (str != ".exit") {
+		CmdControl cmdControl (dotCmd);
+		while (str != "exit") {
 			cout << "command: ";
 			getline (cin, str);
 //			cout << str << endl;
 			try {
 				cmdControl.updateInput (str);
 				cout << cmdControl.executeCmd () << endl;
+
+				switch (cmdControl.getPromptFlag () ) {
+				case 0:
+					while (true) {
+						cout << "Do you still want to continue? (Y/N): ";
+						getline (cin, str);
+						if (str == "Y" || str == "y") {
+							cmdControl.activatePrompt ();
+							break;
+						} else if (str == "N" || str == "n") {
+							break;
+						} else;
+					}
+				default:
+					break;
+				}
 			} catch (string xcpt) {
 				cout << "INV" << endl;
 			}

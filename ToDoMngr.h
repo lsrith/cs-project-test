@@ -17,6 +17,7 @@ enum view_t {DAILY, WEEKLY, MONTHLY};
 class ToDoMngr {
 public:
         enum search_t {SEXACT, SSIMILAR, SEACH};
+		enum TaskElement {TTIME = 0, TPERIOD, TNAME, TVENUE, TNOTE, TALERT, TREPEAT_T, TREPEAT, TPRIORITY};
 
         ToDoMngr ();
         list<Task> get_active_list ();
@@ -61,7 +62,7 @@ public:
         // if forceAdd is true, just add and return a fresh list
         // else return the clashed tasks
 
-//        list<Task> edit (int taskId);
+        list<Task> edit (int taskId, TaskElement taskElem, string data);
         Task erase (int taskId);
         // return an erased task
         // if taskId is incorrect, return a default Task

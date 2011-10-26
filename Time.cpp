@@ -231,6 +231,12 @@ string Time::string_clock ()
 	return str.str ();
 }
 
+string Time::string_clock_24 () {
+	ostringstream str;
+	str << setw(2) << setfill ('0') << _clk / 100 << ":" << setw(2) << setfill ('0') << _clk % 100 << "  ";
+	return str.str ();
+}
+
 bool Time::isAfter (date_t start_date, date_t end_date)
 {
 	bool _isAfter;

@@ -301,7 +301,7 @@ list<Task> ToDoMngr::add(Task task, bool forceAdd)
     return _addList;
    }
   }
- }
+ }	
 }
 
 
@@ -384,7 +384,7 @@ Task ToDoMngr::erase(int taskId)
  }     
  
  Task deletetask = *di;
- _activeTaskList.erase(di);                                                           
+// _activeTaskList.erase(di);                                                           
  
  return deletetask;  
 }
