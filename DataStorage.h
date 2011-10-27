@@ -9,11 +9,10 @@ using namespace std;
 
 template <typename data_t>
 bool isFound (list<data_t> dataList, data_t data);
+enum search_t {SEXACT, SSIMILAR, SEACH};
 
 class DataStorage {
-public:
-	enum search_t {SEXACT, SSIMILAR, SEACH};
-	
+public:	
 	DataStorage ();
 
 	void updateStorageName (string storageName);
