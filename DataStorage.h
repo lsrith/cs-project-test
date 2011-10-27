@@ -1,6 +1,3 @@
-/*
-* author Chew
-*/
 #ifndef DATASTORAGE_H_
 #define DATASTORAGE_H_
 #include "TimePeriod.h"
@@ -59,12 +56,12 @@ private:
 	string _taskIdxFile;
 
 	int _largestIndex;
-	vector<list<int>> arrangedTask;
+	vector< list<int> > arrangedTask;
 	vector<Time::date_t> dates;
 	vector<Task> tasks;
 	vector<bool> activeTasks;
 	vector<string> tableNames;
-	vector<list<int>> tableTasks;
+	vector< list<int> > tableTasks;
 	vector<TimePeriod> tablePeriod;
 	
 	void updateDates (list<Time::date_t>);

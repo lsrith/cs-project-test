@@ -38,7 +38,7 @@ public:
 	string executeCmd ();
 	input_t getErrorFlag ();
 	prompt_t getPromptFlag ();
-	string activatePrompt ();
+	string activatePrompt (bool);
 
 private:	
 	string _input;

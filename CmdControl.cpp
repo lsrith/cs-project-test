@@ -505,7 +505,7 @@ string CmdControl::executeVIEW () {
 string CmdControl::executeADD () {
 	string str;
 
-	_force = true;
+	_force = false;
 
 	if (_sequence->front () == CMD && _cmdInput->front () == CFORCE) {
 		pop ();
@@ -514,7 +514,9 @@ string CmdControl::executeADD () {
 
 	update_task (&_task);
 		
-	_taskList = &(_toDoMngr.add (_task, _force));
+	list<Task> taskList = (_toDoMngr.add (_tableName, _task, _force));
+	_taskList = &taskList;
+
 	if (!_force && !_taskList->empty ()) {
 		str = ToDoMngr::view (_task) + MSG_CLASH + ToDoMngr::view (*_taskList);
 		_flagPrompt = ADDCLASHED;
@@ -578,7 +580,7 @@ string CmdControl::executeNEXT () {
 			temp = _time + 7 * Time::DAY;
 			break;
 		case MONTHLY:
-			if (_time++)
+			if (++_time)
 				temp = _time;
 			else
 				temp.modify_date (Time::INF_DATE);
@@ -630,7 +632,7 @@ string CmdControl::executePREV () {
 			temp = _time - 7 * Time::DAY;
 			break;
 		case MONTHLY:
-			if (_time--)
+			if (--_time)
 				temp = _time;
 			else
 				temp.modify_date (Time::INF_DATE);
@@ -1346,21 +1348,23 @@ CmdControl::prompt_t CmdControl::getPromptFlag () {
 	return _flagPrompt;
 }
 
-string CmdControl::activatePrompt () {
+string CmdControl::activatePrompt (bool activate) {
 	string str;
 
-	switch (_flagPrompt) {
-	case ADDCLASHED:
-		_toDoMngr.add (_task, true);
-		str = ToDoMngr::view (_task) + MSG_ADDED;
+	if (activate) {
+		switch (_flagPrompt) {
+		case ADDCLASHED:
+			_toDoMngr.add (_task, true);
+			str = ToDoMngr::view (_task) + MSG_ADDED;
 	
-		if (!_taskList->empty ()) {
-			clearTaskElement ();
-			_taskList->clear ();
+			if (!_taskList->empty ()) {
+				clearTaskElement ();
+				_taskList->clear ();
+			}
+			break;
+		default:
+			break;
 		}
-		break;
-	default:
-		break;
 	}
 
 	_flagPrompt = NOPROMPT;

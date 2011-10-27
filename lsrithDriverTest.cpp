@@ -98,9 +98,10 @@ int main () {
 						cout << "Do you still want to continue? (Y/N): ";
 						getline (cin, str);
 						if (str == "Y" || str == "y") {
-							cmdControl.activatePrompt ();
+							cmdControl.activatePrompt (true);
 							break;
 						} else if (str == "N" || str == "n") {
+							cmdControl.activatePrompt (false);
 							break;
 						} else;
 					}
