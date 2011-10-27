@@ -273,10 +273,6 @@ str = "_toDoMngr.redo ()";
 	case CNOTE:
 	case CALERT:
 	case CREPEAT:
-	case CPRIORITY:
-	case CHIGH:
-	case CIMPT:
-	case CNOMAL:
 		if (!_taskElemCleared)
 			str = executeCmd (CADD);
 		break;
@@ -717,11 +713,6 @@ void CmdControl::update_task (Task* taskPtr) {
 				_taskElement[1] = true;
 			}
 			break;
-		case CNAME:
-			pop ();
-			taskPtr->name = mergeStringInput ();
-			_taskElement[2] = true;
-			break;
 		case CVENUE:
 			pop ();
 			taskPtr->venue = mergeStringInput ();
@@ -744,63 +735,42 @@ void CmdControl::update_task (Task* taskPtr) {
 			pop ();
 			if (_sequence->front () == CMD) {
 				switch (_cmdInput->front ()) {
-				/*
 				case CHOUR:
-					task.repeat_t = RepeatType::HOUR;
+					taskPtr->repeat = 60;
 					break;
 				case CFORTNIGHT:
-					task.repeat_t = RepeatType::FORTNIGHT;
+					taskPtr->repeat = 14 * Time::DAY;
 					break;
-				case CNOREPEAT:
-					task.repeat_t = RepeatType::NOREPEAT;
+				case CYEAR:
+					taskPtr->repeat = 2;
 					break;
-				*/
 				case CDAY:
-					taskPtr->repeat_t = DAY;
+					taskPtr->repeat = Time::DAY;
 					break;
 				case CWEEK:
-					taskPtr->repeat_t = WEEK;
+					taskPtr->repeat = 7 * Time::DAY;
 					break;
 				case CMONTH:
-					taskPtr->repeat_t = MONTH;
-					break;
-				case CCOSTOM:
-					taskPtr->repeat_t = COSTOM;
+					taskPtr->repeat = 1;
 					break;
 				default:
 					_flagError = CMD;
 					break;
 				}
-				
-				if (_cmdInput->front () == CCOSTOM)
-					_cmdInput->front () = CREPEAT;
-				else
-					pop ();
 			} else if (_sequence->front () == DATA) {
-				Time time = get_time ();
-				if (_flagError != DATA) {
-					taskPtr->repeat_t = COSTOM;
-					taskPtr->repeat = time;
+				int mins = convertToInt (_dataInput->front ());
+				if (mins >= 0) {
+					if (mins < 3)
+						mins = 3;
+
+					taskPtr->repeat = mins;
+					pop ();
+				} else {
+					Time::clk_t clock = get_clock ();
+					if (_flagError == NONE)
+						taskPtr->repeat = clock / 100 * 60 + clock % 100;
 				}
 			} else;
-			break;
-		case CPRIORITY:
-			pop ();
-			break;
-		case CHIGH:
-			taskPtr->priority = HIGH;
-			_taskElement[8] = true;
-			pop ();
-			break;
-		case CIMPT:
-			taskPtr->priority = IMPORTANT;
-			_taskElement[8] = true;
-			pop ();
-			break;
-		case CNOMAL:
-			taskPtr->priority = SIMPLE;
-			_taskElement[8] = true;
-			pop ();
 			break;
 		default:
 			reachExeCmd = true;

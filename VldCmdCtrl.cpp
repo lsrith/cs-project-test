@@ -130,9 +130,9 @@ VldCmdCtrl::command VldCmdCtrl::convertToCommand (int indx) {
 		case 13:	cmd = CALERT;		break;
 		case 14:	cmd = CREPEAT;		break;
 		case 15:	cmd = CPRIORITY;	break;
-		case 16:	cmd = CHIGH;		break;
-		case 17:	cmd = CIMPT;		break;
-		case 18:	cmd = CNOMAL;		break;
+		case 16:	cmd = CHOUR;		break;
+		case 17:	cmd = CFORTNIGHT;	break;
+		case 18:	cmd = CYEAR;		break;
 		case 19:	cmd = CDAY;			break;
 		case 20:	cmd = CWEEK;		break;
 		case 21:	cmd = CMONTH;		break;
@@ -246,9 +246,9 @@ string VldCmdCtrl::convertToString (command cmd) {
 	case (CALERT):		str = "ALERT";		break;
 	case (CREPEAT):		str = "REPEAT";		break;
 	case (CPRIORITY):	str = "PRIORITY";	break;
-	case (CHIGH):		str = "HIGH";		break;
-	case (CIMPT):		str = "IMPT";		break;
-	case (CNOMAL):		str = "NOMAL";		break;
+	case (CHOUR):		str = "HOUR";		break;
+	case (CFORTNIGHT):	str = "FORTNIGHT";	break;
+	case (CYEAR):		str = "YEAR";		break;
 	case (CDAY):		str = "DAY";		break;
 	case (CWEEK):		str = "WEEK";		break;
 	case (CMONTH):		str = "MONTH";		break;
