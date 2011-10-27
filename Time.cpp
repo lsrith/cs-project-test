@@ -7,14 +7,19 @@ using namespace std;
 
 string Time::INVALID_DATE = "The date is invalid!";
 string Time::INVALID_TIME = "The time is invalid!";
-Time::clk_t Time::INF_CLOCK = 2359;				//infinite time
+Time::clk_t Time::DFLT_CLOCK = -1;				//default clock
+Time::date_t Time::DFLT_DATE = 0;				//default date
+Time::clk_t Time::INF_CLOCK = 2400;				//infinite clock
 Time::date_t Time::INF_DATE = 31129999;			//infinite date
-int Time::DAY = 1440;						//1 day = 1440 mins
+int Time::DAY = 1440;							//1 day = 1440 mins
+int Time::MAX_YEAR = 2100;
+int Time::MIN_YEAR = 1970;
 
 Time::Time ()
 {
-	_clk = INF_CLOCK;
-	_date = INF_DATE;
+	_clk = DFLT_CLOCK;
+	_date = DFLT_DATE;
+	_mins = 0;
 }
 
 Time::Time (date_t date, clk_t clk)
@@ -22,17 +27,19 @@ Time::Time (date_t date, clk_t clk)
 	if (_valid_date (date))
 		_date = date;
 	else
-		_date = INF_DATE;
+		_date = DFLT_DATE;
 
 	if (_valid_clock (clk))
 		_clk = clk;
 	else
-		_clk = INF_CLOCK;
+		_clk = DFLT_CLOCK;
+
+	convert_to_mins ();
 }
 
 bool Time::_valid_date (date_t date)
 {
-	if (date == INF_DATE)
+	if (date == INF_DATE || date == DFLT_DATE)
 		return true;
 
 	bool valid_date = true;
@@ -41,7 +48,7 @@ bool Time::_valid_date (date_t date)
 	mth = (date % 1000000) / 10000;
 	year = (date % 10000);
 
-	if (day >= 1 && (mth >= 1 && mth <= 12) && (year >= 1970 && year <= 2100))
+	if (day >= 1 && (mth >= 1 && mth <= 12) && (year >= MIN_YEAR && year <= MAX_YEAR))
 	{
 		switch (mth)
 		{
@@ -83,7 +90,7 @@ bool Time::_valid_date (date_t date)
 
 bool Time::_valid_clock (clk_t clk)
 {
-	if (clk == INF_CLOCK)
+	if (clk == INF_CLOCK || clk == DFLT_CLOCK)
 		return true;
 
 	clk_t hour, min;
@@ -104,18 +111,24 @@ int Time::get_day ()
 
 void Time::modify_date (date_t new_date)
 {
-	if (_valid_date (new_date))
+	if (_valid_date (new_date)) {
 		_date = new_date;
-	else
+		_mins = count_days () * DAY;
+	} else {
 		throw (INVALID_DATE);
+	}
 }
 
 void Time::modify_clock (clk_t new_clk)
 {
-	if (_valid_clock (new_clk))
+	if (_valid_clock (new_clk)) {
 		_clk = new_clk;
-	else
+
+		if (_clk != INF_CLOCK && _clk != DFLT_CLOCK)
+			_mins = _clk % 100 + (_clk / 100) * 60;
+	} else {
 		throw (INVALID_TIME);
+	}
 }
 
 void Time::current_time ()
@@ -147,6 +160,7 @@ void Time::current_time ()
 
 	_date = day * 1000000 + mth * 10000 + year;
 	_clk = (clk[0] - '0') * 1000 + (clk[1] - '0') * 100 + (clk[3] - '0') * 10 + (clk[4] - '0');
+	convert_to_mins ();
 }
 
 Time::clk_t Time::get_clock ()
@@ -161,11 +175,17 @@ Time::date_t Time::get_date ()
 
 string Time::string_date ()
 {
-	ostringstream str;
-	str << display_day (get_day ()) << " " << setw (2) << setfill ('0')
-		<< _date / 1000000 << " " << display_month ((_date % 1000000) / 10000)
-		<< " " << setw(2) << setfill ('0') <<_date % 10000;
-	return str.str ();
+	if (_date == DFLT_DATE) {
+		return "   NO   DATE   ";
+	} else if (_date == INF_DATE) {
+		return "       -       ";
+	} else {
+		ostringstream str;
+		str << display_day (get_day ()) << " " << setw (2) << setfill ('0')
+			<< _date / 1000000 << " " << display_month ((_date % 1000000) / 10000)
+			<< " " << _date % 10000;
+		return str.str ();
+	}
 }
 
 string Time::display_month (int mth)
@@ -207,41 +227,55 @@ string Time::display_day (int day)
 
 string Time::string_clock ()
 {
-	ostringstream str;
-	clk_t hour, min;
-	string AMPM;
-
-	min = _clk % 100;
-	if (_clk < 100) {
-		hour = 12;
-		AMPM = "AM";
-	} else if (_clk < 1200) {
-		hour = _clk / 100;
-		AMPM = "AM";
-	} else if (_clk < 1300) {
-		hour = _clk / 100;
-		AMPM = "PM";
+	if (_clk == DFLT_CLOCK) {
+		return "NO CLOCK";
+	} else if (_clk == INF_CLOCK) {
+		return "    -   ";
 	} else {
-		hour = _clk / 100 - 12;
-		AMPM = "PM";
-	}
+		ostringstream str;
+		clk_t hour, min;
+		string AMPM;
 
-	str << setw(2) << setfill ('0') << hour << ":" << setw(2) <<
-		setfill ('0') << min << " " << AMPM;
-	return str.str ();
+		min = _clk % 100;
+		if (_clk < 100) {
+			hour = 12;
+			AMPM = "AM";
+		} else if (_clk < 1200) {
+			hour = _clk / 100;
+			AMPM = "AM";
+		} else if (_clk < 1300) {
+			hour = _clk / 100;
+			AMPM = "PM";
+		} else {
+			hour = _clk / 100 - 12;
+			AMPM = "PM";
+		}
+
+		str << setw(2) << setfill ('0') << hour << ":" << setw(2) <<
+			setfill ('0') << min << " " << AMPM;
+		return str.str ();
+	}
 }
 
 string Time::string_clock_24 () {
-	ostringstream str;
-	str << setw(2) << setfill ('0') << _clk / 100 << ":" << setw(2) << setfill ('0') << _clk % 100 << "  ";
-	return str.str ();
+	if (_clk == DFLT_CLOCK) {
+		return "NO CLOCK";
+	} else if (_clk == INF_CLOCK) {
+		return "    -   ";
+	} else {
+		ostringstream str;
+		str << setw(2) << setfill ('0') << _clk / 100 << ":" << setw(2) << setfill ('0') << _clk % 100 << "  ";
+		return str.str ();
+	}
 }
 
 bool Time::isAfter (date_t start_date, date_t end_date)
 {
 	bool _isAfter;
-	
-	if (start_date % 10000 < end_date % 10000)
+
+	if (start_date == end_date)
+		_isAfter = false;
+	else if (start_date % 10000 < end_date % 10000)
 		_isAfter = true;
 	else if (start_date % 10000 > end_date % 10000)
 		_isAfter = false;
@@ -265,85 +299,58 @@ bool Time::isAfter (date_t start_date, date_t end_date)
 
 bool Time::operator> (Time time)
 {
-	bool isSmall;
-	if (this->_date == time._date)
-	{
-		if (time._clk < this->_clk)
-			isSmall = true;
-		else
-			isSmall = false;
-	}
-	else if (isAfter(time._date, this->_date))
-		isSmall = true;
-	else
-		isSmall = false;
-
-	return isSmall;	
+	return this->_mins > time._mins;
 }
 
 bool Time::operator== (Time time)
 {
-	bool isEqual;
-	if (this->_date == time._date && this->_clk == time._clk)
-		isEqual = true;
-	else
-		isEqual = false;
-	
-	return isEqual;
+	return this->_date == time._date && this->_clk == time._clk; 
 }
 
-bool Time::operator!= (Time time) {
-	if (this->operator== (time))
-		return false;
-	else
-		return true;
+bool Time::operator!= (Time time)
+{
+	return this->_date != time._date || this->_clk != time._clk;
 }
 
 bool Time::operator< (Time time)
 {
-	bool isSmall;
-	if (this->_date == time._date)
-	{
-		if (time._clk > this->_clk)
-			isSmall = true;
-		else
-			isSmall = false;
-	}
-	else if (isAfter(this->_date, time._date))
-		isSmall = true;
-	else
-		isSmall = false;
-
-	return isSmall;
+	return this->_mins < time._mins;
 }
 
 int Time::operator- (Time time)
 {
-	int duration;
-
-	if (*this == time)
-		duration = 0;
-	else
-		duration = this->convert_to_mins () - time.convert_to_mins ();
-
-	if (duration < 0)
-		duration = 0 - duration;
-
-	return duration;
+	return this->_mins - time._mins;
 }
 
 Time& Time::operator+ (int mins)
 {
-	unsigned int duration = this->convert_to_mins () + mins;
 	Time sum;
-	sum.convert_from_mins (duration);
+	if (this->_clk != DFLT_CLOCK && this->_clk != INF_CLOCK)
+		sum._mins = this->_mins + mins;
+	else
+		sum._mins = this->_mins + mins - mins % DAY;
+
+	sum.convert_from_mins ();
 	return sum;
+}
+
+Time& Time::operator- (int mins)
+{
+	Time minus;
+	if (this->_clk != DFLT_CLOCK && this->_clk != INF_CLOCK)
+		minus._mins = this->_mins - mins;
+	else
+		minus._mins = this->_mins - mins - mins % DAY;
+
+	minus.convert_from_mins ();
+	return minus;
 }
 
 Time& Time::operator= (Time time)
 {
 	this->_date = time._date;
 	this->_clk = time._clk;
+	this->_mins = time._mins;
 	return *this;
 }
 
@@ -363,8 +370,9 @@ bool Time::operator++ () {
 	if (day > max_day)
 		day = max_day;
 
-	if (year <= 9999) {
+	if (year <= MAX_YEAR) {
 		_date = day * 1000000 + mnth * 10000 + year;
+		convert_to_mins ();
 		return true;
 	} else
 		return false;
@@ -386,30 +394,29 @@ bool Time::operator-- () {
 	if (day > max_day)
 		day = max_day;
 
-	if (year >= 0) {
+	if (year >= MIN_YEAR) {
 		_date = day * 1000000 + mnth * 10000 + year;
+		convert_to_mins ();
 		return true;
 	} else
 		return false;
 }
 
-unsigned int Time::convert_to_mins ()
+void Time::convert_to_mins ()
 {
-	short int hour = _clk / 100;
-	short int min = _clk % 100;
-	unsigned int numMins, numDays;
-
-	numDays = count_days ();
-	numMins = numDays * DAY + hour * 60 + min;
-
-	return numMins;
+	_mins = 0;
+	if (_date != DFLT_DATE && _date != INF_DATE) {
+		_mins += count_days () * DAY;
+		if (_clk != DFLT_CLOCK && _clk != INF_CLOCK)
+			_mins += (_clk / 100) * 60 + _clk % 100;
+	}
 }
 
-void Time::convert_from_mins (unsigned int numMins)
+void Time::convert_from_mins ()
 {
-	short int min = numMins % 60;
-	short int hour = ((numMins - min) % DAY) / 60;
-	unsigned int numDays = (numMins - hour * 60 - min) / DAY;
+	short int min = _mins % 60;
+	short int hour = ((_mins - min) % DAY) / 60;
+	unsigned int numDays = (_mins - hour * 60 - min) / DAY;
 	int year, mnth, day;
 
 	for (year = 1970; numDays > 365 ; year++)
@@ -418,12 +425,17 @@ void Time::convert_from_mins (unsigned int numMins)
 		else
 			numDays -= 365;
 	
-	for (mnth = 1; numDays > days_in_month (mnth, year); mnth++)
-		numDays -= days_in_month (mnth, year);
+	if (year <= MAX_YEAR) {
+		for (mnth = 1; numDays > days_in_month (mnth, year); mnth++)
+			numDays -= days_in_month (mnth, year);
 	
-	day = numDays;
-	_clk = hour * 100 + min;
-	_date = day * 1000000 + mnth * 10000 + year;
+		day = numDays;
+		_clk = hour * 100 + min;
+		_date = day * 1000000 + mnth * 10000 + year;
+	} else {
+		_clk = INF_CLOCK;
+		_date = INF_DATE;
+	}
 }
 
 int Time::count_days ()

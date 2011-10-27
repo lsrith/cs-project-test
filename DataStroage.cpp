@@ -308,25 +308,23 @@ list<Task> DataStorage::load (TimePeriod period)
 {
 	list<Task> taskList;
 	int startIndex, endIndex;
-	Time dfltTime;
-	if (period.get_start_time () == dfltTime && period.get_end_time () == dfltTime) {
+	if ((period.get_start_time ().get_date () == Time::DFLT_DATE && period.get_end_time ().get_date () == Time::DFLT_DATE) ||
+		(period.get_start_time ().get_date () == Time::INF_DATE && period.get_end_time ().get_date () == Time::INF_DATE)) {
 		startIndex = 0;
 		endIndex = dates.size () - 1;
 	} else {
 		startIndex = getSimDateIndex (period.get_start_time ().get_date ());
-
 		if (Time::isAfter (period.get_end_time ().get_date (), dates[startIndex]))
 			return taskList;
 
 		endIndex = getSimDateIndex (period.get_end_time ().get_date ());
-		
 		if (startIndex == dates.size ())
 			return taskList;
 		else if (endIndex == dates.size ())
 			endIndex--;
 		else;
 	}
-
+	
 	list<int> taskIndex;
 	list<int>::iterator iter;
 	for (int i = startIndex; i <= endIndex; i++) 
@@ -402,7 +400,6 @@ void DataStorage::reIndexing () {
 
 void DataStorage::loadFromFile () {
 	string str;
-	stringstream strStream;
 
 	ifstream taskFile (_taskFile);
 	if (taskFile.is_open ()) {
@@ -428,6 +425,7 @@ void DataStorage::loadFromFile () {
 	ifstream taskIdxFile (_taskIdxFile);
 	if (taskIdxFile.is_open ()) {
 		while (getline (taskIdxFile, str)) {
+			stringstream strStream;
 			strStream << str;
 			strStream >> date;
 			dates.push_back (date);
@@ -448,6 +446,7 @@ void DataStorage::loadFromFile () {
 	ifstream tableIdxFile (_tableIdxFile);
 	if (tableIdxFile.is_open ()) {
 		while (getline (tableIdxFile, str)) {
+			stringstream strStream;
 			strStream << str;
 			strStream >> str;
 			tableNames.push_back (str);

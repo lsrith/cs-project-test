@@ -10,11 +10,13 @@ using namespace std;
 
 class Time {                            //class name is to be modified
 public:
-	typedef unsigned short int clk_t;		//format: HHMM 
+	typedef short int clk_t;		//format: HHMM 
 	typedef unsigned int date_t;            //format: DDMMYYYY
 	static int DAY;
 	static clk_t INF_CLOCK;
 	static date_t INF_DATE;
+	static clk_t DFLT_CLOCK;
+	static date_t DFLT_DATE;
 
 	Time ();
 	Time (date_t date, clk_t clk);
@@ -36,6 +38,7 @@ public:
 	bool operator< (Time time);      //return true if the time is after *this, else false
 
 	int operator- (Time time);		//return the difference between the two time in mins
+	Time& operator- (int mins);		//return the min
 	Time& operator+ (int mins);		//return the sum
 	Time& operator= (Time time);
 	bool operator++ ();				//increment by one month, return true if it's possible
@@ -52,14 +55,17 @@ public:
 private:
 	clk_t _clk;
 	date_t _date;
+	unsigned int _mins;
 
+	static int MAX_YEAR;
+	static int MIN_YEAR;
 	static string INVALID_DATE;
 	static string INVALID_TIME;
 	friend class TimePeriod;
    
-	int count_days ();									//count number of days since 01/01/1970
-	unsigned int convert_to_mins ();					//count number of mins since 01/01/1970 at 00:00
-	void convert_from_mins (unsigned int);				//inverse of convert_to_mins ()
+	int count_days ();						//count number of days since 01/01/1970
+	void convert_to_mins ();						//count number of mins since 01/01/1970 at 00:00
+	void convert_from_mins ();				//inverse of convert_to_mins ()
 	int days_in_month (int, int);
 };
 #endif
