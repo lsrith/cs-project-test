@@ -18,7 +18,7 @@ queue<data_t>& operator+= (queue<data_t>& Q1, queue<data_t> Q2);
 
 class CmdControl: public VldCmdCtrl {
 public:
-	enum prompt_t {ADDCLASHED, CONTINUE, VLDINPUT, NEWINPUT, NOPROMPT};
+	enum prompt_t {ADDCLASHED, EDITCLASHED, CONTINUE, VLDINPUT, NEWINPUT, NOPROMPT};
 	
 	template <typename data_t>
 	void clear (queue<data_t>& Q);
@@ -55,8 +55,7 @@ private:
 	ToDoMngr _toDoMngr;
 //	ToDoMngr::search_t _search;
 
-	vector<bool> _taskElement;
-	bool _taskElemCleared;
+	ToDoMngr::TaskElement _taskElement;
 	Task _task;
 	list<Task>* _taskList;
 	string _tableName;
@@ -75,13 +74,13 @@ private:
 	Time _time;
 	view_t _viewType;
 
-	static int TASKELEMENTS;
 	static string INV_CMD;
 	static string INV_DATA;
 	static string MSG_ERROR;
 	static string MSG_CLEAR;
 	static string MSG_CLASH;
 	static string MSG_ADDED;
+	static string MSG_EDITED;
 	static string MSG_DELETED;
 	static string MSG_NO_NEXT;
 	static string MSG_NO_PREV;
@@ -95,6 +94,7 @@ private:
 	string executeEDIT ();
 	string executeDELETE ();
 	string executeVIEW ();
+	string executeSEARCH ();
 	string executeTABLE ();
 	string executeHELP ();
 	string executeNEXT ();
@@ -131,6 +131,7 @@ private:
 	int convertToInt (string);	// return -1 if the whole string is not an integer
 	string mergeStringInput ();
 	void clearTaskElement ();
+	bool checkTaskElement (bool);
 
 	void activate2ndQs ();
 	void deactivate2ndQs ();

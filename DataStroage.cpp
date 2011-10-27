@@ -10,14 +10,6 @@ using namespace std;
 
 DataStorage::DataStorage ()
 {
-	_largestIndex = 1;
-	Task task;
-	tasks.push_back (task);
-	activeTasks.push_back (false);
-	_taskFile = "dflt.txt";
-	_tableIdxFile = "dflttt.txt";
-	_taskIdxFile = "dflttk.txt";
-	loadFromFile ();
 }
 
 void DataStorage::updateStorageName (string storageName) {
@@ -29,6 +21,9 @@ void DataStorage::updateStorageName (string storageName) {
 	Task task;
 	tasks.push_back (task);
 	activeTasks.push_back (false);
+
+	if (storageName.empty ())
+		storageName = "dflt";
 
 	_taskFile = storageName + ".txt";
 	_tableIdxFile = storageName + "tt.txt";

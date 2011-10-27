@@ -9,10 +9,6 @@
 #include <iostream>
 using namespace std;
 
-
-ToDoMngr::ToDoMngr () {	
-}
-
 list<Task> ToDoMngr::get_active_list () {
 	return _activeTaskList;
 }
@@ -496,7 +492,17 @@ string ToDoMngr::reminder(){
         return _format.str();//+view(DAILY,time);   //pass to view() to search for the tasks on that particular date and display it...year is not taken into account at present.
 }
 
+string ToDoMngr::view (view_t viewType, string tableName) {
+	return "viewTypetab";
+}
 
+string ToDoMngr::viewTableNames () {
+	return "viewTab";
+}
+
+string ToDoMngr::alert () {
+	return "alert";
+}
 
 list<Task> ToDoMngr::add(Task task, bool forceAdd)                                                                      
 {
@@ -661,4 +667,44 @@ list<Task> ToDoMngr::add(string tableName, Task task, bool forceAdd)
   list<int> IdxList;
   _dataStorage.save(tableName,task.get_period(), IdxList);
  }
+}
+
+list<Task> ToDoMngr::edit (int taskId, TaskElement* taskElem, Task* task, bool forceEdit) {
+	return _clashList;
+}
+
+void ToDoMngr::undo () {
+}
+
+void ToDoMngr::redo () {
+}
+
+//Rith
+string ToDoMngr::search (search_t type, string phrase) {
+	return ToDoMngr::view (_dataStorage.search (phrase, type));
+}
+
+void ToDoMngr::exit () {
+	_dataStorage.exit ();
+	_activeTaskList.clear ();
+	_clashList.clear ();
+}
+
+void ToDoMngr::clear () {
+	_dataStorage.clear ();
+}
+
+ToDoMngr::ToDoMngr () {
+	_dataStorage.updateStorageName ("");
+}
+
+ToDoMngr::ToDoMngr (string storageName) {
+	_dataStorage.updateStorageName (storageName);
+}
+
+void ToDoMngr::updateStorageName (string storageName) {
+	_dataStorage.exit ();
+	_activeTaskList.clear ();
+	_clashList.clear ();
+	_dataStorage.updateStorageName (storageName);
 }

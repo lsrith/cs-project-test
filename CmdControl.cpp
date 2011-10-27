@@ -8,6 +8,7 @@ string CmdControl::INV_CMD = "unknown command: ";
 string CmdControl::INV_DATA = "invalid data input: ";
 string CmdControl::MSG_DELETED = " is deleted.";
 string CmdControl::MSG_ADDED = " is added.";
+string CmdControl::MSG_EDITED = " is edited.";
 string CmdControl::MSG_CLEAR = "All your tasks have been deleted!";
 string CmdControl::MSG_CLASH = " is clashed with the following:\n";
 string CmdControl::MSG_ERROR = "\n\tERROR!!\n";
@@ -17,7 +18,6 @@ string CmdControl::MSG_WRONG_DATE = "Invalid date entered!";
 string CmdControl::MSG_WRONG_ID = "Invalid index entered!";
 string CmdControl::MSG_WRONG_TABLE = "Invalid timetable name entered!";
 string CmdControl::MSG_WRONG_PERIOD = "Invalid period entered!";
-int CmdControl::TASKELEMENTS = 9;
 
 CmdControl::CmdControl (bool dotCmd) {
 	if (dotCmd) {
@@ -38,7 +38,6 @@ CmdControl::CmdControl (bool dotCmd) {
 	_flagError = NONE;
 	_force = false;
 	_activeListAccessible = false;
-	_taskElement.resize (TASKELEMENTS);
 	clearTaskElement ();
 //	_search = ToDoMngr::search_t::SEACH;
 // these two following parts are to be modified
@@ -51,11 +50,27 @@ CmdControl::CmdControl (bool dotCmd) {
 }
 
 void CmdControl::clearTaskElement () {
-	for (int i = 0; i < TASKELEMENTS; i++)
-		_taskElement[i] = false;
-	_taskElemCleared = true;
-	Task task;
-	_task = task;
+	_taskElement._alert = false;
+	_taskElement._note = false;
+	_taskElement._period = false;
+	_taskElement._repeat = false;
+	_taskElement._time = false;
+	_taskElement._venue = false;
+}
+
+bool CmdControl::checkTaskElement (bool condition) {
+	bool allCond;
+
+	if (condition) {
+		allCond = _taskElement._alert && _taskElement._note && _taskElement._period
+			&& _taskElement._repeat && _taskElement._time && _taskElement._venue;
+	} else {
+		allCond = _taskElement._alert || _taskElement._note || _taskElement._period
+			|| _taskElement._repeat || _taskElement._time || _taskElement._venue;
+		allCond = !allCond;
+	}
+
+	return allCond;
 }
 
 void CmdControl::updateInput (string& input) {
@@ -216,6 +231,26 @@ string CmdControl::executeCmd (command cmd) {
 	}
 
 	switch (cmd) {
+	case CTIME:
+	case CFROM:
+	case CNAME:
+	case CVENUE:
+	case CNOTE:
+	case CALERT:
+	case CREPEAT:
+		if (!checkTaskElement (false)) {
+			_toDoMngr.undo ();
+			str = executeCmd (CADD);
+		} else {
+			pop ();
+		}
+		break;
+	default:
+		clearTaskElement ();
+		break;
+	}
+
+	switch (cmd) {
 	case CADD:
 		str = executeADD ();
 		break;
@@ -235,18 +270,16 @@ string CmdControl::executeCmd (command cmd) {
 		str = _toDoMngr.reminder ();
 		break;
 	case CUNDO:
-//		_toDoMngr.undo ();
-str = "_toDoMngr.undo ()";
+		_toDoMngr.undo ();
 		break;
 	case CREDO:
-//		_toDoMngr.redo ();
-str = "_toDoMngr.redo ()";
+		_toDoMngr.redo ();
 		break;
 	case CSORT:
 		executeSORT ();
 		break;
 	case CCLEAR:
-//		_toDoMngr.clear ();
+		_toDoMngr.clear ();
 		str = MSG_CLEAR;
 		break;
 	case CRESET:
@@ -255,26 +288,18 @@ str = "_toDoMngr.redo ()";
 	case CHELP:
 		str = executeHELP ();
 		break;
+	case CSEARCH:
+		str = executeSEARCH ();
+		break;
 	case CEXIT:
 		if (_sequence->empty () == false && _sequence->front () == CMD && _cmdInput->front () == CTABLE) {
 			pop ();
 			_tableName.erase ();
 		} else {
 			update_dayMonth (_dayMonth);
+			_toDoMngr.exit ();
 			exit (true);
-//			_toDoMngr.exit ();
-//str = "_toDoMngr.exit ()";
 		}
-		break;
-	case CTIME:
-	case CFROM:
-	case CNAME:
-	case CVENUE:
-	case CNOTE:
-	case CALERT:
-	case CREPEAT:
-		if (!_taskElemCleared)
-			str = executeCmd (CADD);
 		break;
 	default:
 		break;
@@ -498,6 +523,39 @@ string CmdControl::executeVIEW () {
 	return str;
 }
 
+string CmdControl::executeSEARCH () {
+	string str;
+	if (_sequence->empty ())
+		return str;
+
+	search_t type = SEACH;
+	if (_sequence->front () == CMD) {
+		switch (_cmdInput->front ()) {
+		case CEXACT:
+			type = SEXACT;
+			pop ();
+			break;
+		case CEACH:
+			type = SEACH;
+			pop ();
+			break;
+		case CSIMILAR:
+			type = SSIMILAR;
+			pop ();
+			break;
+		default:
+			_flagError = CMD;
+			break;
+		}
+	}
+
+	if (_flagError == NONE && _sequence->front () == DATA) {
+		str = _toDoMngr.search (type, mergeStringInput ());
+	}
+
+	return str;
+}
+
 string CmdControl::executeADD () {
 	string str;
 
@@ -515,7 +573,7 @@ string CmdControl::executeADD () {
 
 	if (!_force && !_taskList->empty ()) {
 		str = ToDoMngr::view (_task) + MSG_CLASH + ToDoMngr::view (*_taskList);
-		_flagPrompt = ADDCLASHED;
+		_flagPrompt = EDITCLASHED;
 	} else if (_force && !_taskList->empty ()) {
 		str = MSG_ERROR;
 	} else {
@@ -530,8 +588,37 @@ string CmdControl::executeADD () {
 }
 
 string CmdControl::executeEDIT () {
-//	string str;
-string str = "exeEDIT";
+	string str;
+
+	if (_sequence->empty ())
+		return str;
+	else if (_sequence->front () == DATA) {
+		_taskId = convertToInt (_dataInput->front ());
+		if (_taskId < 1) {
+			_flagError = DATA;
+		}
+	} else;
+
+	if (_flagError == NONE && _sequence->front () == CMD) {
+		Task task = get_task ();
+
+		list<Task> taskList = (_toDoMngr.edit (_taskId, &_taskElement, &_task, _force));
+		_taskList = &taskList;
+
+		if (!_force && !_taskList->empty ()) {
+			str = ToDoMngr::view (_task) + MSG_CLASH + ToDoMngr::view (*_taskList);
+			_flagPrompt = ADDCLASHED;
+		} else if (_force && !_taskList->empty ()) {
+			str = MSG_ERROR;
+		} else {
+			str = ToDoMngr::view (_task) + MSG_EDITED;
+		}
+	
+		if (!_taskList->empty ()) {
+			_taskList->clear ();
+		}
+	}
+
 	return str;
 }
 
@@ -703,32 +790,32 @@ void CmdControl::update_task (Task* taskPtr) {
 			time = get_time ();
 			if (_flagError != DATA) {
 				taskPtr->modify_time (time);
-				_taskElement[0] = true;
+				_taskElement._time = true;
 			}
 			break;
 		case CFROM:
 			period = get_period ();
 			if (_flagError == NONE) {
 				taskPtr->modify_period (period);
-				_taskElement[1] = true;
+				_taskElement._period = true;
 			}
 			break;
 		case CVENUE:
 			pop ();
 			taskPtr->venue = mergeStringInput ();
-			_taskElement[3] = true;
+			_taskElement._venue = true;
 			break;
 		case CNOTE:
 			pop ();
 			taskPtr->note = mergeStringInput ();
-			_taskElement[4] = true;
+			_taskElement._note = true;
 			break;
 		case CALERT:
 			pop ();
 			time = get_time ();
 			if (_flagError != DATA) {
 				taskPtr->alert = time;
-				_taskElement[5] = true;
+				_taskElement._alert = true;
 			}
 			break;
 		case CREPEAT:
@@ -737,21 +824,27 @@ void CmdControl::update_task (Task* taskPtr) {
 				switch (_cmdInput->front ()) {
 				case CHOUR:
 					taskPtr->repeat = 60;
+					pop ();
 					break;
 				case CFORTNIGHT:
 					taskPtr->repeat = 14 * Time::DAY;
+					pop ();
 					break;
 				case CYEAR:
 					taskPtr->repeat = 2;
+					pop ();
 					break;
 				case CDAY:
 					taskPtr->repeat = Time::DAY;
+					pop ();
 					break;
 				case CWEEK:
 					taskPtr->repeat = 7 * Time::DAY;
+					pop ();
 					break;
 				case CMONTH:
 					taskPtr->repeat = 1;
+					pop ();
 					break;
 				default:
 					_flagError = CMD;
@@ -771,6 +864,9 @@ void CmdControl::update_task (Task* taskPtr) {
 						taskPtr->repeat = clock / 100 * 60 + clock % 100;
 				}
 			} else;
+
+			if (taskPtr->repeat != 0)
+				_taskElement._repeat = true;
 			break;
 		default:
 			reachExeCmd = true;
@@ -781,6 +877,7 @@ void CmdControl::update_task (Task* taskPtr) {
 
 Task CmdControl::get_task () {
 	Task task;
+	clearTaskElement ();
 	update_task (&task);
 	return task;
 }
@@ -1326,11 +1423,12 @@ string CmdControl::activatePrompt (bool activate) {
 		case ADDCLASHED:
 			_toDoMngr.add (_task, true);
 			str = ToDoMngr::view (_task) + MSG_ADDED;
-	
-			if (!_taskList->empty ()) {
-				clearTaskElement ();
-				_taskList->clear ();
-			}
+			clearTaskElement ();
+			break;
+		case EDITCLASHED:
+			_toDoMngr.edit (_taskId, &_taskElement, &_task, true);
+			str = ToDoMngr::view (_task) + MSG_ADDED;
+			clearTaskElement ();
 			break;
 		default:
 			break;
