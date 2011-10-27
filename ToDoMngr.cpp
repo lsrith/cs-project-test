@@ -500,59 +500,54 @@ string ToDoMngr::reminder(){
 
 list<Task> ToDoMngr::add(Task task, bool forceAdd)                                                                      
 {
-	list<Task> _addList;
+ list<Task> _addList;
  if(forceAdd == true || task.timeTask == true)
-{ 
-  // forceAdd is true or it is a time task, save to dataStorage
+ { 
+  // forceAdd is true or is timetask 
   _addList.push_back(task);
   _dataStorage.save(_addList); 
   
   // and return empty list
   _addList.clear();
   return _addList;
-}
-
-// forceAdd is false and it is a period task
+ }
  else
  {
   bool clash = false;
-  //check for if there are any existing task in dataStorage on the date of the task
-  list<Task> checkClashList = _dataStorage.load(task.get_period());  
+  list<task> checkList;
+  checkList = _dataStorage.load(task.get_period());
   
-  //no existing task
-  if(checkClashList.size() == 0)
+  if(checkList.empty() == true)
   {
-   clash == false;
+   clash = false;
   }
-
-  else //check for clashes of time 
+  else
   {
-   list<Task>::iterator checkClash = checkClashList.begin();
-    for(int i=1; i<checkClashList.size();i++)
+   list<Task>::iterator li = checkList.begin();
+   for(int i=1; i<= checkList.size(); i++)
+   {
+    TimePeriod taskPeriod = checkList.begin()->get_period();
+    if(task.get_period() = taskPeriod)
     {
-     if(checkClash->get_period() == task.get_period() || checkClash->timeTask == true)
-     {
-      clash == false; 
-     }
-     else 
-     {
-      clash == true;
-     }
-     checkClash++;
+     clash = true;
+     _clashList.push_back(li);
     }
-
-   if(clash == true) // clashes present, add to Clashlist and return                   
-   {
-    _clashList.push_back(task);
-    return _clashList;
-   }
-   else // no clashes, add to dataStorage and return empty list
-   {
-     _addList.push_back(task);
-     _dataStorage.save(_addList);
-    _addList.clear();
-    return _addList;
-   }
+    li++;
+   }     
+  }
+  
+  if(clash == true)
+    {
+   return _clashList;
+  }
+  else
+  {
+  _addList.push_back(task);
+  _dataStorage.save(_addList); 
+  
+  // and return empty list
+  _addList.clear();
+  return _addList;
   }
  }
 }
