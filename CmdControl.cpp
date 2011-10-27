@@ -193,6 +193,29 @@ string CmdControl::executeCmd (command cmd) {
 	string str;
 
 	switch (cmd) {
+	case CFIRST:
+		str = executeFIRST ();
+		break;
+	case CLAST:
+		str = executeLAST ();
+		break;
+	case CNEXT:
+		str = executeNEXT ();
+		break;
+	case CPREVIOUS:
+		str = executePREV ();
+		break;
+	default:
+		_taskId = 0;
+		_time.modify_date (Time::DFLT_DATE);
+		_period.modify_start_time (_time);
+		_period.modify_end_time (_time);
+		_first = false;
+		_last = false;
+		break;
+	}
+
+	switch (cmd) {
 	case CADD:
 		str = executeADD ();
 		break;
@@ -210,20 +233,6 @@ string CmdControl::executeCmd (command cmd) {
 		break;
 	case CREMINDER:
 		str = _toDoMngr.reminder ();
-		break;
-	case CFIRST:
-		while (executePREV ());
-		break;
-	case CLAST:
-		while (executeNEXT ());
-		break;
-	case CNEXT:
-		if (!executeNEXT ())
-			str = MSG_NO_NEXT;
-		break;
-	case CPREVIOUS:
-		if (!executePREV ())
-			str = MSG_NO_PREV;
 		break;
 	case CUNDO:
 //		_toDoMngr.undo ();
@@ -421,19 +430,19 @@ string CmdControl::executeDELETE () {
 string CmdControl::executeVIEW () {
 	string str;
 
-	view_t viewType = DAILY;
+	_viewType = DAILY;
 	if (!_sequence->empty () && _sequence->front () == CMD) {
 		switch (_cmdInput->front ()) {
 		case CDAY:
-			viewType = DAILY;
+			_viewType = DAILY;
 			pop ();
 			break;
 		case CWEEK:
-			viewType = WEEKLY;	
+			_viewType = WEEKLY;	
 			pop ();
 			break;
 		case CMONTH:
-			viewType = MONTHLY;
+			_viewType = MONTHLY;
 			pop ();
 			break;
 		default:
@@ -441,20 +450,15 @@ string CmdControl::executeVIEW () {
 		}
 	}
 
-	Time time;
-	TimePeriod period;
-
 	if (_sequence->empty ())
-		return _toDoMngr.view (period);
+		return _toDoMngr.view (_period);
 
 	switch (_sequence->front ()) {
 	case DATA:
 		if (_activeListAccessible) {
 			string data = _dataInput->front ();
-			int taskId = convertToInt (data);
-			str = _toDoMngr.view (taskId);
-str = "_toDoMngr.view (taskId)";
-
+			_taskId = convertToInt (data);
+			str = _toDoMngr.view (_taskId);
 			if (!str.empty ())
 				pop ();
 		}
@@ -462,22 +466,18 @@ str = "_toDoMngr.view (taskId)";
 	case CMD:
 		switch (_cmdInput->front ()) {
 		case CFROM:
-		case CTO:
-			period = get_period ();
+			_period = get_period ();
 			
 			if (_flagError != DATA) {
-			str = _toDoMngr.view (period);
+				str = _toDoMngr.view (_period);
 			}
-//			str = executeFunction (_toDoMngr.view);
-//			str = "executeFunction (_toDoMngr.view)";
 			break;
 		case CTIME:
 		case CDATE:
 			pop ();
-			time.modify_date (get_date ());
+			_time.modify_date (get_date ());
 			if (_flagError != DATA) {
-				str = _toDoMngr.view (viewType, time);		
-//str = "_toDoMngr.view (viewType, time)";		
+				str = _toDoMngr.view (_viewType, _time);
 			}
 			break;
 		case CTABLE:
@@ -558,16 +558,134 @@ void CmdControl::executeSORT () {
 cout << "exeSort" << endl;
 }
 
-bool CmdControl::executeNEXT () {
-	bool notLast = false;
-cout << boolalpha << notLast << endl;
-	return notLast;
+string CmdControl::executeNEXT () {
+	pop ();
+	_first = false;
+	string str;
+
+	if (_taskId != 0) {
+		_taskId++;
+		str = _toDoMngr.view (_taskId);
+		if (str.empty ())
+			_last = true;
+	} else if (_time.get_date () != Time::DFLT_DATE) {
+		Time temp;
+		switch (_viewType) {
+		case DAILY:
+			temp = _time + Time::DAY;
+			break;
+		case WEEKLY:
+			temp = _time + 7 * Time::DAY;
+			break;
+		case MONTHLY:
+			if (_time++)
+				temp = _time;
+			else
+				temp.modify_date (Time::INF_DATE);
+			break;
+		}
+
+		if (_time.get_date () == Time::INF_DATE) {
+ 			_last = true;
+		} else {
+			_time = temp;
+			str = _toDoMngr.view (_viewType, _time);
+		}
+	} else if (_period.get_start_time ().get_date () != Time::DFLT_DATE) {
+		TimePeriod temp;
+		temp.modify_start_time (_period.get_end_time () + Time::DAY);
+		temp.modify_end_time (_period.get_end_time () + (_period.get_end_time () - _period.get_start_time ()) + Time::DAY);
+
+		if (temp.get_end_time ().get_date () != Time::DFLT_DATE && temp.get_end_time ().get_date () != Time::INF_DATE) {
+			_period = temp;
+			str = _toDoMngr.view (_period);
+		} else {
+			_last = true;
+		}
+	} else;
+
+	if (_last)
+		str = MSG_NO_NEXT;
+
+	return str;
 }
 
-bool CmdControl::executePREV () {
-	bool notFirst = false;
-cout << boolalpha << notFirst << endl;
-	return notFirst;
+string CmdControl::executePREV () {
+	pop ();
+	_last = false;
+	string str;
+
+	if (_taskId != 0) {
+		_taskId--;
+		str = _toDoMngr.view (_taskId);
+		if (str.empty ())
+			_first = true;
+	} else if (_time.get_date () != Time::DFLT_DATE) {
+		Time temp;
+		switch (_viewType) {
+		case DAILY:
+			temp = _time - Time::DAY;
+			break;
+		case WEEKLY:
+			temp = _time - 7 * Time::DAY;
+			break;
+		case MONTHLY:
+			if (_time--)
+				temp = _time;
+			else
+				temp.modify_date (Time::INF_DATE);
+			break;
+		}
+
+		if (_time.get_date () == Time::INF_DATE) {
+ 			_first = true;
+		} else {
+			_time = temp;
+			str = _toDoMngr.view (_viewType, _time);
+		}
+	} else if (_period.get_end_time ().get_date () != Time::DFLT_DATE) {
+		TimePeriod temp;
+		temp.modify_end_time (_period.get_start_time () - Time::DAY);
+		temp.modify_start_time (_period.get_start_time () - (_period.get_end_time () - _period.get_start_time ()) - Time::DAY);
+
+		if (temp.get_start_time ().get_date () != Time::DFLT_DATE && temp.get_start_time ().get_date () != Time::INF_DATE) {
+			_period = temp;
+			str = _toDoMngr.view (_period);
+		} else {
+			_first = true;
+		}
+	} else;
+
+	if (_first)
+		str = MSG_NO_PREV;
+
+	return str;
+}
+
+string CmdControl::executeFIRST () {
+	string str;
+	string temp;
+	
+	while (!_first) {
+		temp = executePREV ();
+		if (!_first)
+			str = temp;
+	}
+
+	return str;
+}
+
+string CmdControl::executeLAST () {
+	string str;
+	string temp;
+	
+	while (!_last) {
+		temp = executeNEXT ();
+		if (!_last)
+			str = temp;
+	}
+
+	return str;
 }
 
 bool CmdControl::getTableName () {
@@ -778,7 +896,7 @@ Time CmdControl::get_time () {
 
 Time::date_t CmdControl::get_date () {
 	if (_sequence->empty ())
-		return Time::INF_DATE;
+		return Time::DFLT_DATE;
 
 	Time currTime;
 	currTime.current_time ();
@@ -792,7 +910,7 @@ Time::date_t CmdControl::get_date () {
 		return currTime.get_date ();
 	} else if (_sequence->front () == CMD) {
 		_flagError = CMD;
-		return Time::INF_DATE;
+		return Time::DFLT_DATE;
 	} else;
 
 	string strDate = _dataInput->front ();
@@ -1115,7 +1233,7 @@ void CmdControl::convertToInt (string str, int& day, int& mnth) {
 Time::clk_t CmdControl::get_clock () {
 	Time::clk_t clock = 0;
 	if (_sequence->empty ()) {
-		return	clock = Time::INF_CLOCK;
+		return	clock = Time::DFLT_CLOCK;
 	} else if (_sequence->front () == CMD && _cmdInput->front () == CNOW) {
 		pop ();
 		Time currTime;
@@ -1123,7 +1241,7 @@ Time::clk_t CmdControl::get_clock () {
 		return currTime.get_clock ();
 	} else if (_sequence->front () == CMD) {
 		_flagError = CMD;
-		return clock = Time::INF_CLOCK;
+		return clock = Time::DFLT_CLOCK;
 	} else;
 
 	string strClk = _dataInput->front ();

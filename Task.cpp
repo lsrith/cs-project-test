@@ -20,8 +20,23 @@ Task::Task (Time time) {
 }
 
 Task::Task (TimePeriod period) {
-	_period = period;
-	timeTask = false;
+	if (period.get_start_time ().get_date () == Time::DFLT_DATE && period.get_end_time ().get_date () == Time::DFLT_DATE) {
+		timeTask = true;
+	} else if (period.get_start_time ().get_date () == Time::DFLT_DATE) {
+		timeTask = true;
+		_time = period.get_end_time ();
+	} else if (period.get_end_time ().get_date () == Time::DFLT_DATE) {
+		timeTask = true;
+		_time = period.get_start_time ();
+	} else if (period.get_start_time ().get_date () == Time::INF_DATE && period.get_end_time ().get_date () == Time::INF_DATE) {
+		timeTask = true;
+		_time.modify_date (Time::INF_DATE);
+		_time.modify_clock (period.get_start_time ().get_clock ());
+	} else {
+		timeTask = false;
+		_period = period;
+	}
+
 	repeat_t = NOREPEAT;
 	forceAdd = false;
 	priority = SIMPLE;
@@ -172,12 +187,22 @@ void Task::modify_time (Time newTime) {
 	}
 }
 
-void Task::modify_period (TimePeriod newPeriod) {
-	Time dfltTime;
-	if (newPeriod.get_start_time () != dfltTime && newPeriod.get_end_time () != dfltTime) {
+void Task::modify_period (TimePeriod period) {
+	if (period.get_start_time ().get_date () == Time::DFLT_DATE && period.get_end_time ().get_date () == Time::DFLT_DATE) {
+		timeTask = true;
+	} else if (period.get_start_time ().get_date () == Time::DFLT_DATE) {
+		timeTask = true;
+		_time = period.get_end_time ();
+	} else if (period.get_end_time ().get_date () == Time::DFLT_DATE) {
+		timeTask = true;
+		_time = period.get_start_time ();
+	} else if (period.get_start_time ().get_date () == Time::INF_DATE && period.get_end_time ().get_date () == Time::INF_DATE) {
+		timeTask = true;
+		_time.modify_date (Time::INF_DATE);
+		_time.modify_clock (period.get_start_time ().get_clock ());
+	} else {
 		timeTask = false;
-		_period = newPeriod;
-		_time = dfltTime;
+		_period = period;
 	}
 }
 

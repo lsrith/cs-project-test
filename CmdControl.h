@@ -67,6 +67,14 @@ private:
 	prompt_t _flagPrompt;
 	bool _dayMonth;
 
+	//view variable
+	int _taskId;
+	bool _first;
+	bool _last;
+	TimePeriod _period;
+	Time _time;
+	view_t _viewType;
+
 	static int TASKELEMENTS;
 	static string INV_CMD;
 	static string INV_DATA;
@@ -89,12 +97,14 @@ private:
 	string executeVIEW ();
 	string executeTABLE ();
 	string executeHELP ();
+	string executeNEXT ();
+	string executePREV ();
+	string executeFIRST ();
+	string executeLAST ();
 	string checkAlert ();
 	string executeEditCmd (int);
 	string executeFunction (string (*function) (TimePeriod));
 	void executeSORT ();
-	bool executeNEXT ();
-	bool executePREV ();
 
 	void splitInput ();
 	command translateCmd (string);
