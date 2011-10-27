@@ -86,18 +86,6 @@ private:
         DataStorage _dataStorage;
         list<Task> _activeTaskList;
         list<Task> _clashList;
-        
-        // for redo and undo function //
-        enum _cmd {add_Task, erase_TaskId, erase_Period, add_blankTable, add_NewTable, erase_Table };
-        struct userTask 
-        {int _cmd, _Taskid;
-         list <Task> _taskList;
-         bool _forceAdd;
-         TimePeriod _period;
-         string _tableName;};
-
-stack<userTask> undoStack;
-stack<userTask> redoStack;
 
 };
 #endif
