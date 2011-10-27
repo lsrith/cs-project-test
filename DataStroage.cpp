@@ -123,7 +123,7 @@ void DataStorage::clear () {
 	Task task;
 	tasks.push_back (task);
 
-	ofstream taskFile (_taskFile);
+	ofstream taskFile (_taskFile.str ());
 	taskFile.close ();
 	ofstream taskIdxFile (_taskIdxFile);
 	taskFile.close ();

@@ -514,7 +514,7 @@ list<Task> ToDoMngr::add(Task task, bool forceAdd)
  else
  {
   bool clash = false;
-  list<task> checkList;
+  list<Task> checkList;
   checkList = _dataStorage.load(task.get_period());
   
   if(checkList.empty() == true)
@@ -527,10 +527,10 @@ list<Task> ToDoMngr::add(Task task, bool forceAdd)
    for(int i=1; i<= checkList.size(); i++)
    {
     TimePeriod taskPeriod = checkList.begin()->get_period();
-    if(task.get_period() = taskPeriod)
+    if(task.get_period() == taskPeriod)
     {
      clash = true;
-     _clashList.push_back(li);
+     _clashList.push_back(*li);
     }
     li++;
    }     
@@ -551,10 +551,6 @@ list<Task> ToDoMngr::add(Task task, bool forceAdd)
   }
  }
 }
-
-
-
-
 
 bool ToDoMngr::newTable(string name, TimePeriod period)
 {
