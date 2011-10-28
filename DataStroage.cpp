@@ -364,6 +364,18 @@ void DataStorage::exit () {
 	writeTableIdxToFile ();
 }
 
+list<Task> DataStorage::get_alertTasks () {
+	list<Task> alertTasks;
+	Time dfltTime;
+	int size = activeTasks.size ();
+	for (int i = 0; i < size; i++)
+		if (activeTasks[i] && tasks[i].alert != dfltTime)
+			alertTasks.push_back (tasks[i]);
+
+	sort (&alertTasks);
+	return alertTasks;
+}
+
 template <typename data_t>
 bool isFound (list<data_t> dataList, data_t data) {
 	list<data_t>::iterator iter;
