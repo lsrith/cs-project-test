@@ -49,6 +49,8 @@ public:
 //	string costomSearch (/*arguments to be modify*/);
 	// search based on some criteria
 
+	list<Task> get_alertTasks ();
+
 private: 
 	string _taskFile;
 	string _tableIdxFile;
