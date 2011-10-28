@@ -4,6 +4,7 @@
 
 #ifndef CMDCONTROL_H_
 #define CMDCONTROL_H_
+#include "Logging.h"
 #include "VldCmdCtrl.h"
 #include "Task.h"
 #include "ToDoMngr.h"
@@ -40,7 +41,8 @@ public:
 	prompt_t getPromptFlag ();
 	string activatePrompt (bool);
 
-private:	
+private:
+	Logging log;
 	string _input;
 	queue<command> _1stCmd;
 	queue<command> _2ndCmd;
