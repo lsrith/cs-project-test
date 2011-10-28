@@ -9,6 +9,7 @@ Task::Task ()
 {
 	_index = 0;
 	repeat = 0;
+	timeTask = true;
 }
 
 Task::Task (Time time) {
@@ -75,7 +76,7 @@ void Task::invConvert (string& str) {
 	int pos = note.find (spaceMarker, 0);
 	note.erase (0, pos + spaceMarker.size ());
 	pos = note.find (spaceMarker, 0);
-	venue = note.substr (0, pos - 1);
+	venue = note.substr (0, pos);
 	note.erase (0, pos + spaceMarker.size ());
 }
 

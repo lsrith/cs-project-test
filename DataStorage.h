@@ -34,7 +34,7 @@ public:
 	void clear ();
 	void exit ();
 
-	void save (string tableName, TimePeriod period, list<int> templateIndex);
+	void save (string tableName, TimePeriod period, list<int> taskIndex);
 	// save the timetable with the name and period so that you can load back all tasks
 	// if the tableName is the existing one, check the period
 	// if the period is the same, add more index inside; else, overwrite the old one
@@ -55,6 +55,7 @@ private:
 	string _taskIdxFile;
 
 	int _largestIndex;
+	static int FRAGMENT;
 	vector< list<int> > arrangedTask;
 	vector<Time::date_t> dates;
 	vector<Task> tasks;
