@@ -581,8 +581,8 @@ bool ToDoMngr::newTable(string name, TimePeriod period)
  }
  else // no clash return true and save to dataStorage with empty taskIdxList
  {
-  list<int> taskIdxList;
-  _dataStorage.save(name, period, taskIdxList);            
+  list<Task> taskList;
+  _dataStorage.save(name, period, taskList);            
   return true;
  }
 }
@@ -664,7 +664,7 @@ list<Task> ToDoMngr::add(string tableName, Task task, bool forceAdd)
  
  else
  {
-  list<int> IdxList;
+  list<Task> IdxList;
   _dataStorage.save(tableName,task.get_period(), IdxList);
  }
 }

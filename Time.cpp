@@ -2,7 +2,6 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
-#include <iostream>
 using namespace std;
 
 string Time::INVALID_DATE = "The date is invalid!";
@@ -114,6 +113,8 @@ void Time::modify_date (date_t new_date)
 	if (_valid_date (new_date)) {
 		_date = new_date;
 		_mins = count_days () * DAY;
+		if (_clk != INF_CLOCK && _clk != DFLT_CLOCK)
+			_mins += _clk % 100 + (_clk / 100) * 60;
 	} else {
 		throw (INVALID_DATE);
 	}
@@ -121,11 +122,14 @@ void Time::modify_date (date_t new_date)
 
 void Time::modify_clock (clk_t new_clk)
 {
+	if (_clk != INF_CLOCK && _clk != DFLT_CLOCK)
+		_mins -= _clk % 100 + (_clk / 100) * 60;
+
 	if (_valid_clock (new_clk)) {
 		_clk = new_clk;
 
 		if (_clk != INF_CLOCK && _clk != DFLT_CLOCK)
-			_mins = _clk % 100 + (_clk / 100) * 60;
+			_mins += _clk % 100 + (_clk / 100) * 60;
 	} else {
 		throw (INVALID_TIME);
 	}
