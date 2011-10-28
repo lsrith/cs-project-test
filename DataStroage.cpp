@@ -1,88 +1,52 @@
 #include "DataStorage.h"
 #include "Task.h"
 #include "Time.h"
-#include <time.h>
 #include <vector>
 #include <fstream>
 #include <sstream>
-#include <iostream>
-#include "ToDoMngr.h"
 using namespace std;
-
-int DataStorage::FRAGMENT = 5;
 
 DataStorage::DataStorage ()
 {
 }
 
 void DataStorage::updateStorageName (string storageName) {
-	arrangedTask.clear ();
-	dates.clear ();
-	tasks.clear ();
-	activeTasks.clear ();
 	_largestIndex = 1;
-	Task task;
-	tasks.push_back (task);
-	activeTasks.push_back (false);
+	TaskNode* node = new TaskNode;
+	_indxTasks.push_back (node);
 
 	if (storageName.empty ())
 		storageName = "dflt";
 
-	_taskFile = storageName + ".txt";
-	_tableIdxFile = storageName + "tt.txt";
-	_taskIdxFile = storageName + "tk.txt";
+	_taskFile = storageName + "tk.txt";
+	_tableFile = storageName + "tt.txt";
 	loadFromFile ();
 }
 
-void DataStorage::save (string tableName, TimePeriod period, list<int> taskIndex)
-{
-	int index = getTableIndex (tableName);
-	list<int>::iterator iter;
-
-	if (index == -1) {
-		tableNames.push_back (tableName);
-		tablePeriod.push_back (period);
-		save (tableName, period, taskIndex);
-	} else {
-		if (tablePeriod[index] == period) {
-			for (iter = taskIndex.begin (); iter != taskIndex.end (); iter++) {
-				if (!isFound (tableTasks[index], *iter)) {
-					tableTasks[index].push_back (*iter);
-				}				
-			}
-		} else {
-			tablePeriod[index] = period;
-			tableTasks[index].clear ();
-			save (tableName, period, taskIndex);
-		}
-	}
-
-	writeTableIdxToFile ();
-}
-
-int DataStorage::getTableIndex (string tableName)
-{
-	int index, size = tableNames.size ();
-	for (index = 0; index < size; index++)
-		if (tableNames[index] == tableName)
-			break;
-
-	if (index == size)
-		index = -1;
-	return index;
-}
-
-list<Task> DataStorage::load (string tableName)
+list<Task> DataStorage::load (TimePeriod period)
 {
 	list<Task> taskList;
-	int index = getTableIndex (tableName);
-	if (index != -1) {
-		list<int> taskIndex;
-		list<int>::iterator iter;
-		for (iter = tableTasks[index].begin (); iter != tableTasks[index].end (); iter++) {
-			if (!isFound (taskIndex, *iter)) {
-				taskList.push_back (tasks[*iter]);
-				taskIndex.push_back (*iter);
+	list<TaskNode*>::iterator iter;
+	list<TaskNode*>::iterator endIter = _indxTasks.end ();
+	if ((period.get_start_time ().get_date () == Time::DFLT_DATE && period.get_end_time ().get_date () == Time::DFLT_DATE) ||
+		(period.get_start_time ().get_date () == Time::INF_DATE && period.get_end_time ().get_date () == Time::INF_DATE)) {
+		for (iter = _indxTasks.begin (), iter++; iter != endIter; iter++) {
+			if ((*iter)->_active)
+				taskList.push_back ((*iter)->_task);
+		}
+	} else {
+		bool clash = false;
+		for (iter = _indxTasks.begin (); iter != endIter; iter++) {
+			if ((*iter)->_active) {
+				if ((*iter)->_task.timeTask)
+					clash = period.operator== ((*iter)->_task.get_time ());
+				else
+					clash = period.operator== ((*iter)->_task.get_period ());
+			}
+
+			if (clash == true) {
+				taskList.push_back ((*iter)->_task);
+				clash = false;
 			}
 		}
 	}
@@ -91,44 +55,106 @@ list<Task> DataStorage::load (string tableName)
 	return taskList;
 }
 
-vector<string> DataStorage::load_table_name ()
-{
+list<Task> DataStorage::load (string tableName) {
+	list<Task> taskList;
+	list<TableNode*>::iterator iter;
+	for (iter = _tables.begin (); iter != _tables.end (); iter++)
+		if ((*iter)->_name == tableName)
+			break;
+
+	if (!(*iter)->_active)
+		return taskList;
+
+	list<TaskNode*>::iterator taskIter;
+	for (taskIter = (*iter)->_tasks.begin (); taskIter != (*iter)->_tasks.end (); taskIter++) {
+		if ((*taskIter)->_active)
+			taskList.push_back ((*taskIter)->_task);
+	}
+
+	return taskList;
+}
+
+void DataStorage::exit () {
+	reIndexing ();
+	writeToFile ();
+}
+
+list<Task> DataStorage::get_alertTasks () {
+	list<Task> alertTasks;
+	Time dfltTime;
+	list<TaskNode*>::iterator iter;
+	list<TaskNode*>::iterator endIter = _indxTasks.end ();
+	for (iter = _indxTasks.begin (); iter != endIter; iter++)
+		if ((*iter)->_active && (*iter)->_task.alert != dfltTime)
+			alertTasks.push_back ((*iter)->_task);
+
+	sort (&alertTasks);
+	return alertTasks;
+}
+
+vector<string> DataStorage::load_table_name () {
+	vector<string> tableNames;
+	list<TableNode*>::iterator iter;
+	for (iter = _tables.begin (); iter != _tables.end (); iter++)
+		if ((*iter)->_active)
+			tableNames.push_back ((*iter)->_name);
+	
 	return tableNames;
 }
 	
 void DataStorage::erase (list<int> taskIndex) {
 	if (taskIndex.empty ()) return;
 	
-	list<int>::iterator iter;
-	for (iter = taskIndex.begin (); iter != taskIndex.end (); iter++) {
-		activeTasks[*iter] = false;
-		for (int i = 0; i < arrangedTask.size (); i++)
-			arrangedTask[i].remove (*iter);
-
-		for (int i = 0; i < tableTasks.size (); i++)
-			tableTasks[i].remove (*iter);
+	taskIndex.sort ();
+	list<int>::iterator iter = taskIndex.begin ();
+	list<int>::iterator endIter = taskIndex.end ();
+	list<TaskNode*>::iterator nodeIter = _indxTasks.begin ();
+	list<TaskNode*>::iterator endNodeIter = _indxTasks.end ();
+	list<TaskNode*> erasedTasks;
+	int index = 0;
+	while (iter != endIter && nodeIter != endNodeIter) {
+		if (*iter == index) {
+			(*nodeIter)->_active = false;
+			erasedTasks.push_back (*nodeIter);
+			iter++;
+		}
+		nodeIter++;
+		index++;
 	}
 
-	writeTableIdxToFile ();
-	writeTaskIdxToFile ();
+	appendToFile (&erasedTasks);
+}
+
+void DataStorage::erase (string tableName) {
+	list<Task> taskList;
+	list<TableNode*>::iterator iter;
+	for (iter = _tables.begin (); iter != _tables.end (); iter++)
+		if ((*iter)->_name == tableName)
+			break;
+
+	(*iter)->_active = false;
+	setInactive (&((*iter)->_tasks));
+	(*iter)->_tasks.clear ();
+	appendToFile (*iter);
+}
+
+void DataStorage::setInactive (list<TaskNode*>* tasks) {
+	list<TaskNode*>::iterator iter;
+	for (iter = tasks->begin (); iter != tasks->end (); iter++) {
+		(*iter)->_active = false;
+	}
 }
 
 void DataStorage::clear () {
-	arrangedTask.clear ();
-	dates.clear ();
-	tasks.clear ();
-	tableTasks.clear ();
-	tablePeriod.clear ();
+	_indxTasks.clear ();
+	_tables.clear ();
+	TaskNode* node = new TaskNode;
+	_indxTasks.push_back (node);
 	_largestIndex = 1;
-	Task task;
-	tasks.push_back (task);
-
 	ofstream taskFile (_taskFile);
 	taskFile.close ();
-	ofstream taskIdxFile (_taskIdxFile);
-	taskFile.close ();
-	ofstream tableIdxFile (_taskIdxFile);
-	taskFile.close ();
+	ofstream tableFile (_tableFile);
+	tableFile.close ();
 }
 
 void DataStorage::sort (list<Task>* taskList) {
@@ -169,390 +195,257 @@ void DataStorage::sort (list<Task>* taskList) {
 	}
 }
 
-void DataStorage::save (list<Task>* taskList)
-{
+void DataStorage::save (list<Task>* taskList) {
 	if (taskList->empty ()) return;
-	 
-	Task* taskPtr;
-	list<Task> timePeriodModifiedTasks;
-	list<int> timePeriodModifiedIndex;
-	list<Task>::iterator iter;
-	list<Time::date_t> dateList;	
-	for (iter = taskList->begin(); iter != taskList->end(); iter++)
-	{
-		if (iter->timeTask == true) {
-			dateList.push_back (iter->get_time ().get_date ());
-		} else {
-			Time time;
-			TimePeriod period = iter->get_period ();
-			for (time = period.get_start_time (); time.get_date () != period.get_end_time ().get_date (); time = time + Time::DAY) {
-				dateList.push_back (time.get_date ());
-			}
-			dateList.push_back (time.get_date ());
-		}
-	}
-	updateDates (dateList);
 
-//timePeriod related change
-//for now, time and timePeriod can be modified
-	int dateIndex;
-	for (iter = taskList->begin(); iter != taskList->end(); iter++)
-	{	
-		if (iter->_index == 0)
-		{
+	list<Task>::iterator iter;
+	list<TaskNode*>::iterator nodeIter;
+	list<TaskNode*> newTasks;
+	for (iter = taskList->begin(); iter != taskList->end(); iter++) {	
+		if (iter->_index == 0) {
 			iter->_index = _largestIndex;
 			_largestIndex++;
-			tasks.push_back (*iter);
-			activeTasks.push_back (true);
-
-			if (iter->timeTask == true) {
-				dateIndex = getDateIndex (iter->get_time ().get_date ());
-				arrangedTask[dateIndex].push_back (iter->_index);
-			} else {
-				TimePeriod period = iter->get_period ();
-				int startIndex = getDateIndex (iter->get_period ().get_start_time ().get_date ());
-				int endIndex = getDateIndex (iter->get_period ().get_end_time ().get_date ());
-				for (dateIndex = startIndex; dateIndex <= endIndex; dateIndex++) {
-					arrangedTask[dateIndex].push_back (iter->_index);
-				}
-			}
+			TaskNode* node = new TaskNode;
+			node->_active = true;
+			node->_task = *iter;
+			_indxTasks.push_back (node);
+			newTasks.push_back (node);
+		} else {
+			int i;
+			for (i = 0, nodeIter = _indxTasks.begin (); i < iter->_index; i++, nodeIter++);
+			(*nodeIter)->_task = *iter;
+			(*nodeIter)->_active = true;
+			newTasks.push_back (*nodeIter);
 		}
-		else
-		{
-			//check if time or period is modified
-			taskPtr = &tasks[iter->_index];
-			if (taskPtr->get_time () == iter->get_time () && taskPtr->get_period ().get_start_time () == iter->get_period ().get_start_time ()
-				&& taskPtr->get_period ().get_end_time () == iter->get_period ().get_end_time ()) {
-				*taskPtr = *iter;
-				if (!activeTasks[iter->_index]) {
-					if (iter->timeTask == true) {
-						dateIndex = getDateIndex (iter->get_time ().get_date ());
-						arrangedTask[dateIndex].push_back (iter->_index);
-					} else {
-						TimePeriod period = iter->get_period ();
-						int startIndex = getDateIndex (iter->get_period ().get_start_time ().get_date ());
-						int endIndex = getDateIndex (iter->get_period ().get_end_time ().get_date ());
-						for (dateIndex = startIndex; dateIndex <= endIndex; dateIndex++) {
-							arrangedTask[dateIndex].push_back (iter->_index);
-						}
-					}
-					
-					activeTasks[iter->_index] = true;
-				}
-			} else {
-				iter->_index = 0;
-				timePeriodModifiedTasks.push_back (*iter);
-				timePeriodModifiedIndex.push_back (taskPtr->_index);
-			}
-  		}
 	}
 	
-	//append new tasks to the _taskFile
-	ofstream taskFile (_taskFile, ofstream::app);
-	for (iter = taskList->begin(); iter != taskList->end(); iter++) {
-		if (iter->_index != 0)
-			taskFile << iter->stringConvert () << endl;
-	}
-	taskFile.close ();
-
-	writeTaskIdxToFile ();
-
-	erase (timePeriodModifiedIndex);
-	save (&timePeriodModifiedTasks);
+	appendToFile (&newTasks);
 }
 
-void DataStorage::save(list<Task> taskList)
-{
+void DataStorage::save (list<Task> taskList) {
 	save (&taskList);
 }
 
-void DataStorage::updateDates (list<Time::date_t> dateList) 
-{
-	int dateIndex;
-	list<Time::date_t>::iterator iter;
-	vector<Time::date_t>::iterator dateIter;
-	vector<list<int>>::iterator taskDateIter;
-	list<int> temp;
+void DataStorage::save (TableNode* table, list<Task>* taskList) {
+	if (taskList->empty ()) return;
 
-	for (iter = dateList.begin (); iter != dateList.end (); iter++)
-	{
-		dateIndex = getDateIndex (*iter);
-		if (dateIndex == -1)
-		{
-			for (dateIter = dates.begin (), taskDateIter = arrangedTask.begin (); dateIter != dates.end (); dateIter++, taskDateIter++)
-			{
-				if (Time::isAfter (*iter, *dateIter))
-					break;
-			}
-
-			dates.insert (dateIter, *iter);
-			arrangedTask.insert (taskDateIter, temp);
+	list<Task>::iterator iter;
+	list<TaskNode*>::iterator nodeIter;
+	list<TaskNode*> newTasks;
+	for (iter = taskList->begin(); iter != taskList->end(); iter++) {	
+		if (iter->_index == 0) {
+			iter->_index = _largestIndex;
+			_largestIndex++;
+			TaskNode* node = new TaskNode;
+			node->_active = true;
+			node->_table = table->_name;
+			node->_task = *iter;
+			_indxTasks.push_back (node);
+			table->_tasks.push_back (node);
+			newTasks.push_back (node);
+		} else {
+			int i;
+			for (i = 0, nodeIter = _indxTasks.begin (); i < iter->_index; i++, nodeIter++);
+			(*nodeIter)->_task = *iter;
+			(*nodeIter)->_table = table->_name;
+			(*nodeIter)->_active = true;
+			newTasks.push_back (*nodeIter);
 		}
 	}
-}
-
-int DataStorage::getDateIndex (Time::date_t date)
-{
-	int index, size = dates.size ();
-	for (index = 0; index < size; index++) {
-		if (dates[index] == date)
-			break;
-	}
-
-	if (index == size)
-		index = -1;
 	
-	return index;
+	appendToFile (&newTasks);
 }
 
-int DataStorage::getSimDateIndex (Time::date_t date) 
-{
-	int index, size = dates.size ();
-	for (index = 0; index < size; index++) {
-		if (Time::isAfter (date, dates[index]))
-			break;
-		else if (date == dates[index])
-			break;
-		else;
-	}
-
-	return index;
-}
-
-list<Task> DataStorage::load (TimePeriod period)
-{
-	list<Task> taskList;
-	int startIndex, endIndex;
-	if ((period.get_start_time ().get_date () == Time::DFLT_DATE && period.get_end_time ().get_date () == Time::DFLT_DATE) ||
-		(period.get_start_time ().get_date () == Time::INF_DATE && period.get_end_time ().get_date () == Time::INF_DATE)) {
-		startIndex = 0;
-		endIndex = dates.size () - 1;
-	} else {
-		startIndex = getSimDateIndex (period.get_start_time ().get_date ());
-		if (Time::isAfter (period.get_end_time ().get_date (), dates[startIndex]))
-			return taskList;
-
-		endIndex = getSimDateIndex (period.get_end_time ().get_date ());
-		if (startIndex == dates.size ())
-			return taskList;
-		else if (endIndex == dates.size ())
-			endIndex--;
-		else;
-	}
-	
-	list<int> taskIndex;
-	list<int>::iterator iter;
-	for (int i = startIndex; i <= endIndex; i++) 
-	{
-		for (iter = arrangedTask[i].begin (); iter != arrangedTask[i].end (); iter++)
-		{
-			if (!isFound (taskIndex, *iter)) {
-				taskList.push_back (tasks[*iter]);
-				taskIndex.push_back (*iter);
+void DataStorage::save (string tableName, TimePeriod period, list<Task> tasks) {
+	bool existingTable = false;
+	TableNode* table;
+	list<TableNode*>::iterator tableIter;
+	for (tableIter = _tables.begin (); tableIter != _tables.end (); tableIter++) {
+		if ((*tableIter)->_name == tableName) {
+			if ((*tableIter)->_active &&
+				(*tableIter)->_period.get_start_time () == period.get_start_time () &&
+				(*tableIter)->_period.get_end_time () == period.get_end_time ()) {
+				save (*tableIter, &tasks);
+			} else {
+				setInactive (&((*tableIter)->_tasks));
+				(*tableIter)->_period = period;
+				(*tableIter)->_active = true;
+				(*tableIter)->_tasks.clear ();
+				save (*tableIter, &tasks);
 			}
+
+			existingTable = true;
+			table = *tableIter;
+			break;
 		}
 	}
 
-	sort (&taskList);
-	return taskList;
-}
+	if (!existingTable) {
+		TableNode* node = new TableNode;
+		node->_active = true;
+		node->_name = tableName;
+		node->_period = period;
+		_tables.push_back (node);
+		save (node, &tasks);
+		table = node;
+	}
 
-void DataStorage::exit () {
-	reIndexing ();
-	writeTaskToFile ();
-	writeTaskIdxToFile ();
-	writeTableIdxToFile ();
-}
-
-list<Task> DataStorage::get_alertTasks () {
-	list<Task> alertTasks;
-	Time dfltTime;
-	int size = activeTasks.size ();
-	for (int i = 0; i < size; i++)
-		if (activeTasks[i] && tasks[i].alert != dfltTime)
-			alertTasks.push_back (tasks[i]);
-
-	sort (&alertTasks);
-	return alertTasks;
-}
-
-template <typename data_t>
-bool isFound (list<data_t> dataList, data_t data) {
-	list<data_t>::iterator iter;
-	
-	for (iter = dataList.begin (); iter != dataList.end (); iter++)
-		if (*iter == data)
-			return true;
-
-	return false;
+	appendToFile (table);
 }
 
 void DataStorage::reIndexing () {
-	int size = activeTasks.size ();
-	int inactiveTasks = size;
-	for (int i = 0; i < size; i++) {
-		if (activeTasks[i])
-			inactiveTasks--;
-	}
-
-	if ((size / inactiveTasks) > FRAGMENT)
-		return;
-
-	int tabSize = tableTasks.size ();
-	list<Task>* tables = new list<Task>[tabSize];
-	for (int i = 0; i < tabSize; i++) {
-		while (!tableTasks[i].empty ()) {
-			tasks[tableTasks[i].front ()]._index = 0;
-			tables[i].push_back (tasks[tableTasks[i].front ()]);
-			tableTasks[i].pop_front ();
+	list<TableNode*>::iterator tableIter;
+	for (tableIter = _tables.begin (); tableIter != _tables.end (); tableIter++) {
+		if ((*tableIter)->_active) {
+			removeInactiveTasks (&((*tableIter)->_tasks));
+		} else {
+			setInactive (&((*tableIter)->_tasks));
+			tableIter = _tables.erase (tableIter);
+			tableIter--;
 		}
 	}
 
-	list<Task> actTasks;
-	while (size > 1) {
-		if (activeTasks.back () && tasks.back ()._index) {
-			tasks.back ()._index = 0;
-			actTasks.push_back (tasks.back ());
+	removeInactiveTasks (&_indxTasks);
+
+	int newIndx = 0;
+	list<TaskNode*>::iterator taskIter;
+	for (taskIter = _indxTasks.begin (); taskIter != _indxTasks.end (); taskIter++) {
+		(*taskIter)->_task._index = newIndx;
+		newIndx++;
+	}
+	_largestIndex = newIndx;
+}
+
+void DataStorage::removeInactiveTasks (list<TaskNode*>* tasks) {
+	list<TaskNode*>::iterator taskIter = tasks->begin ();
+	taskIter++;
+	while (taskIter != tasks->end ())
+		if (!(*taskIter)->_active) {
+			taskIter = _indxTasks.erase (taskIter);
+		} else {
+			taskIter++;
 		}
+}
 
-		tasks.pop_back ();
-		activeTasks.pop_back ();
-		size--;
+void DataStorage::writeToFile () {
+	ofstream taskFile (_taskFile);
+	list<TaskNode*>::iterator taskIter = _indxTasks.begin ();
+	taskIter++;
+	list<TaskNode*>::iterator endIter = _indxTasks.end ();
+	for (; taskIter != endIter; taskIter++) {
+		taskFile << (*taskIter)->_active << " ." << (*taskIter)->_table << endl;
+		taskFile << (*taskIter)->_task.stringConvert () << endl;
 	}
+	taskFile.close ();
 
-	_largestIndex = 1;
-	int dateSize = dates.size ();
-	for (int i = 0; i < dateSize; i++) {
-		arrangedTask[i].clear ();
+	ofstream tableFile (_tableFile);
+	list<TableNode*>::iterator tabIter;
+	for (tabIter = _tables.begin (); tabIter != _tables.end (); tabIter++) {
+		tableFile << (*tabIter)->_active << " " << (*tabIter)->_name << " ";
+		tableFile << (*tabIter)->_period.get_start_time ().get_date () << " ";
+		tableFile << (*tabIter)->_period.get_start_time ().get_clock () << " ";
+		tableFile << (*tabIter)->_period.get_end_time ().get_date () << " ";
+		tableFile << (*tabIter)->_period.get_end_time ().get_clock () << " " << endl;
 	}
+	tableFile.close ();
+}
 
-	save (&actTasks);
-
-	for (int i = 0; i < tabSize; i++) {
-		save (&tables[i]);
-		list<int> taskIndex;
-		while (!tables[i].empty ()) {
-			taskIndex.push_back (tables[i].front ()._index);
-			tables[i].pop_front ();
-		}
-		save (tableNames[i], tablePeriod[i], taskIndex);
+void DataStorage::appendToFile (list<TaskNode*>* tasks) {
+	ofstream taskFile (_taskFile, fstream::app);
+	list<TaskNode*>::iterator taskIter;
+	list<TaskNode*>::iterator endIter = tasks->end ();
+	for (taskIter = tasks->begin (); taskIter != endIter; taskIter++) {
+		taskFile << (*taskIter)->_active << " ." << (*taskIter)->_table << endl;
+		taskFile << (*taskIter)->_task.stringConvert () << endl;
 	}
+	taskFile.close ();
+}
+
+void DataStorage::appendToFile (TableNode* node) {
+	ofstream tableFile (_tableFile, fstream::app);
+	tableFile << node->_active << " " << node->_name << " ";
+	tableFile << node->_period.get_start_time ().get_date () << " ";
+	tableFile << node->_period.get_start_time ().get_clock () << " ";
+	tableFile << node->_period.get_end_time ().get_date () << " ";
+	tableFile << node->_period.get_end_time ().get_clock () << " " << endl;
+	tableFile.close ();
 }
 
 void DataStorage::loadFromFile () {
 	string str;
+	ifstream tableFile (_tableFile);
+	list<TableNode*>::iterator tabIter;
+	if (tableFile.is_open ()) {
+		Time::date_t date;
+		Time::clk_t clock;
+		while (getline (tableFile, str)) {
+			TableNode* node = new TableNode;
+			stringstream strStream;
+			strStream << str;
+			strStream >> node->_active >> node->_name;
+			strStream >> date >> clock;
+			Time start (date, clock);
+			node->_period.modify_start_time (start);
+			strStream >> date >> clock;
+			Time end (date, clock);
+			node->_period.modify_end_time (end);
+
+			for (tabIter = _tables.begin (); tabIter != _tables.end (); tabIter++) {
+				if ((*tabIter)->_name == node->_name) {
+					**tabIter = *node;
+					delete node;
+					break;
+				}
+			}
+
+			if (tabIter == _tables.end ())
+				_tables.push_back (node);
+		}
+		tableFile.close ();
+	} else {
+		ofstream outFile (_tableFile);
+		outFile.close ();
+	}
 
 	ifstream taskFile (_taskFile);
+	list<TaskNode*>::iterator taskIter;
 	if (taskFile.is_open ()) {
 		while (getline (taskFile, str)) {
-			Task task (str);
-			if (task._index == _largestIndex) {
-				tasks.push_back (task);
-				activeTasks.push_back (false);
+			TaskNode* node = new TaskNode;
+			stringstream strStream;
+			strStream << str;
+			strStream >> node->_active >> str;
+			node->_table = str.substr (1);
+
+			if (getline (taskFile, str)) {
+				Task task (str);
+				node->_task = task;
+			}
+
+			if (node->_task._index == _largestIndex) {
+				_indxTasks.push_back (node);
 				_largestIndex++;
-			} else if (task._index < _largestIndex) {
-				tasks[task._index] = task;
-			} else;		//this case occurs only when there is logic error
+
+				if (node->_table.empty () == false) {
+					for (tabIter = _tables.begin (); tabIter != _tables.end (); tabIter++) {
+						if ((*tabIter)->_name == node->_table) {
+							(*tabIter)->_tasks.push_back (node);
+							break;
+						}
+					}
+				}
+			} else if (node->_task._index < _largestIndex) {
+				TaskNode** ptr;
+				ptr = find_pos (&_indxTasks, node->_task._index);
+				**ptr = *node;
+				delete node;
+			} else;
 		}
 		taskFile.close ();
 	} else {
-		ofstream newFile (_taskFile);
-		newFile.close ();
+		ofstream outFile (_taskFile);
+		outFile.close ();
 	}
-
-	int index, i = 0;
-	Time::date_t date;
-	list<int> intList;
-	ifstream taskIdxFile (_taskIdxFile);
-	if (taskIdxFile.is_open ()) {
-		while (getline (taskIdxFile, str)) {
-			stringstream strStream;
-			strStream << str;
-			strStream >> date;
-			dates.push_back (date);
-			arrangedTask.push_back (intList);
-			while (strStream >> index) {
-				arrangedTask[i].push_back (index);
-				activeTasks[index] = true;
-			}
-			i++;
-		}
-		taskIdxFile.close ();
-	} else {
-		ofstream newFile (_taskIdxFile);
-		newFile.close ();
-	}
-	
-	Time time;
-	TimePeriod period;
-	i = 0;
-	ifstream tableIdxFile (_tableIdxFile);
-	if (tableIdxFile.is_open ()) {
-		while (getline (tableIdxFile, str)) {
-			stringstream strStream;
-			strStream << str;
-			strStream >> str;
-			tableNames.push_back (str);
-			strStream >> date;
-			time.modify_date (date);
-			time.modify_clock (0);
-			period.modify_start_time (time);
-			strStream >> date;
-			time.modify_date (date);
-			time.modify_clock (2359);
-			period.modify_end_time (time);
-			tablePeriod.push_back (period);
-			tableTasks.push_back (intList);
-			while (strStream >> index)
-				tableTasks[i].push_back (index);
-			i++;
-		}
-		tableIdxFile.close ();
-	} else {
-		ofstream newFile (_tableIdxFile);
-		newFile.close ();
-	}
-}
-
-void DataStorage::writeTaskToFile () {
-	ofstream taskFile (_taskFile);
-	vector<Task>::iterator iter;
-	for (iter = tasks.begin(); iter != tasks.end(); iter++) {
-		if (iter->_index != 0)
-			taskFile << iter->stringConvert () << endl;
-	}
-	taskFile.close ();
-}
-
-void DataStorage::writeTaskIdxToFile () {
-	list<int>::iterator intIter;
-	int size = dates.size ();
-	ofstream taskIdxFile (_taskIdxFile);
-
-	for (int i = 0; i < size; i++) {
-		taskIdxFile << dates[i] << " ";
-		for (intIter = arrangedTask[i].begin (); intIter != arrangedTask[i].end (); intIter++)
-			taskIdxFile << *intIter << " ";
-		taskIdxFile << endl;
-	}
-
-	taskIdxFile.close ();
-}
-
-void DataStorage::writeTableIdxToFile () {
-	list<int>::iterator intIter;
-	int size = tableNames.size ();
-	ofstream tableIdxFile (_tableIdxFile);
-
-	for (int i = 0; i < size; i++) {
-		tableIdxFile << tableNames[i] << " ";
-		tableIdxFile << tablePeriod[i].get_start_time ().get_date () << " " << tablePeriod[i].get_end_time ().get_date () << " ";
-		for (intIter = arrangedTask[i].begin (); intIter != arrangedTask[i].end (); intIter++)
-			tableIdxFile << *intIter << " ";
-		tableIdxFile << endl;
-	}
-
-	tableIdxFile.close ();
 }
 
 list<Task> DataStorage::search (string searchedWord, search_t type) {
@@ -571,7 +464,7 @@ list<Task> DataStorage::search (string searchedWord, search_t type) {
 	default:
 		break;
 	}
-	checkTaskList (&taskList);
+
 	return taskList;
 }
 
@@ -582,16 +475,18 @@ list<Task> DataStorage::exactSearch (string searchedWord) {
 	int pos;
 	if (taskFile.is_open ()) {
 		while (getline (taskFile, str)) {
-			pos = str.find (searchedWord);
-			if (pos != string::npos) {
-				Task task (str);
-				taskList.push_back (task);
+			if (getline (taskFile, str)) {
+				pos = str.find (searchedWord);
+				if (pos != string::npos) {
+					Task task (str);
+					taskList.push_back (task);
+				}
 			}
 		}
-
 		taskFile.close ();
 	}
 
+	sort (&taskList);
 	return taskList;
 }
 
@@ -615,19 +510,38 @@ list<Task> DataStorage::eachSearch (string searchedWord) {
 		else
 			searchedWord.erase (0, end_pos + 1);
 	}
-	while (!keyWords.empty ()) {
-		taskList.splice (taskList.end (), exactSearch (keyWords.front ()));
-		keyWords.pop_front ();
-	}
 
+	int pos;
+	list<string>::iterator iter;
+	ifstream taskFile (_taskFile);
+	if (!taskFile.is_open ())
+		return taskList;
+
+	while (getline (taskFile, str)) {
+		if (getline (taskFile, str)) {
+			for (iter = keyWords.begin (); iter != keyWords.end (); iter++) {
+				pos = str.find (*iter);
+				if (pos != string::npos) {
+					Task task (str);
+					taskList.push_back (task);
+				}
+			}
+		}
+	}
+	taskFile.close ();
+	
+	sort (&taskList);
 	return taskList;
 }
 
-void DataStorage::checkTaskList (list<Task>* taskList) {
-	list<Task>::iterator iter;
-	sort (taskList);
-	for (iter = taskList->begin (); iter != taskList->end (); iter++) {
-		if (!activeTasks[iter->_index])
-			taskList->erase (iter);
-	}
+template <typename data_t>
+data_t* find_pos (list<data_t>* dataList, int pos) {
+	list<data_t>::iterator iter;
+	int i;
+	for (i = 0, iter = dataList->begin (); i < pos || iter != dataList->end (); iter++, i++);
+
+	if (iter == dataList->end ())
+		return NULL;
+	else
+		return &(*iter);
 }
