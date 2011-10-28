@@ -6,7 +6,10 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include "ToDoMngr.h"
 using namespace std;
+
+int DataStorage::FRAGMENT = 5;
 
 DataStorage::DataStorage ()
 {
@@ -114,6 +117,8 @@ void DataStorage::clear () {
 	arrangedTask.clear ();
 	dates.clear ();
 	tasks.clear ();
+	tableTasks.clear ();
+	tablePeriod.clear ();
 	_largestIndex = 1;
 	Task task;
 	tasks.push_back (task);
@@ -219,6 +224,21 @@ void DataStorage::save (list<Task>* taskList)
 			if (taskPtr->get_time () == iter->get_time () && taskPtr->get_period ().get_start_time () == iter->get_period ().get_start_time ()
 				&& taskPtr->get_period ().get_end_time () == iter->get_period ().get_end_time ()) {
 				*taskPtr = *iter;
+				if (!activeTasks[iter->_index]) {
+					if (iter->timeTask == true) {
+						dateIndex = getDateIndex (iter->get_time ().get_date ());
+						arrangedTask[dateIndex].push_back (iter->_index);
+					} else {
+						TimePeriod period = iter->get_period ();
+						int startIndex = getDateIndex (iter->get_period ().get_start_time ().get_date ());
+						int endIndex = getDateIndex (iter->get_period ().get_end_time ().get_date ());
+						for (dateIndex = startIndex; dateIndex <= endIndex; dateIndex++) {
+							arrangedTask[dateIndex].push_back (iter->_index);
+						}
+					}
+					
+					activeTasks[iter->_index] = true;
+				}
 			} else {
 				iter->_index = 0;
 				timePeriodModifiedTasks.push_back (*iter);
@@ -356,41 +376,55 @@ bool isFound (list<data_t> dataList, data_t data) {
 }
 
 void DataStorage::reIndexing () {
-	//merge all active task index
-	list<int> taskIdex;
-	int size = arrangedTask.size ();
-	for (int i = 0; i < size; i++)
-		taskIdex.splice (taskIdex.end (), arrangedTask[i]);
-	taskIdex.sort ();
-
-	//remove duplicated index
-	int num;
-	list<int>::iterator iter;
-	for (iter = taskIdex.begin (); iter != taskIdex.end (); iter++) {
-		num = *iter;
-		taskIdex.remove (num);
+	int size = activeTasks.size ();
+	int inactiveTasks = size;
+	for (int i = 0; i < size; i++) {
+		if (activeTasks[i])
+			inactiveTasks--;
 	}
-	
-	//erase inactive task index from the task and table storage
-	list<int> erasedTaskIdx;
-	list<Task> newTaskList;
-	int newIdex = 1;
-	for (iter = taskIdex.begin (); iter != taskIdex.end (); iter++) {
-		if (*iter > newIdex) {
-			tasks[*iter]._index = newIdex;
-			erasedTaskIdx.push_back (*iter);
-			newTaskList.push_back (tasks[*iter]);
-			newIdex++;
-		} else;
-	}
-	erase (erasedTaskIdx);
 
-	//erase inactive task from the task vector
-	for (int i = 0; i < _largestIndex; i++)
-		tasks[tasks[i]._index] = tasks[i];
-	for (; _largestIndex > newIdex; _largestIndex--)
+	if ((size / inactiveTasks) > FRAGMENT)
+		return;
+
+	int tabSize = tableTasks.size ();
+	list<Task>* tables = new list<Task>[tabSize];
+	for (int i = 0; i < tabSize; i++) {
+		while (!tableTasks[i].empty ()) {
+			tasks[tableTasks[i].front ()]._index = 0;
+			tables[i].push_back (tasks[tableTasks[i].front ()]);
+			tableTasks[i].pop_front ();
+		}
+	}
+
+	list<Task> actTasks;
+	while (size > 1) {
+		if (activeTasks.back () && tasks.back ()._index) {
+			tasks.back ()._index = 0;
+			actTasks.push_back (tasks.back ());
+		}
+
 		tasks.pop_back ();
-	save (newTaskList);
+		activeTasks.pop_back ();
+		size--;
+	}
+
+	_largestIndex = 1;
+	int dateSize = dates.size ();
+	for (int i = 0; i < dateSize; i++) {
+		arrangedTask[i].clear ();
+	}
+
+	save (&actTasks);
+
+	for (int i = 0; i < tabSize; i++) {
+		save (&tables[i]);
+		list<int> taskIndex;
+		while (!tables[i].empty ()) {
+			taskIndex.push_back (tables[i].front ()._index);
+			tables[i].pop_front ();
+		}
+		save (tableNames[i], tablePeriod[i], taskIndex);
+	}
 }
 
 void DataStorage::loadFromFile () {
@@ -402,7 +436,7 @@ void DataStorage::loadFromFile () {
 			Task task (str);
 			if (task._index == _largestIndex) {
 				tasks.push_back (task);
-				activeTasks.push_back (true);
+				activeTasks.push_back (false);
 				_largestIndex++;
 			} else if (task._index < _largestIndex) {
 				tasks[task._index] = task;
@@ -425,8 +459,10 @@ void DataStorage::loadFromFile () {
 			strStream >> date;
 			dates.push_back (date);
 			arrangedTask.push_back (intList);
-			while (strStream >> index)
+			while (strStream >> index) {
 				arrangedTask[i].push_back (index);
+				activeTasks[index] = true;
+			}
 			i++;
 		}
 		taskIdxFile.close ();
@@ -523,14 +559,12 @@ list<Task> DataStorage::search (string searchedWord, search_t type) {
 	default:
 		break;
 	}
-
 	checkTaskList (&taskList);
 	return taskList;
 }
 
 list<Task> DataStorage::exactSearch (string searchedWord) {
 	list<Task> taskList;
-
 	string str;
 	ifstream taskFile (_taskFile);
 	int pos;
@@ -562,12 +596,13 @@ list<Task> DataStorage::eachSearch (string searchedWord) {
 
 	while (!searchedWord.empty ()) {
 		end_pos = searchedWord.find_first_of (" ", 0);
-		str = searchedWord.substr (0, end_pos - 1);
+		str = searchedWord.substr (0, end_pos);
 		keyWords.push_back (str);
-		searchedWord.erase (0, end_pos);
-cout << str << endl;
+		if (end_pos == string::npos)
+			searchedWord.erase ();
+		else
+			searchedWord.erase (0, end_pos + 1);
 	}
-
 	while (!keyWords.empty ()) {
 		taskList.splice (taskList.end (), exactSearch (keyWords.front ()));
 		keyWords.pop_front ();
