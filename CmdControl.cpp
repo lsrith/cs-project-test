@@ -43,6 +43,7 @@ CmdControl::CmdControl (bool dotCmd) {
 // these two following parts are to be modified
 	string str = get_vldCmdList (_validCmd, standAloneCmdEndPos);
 	_dayMonth = get_dayMonth ();
+//	log.log ("cmdControl");
 /*
 	if (_validCmd.empty ())
 		cout << "empty" << endl;
@@ -98,12 +99,17 @@ CmdControl::input_t CmdControl::getErrorFlag () {
 }
 
 void CmdControl::splitInput () {
+log.start ("splitInput");
 	string temp;
 	command cmd;
 	unsigned int end_pos = 0;
 
+log.cond ("_dotCmd", _dotCmd);
 	if (_dotCmd) {
+log.call ("checkIfStandAlone");
 		checkIfStandAloneCmd ();
+log.end ();
+log.loop ("_input");
 		while (!_input.empty ()) {
 			if (_input[0] == '.' || _input[0] == '-') {
 				end_pos = _input.find_first_of (" .-", 1);
@@ -129,7 +135,9 @@ void CmdControl::splitInput () {
 					_input.erase (0, end_pos);
 			}
 		}
+log.end ();
 	} else {
+log.loop ("_input");
 		while (!_input.empty ()) {
 			if (_input[0] == '\"') {
 				end_pos = _input.find_first_of ('\"', 1);
@@ -153,7 +161,10 @@ void CmdControl::splitInput () {
 			else
 				_input.erase (0, end_pos);
 		}
+log.end ();
 	}
+log.end ();
+log.end ();
 }
 
 string CmdControl::executeCmd () {
