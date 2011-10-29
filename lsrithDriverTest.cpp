@@ -4,6 +4,7 @@
 #include <string>
 #include <ctime>
 using namespace std;
+
 /*
 int main () {
 
@@ -78,43 +79,37 @@ int main () {
 */
 
 int main () {
+Logging log;
+log.log ("main");
+log.start ("main");
 	string str;
 	bool dotCmd;
 	cout << "dotCmd = ";
 	cin >> dotCmd;
 	try {
+log.call ("cmdControl");
 		CmdControl cmdControl (dotCmd);
-		while (str != "exit") {
+log.loop ("while (true)");
+		while (true) {
 			cout << "command: ";
 			getline (cin, str);
 //			cout << str << endl;
 			try {
-				cmdControl.updateInput (str);
+log.call ("addInput");
+				cmdControl.addInput (str);
+log.end ();
+log.call ("executeCmd");
 				cout << cmdControl.executeCmd () << endl;
-
-				switch (cmdControl.getPromptFlag () ) {
-				case 0:
-					while (true) {
-						cout << "Do you still want to continue? (Y/N): ";
-						getline (cin, str);
-						if (str == "Y" || str == "y") {
-							cmdControl.activatePrompt (true);
-							break;
-						} else if (str == "N" || str == "n") {
-							cmdControl.activatePrompt (false);
-							break;
-						} else;
-					}
-				default:
-					break;
-				}
+log.end ();
 			} catch (string xcpt) {
 				cout << "INV" << endl;
 			}
 		}
+log.end ();
 	} catch (string xcpt) {
 		cout << "INV" + xcpt << endl;
 	}
+log.end ();
 	return 0;
 }
 

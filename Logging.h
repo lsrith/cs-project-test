@@ -15,7 +15,7 @@ public:
 	void call (string);			//start calling function name
 
 private:
-	enum LOG {START, LOOP, COND, CALL};
+	enum LOG {START = 0, LOOP, COND, CALL};
 
 	bool _inactive;
 	bool _start;
