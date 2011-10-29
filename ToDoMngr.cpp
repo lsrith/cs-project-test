@@ -9,6 +9,8 @@
 #include <iostream>
 using namespace std;
 
+string ToDoMngr::NOTHING_TO_VIEW = "";
+
 list<Task> ToDoMngr::get_active_list () {
 	return _activeTaskList;
 }

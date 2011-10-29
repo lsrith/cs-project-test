@@ -16,6 +16,8 @@ enum view_t {DAILY, WEEKLY, MONTHLY};
 
 class ToDoMngr {
 public:
+	static string NOTHING_TO_VIEW;
+
 	struct TaskElement {
 		bool _time;
 		bool _period;

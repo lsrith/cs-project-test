@@ -773,7 +773,7 @@ string CmdControl::executeNEXT () {
 	if (_taskId != 0) {
 		_taskId++;
 		str = _toDoMngr.view (_taskId);
-		if (str.empty ())
+		if (str == ToDoMngr::NOTHING_TO_VIEW)
 			_last = true;
 	} else if (_time.get_date () != Time::DFLT_DATE) {
 		Time temp;
@@ -825,7 +825,7 @@ string CmdControl::executePREV () {
 	if (_taskId != 0) {
 		_taskId--;
 		str = _toDoMngr.view (_taskId);
-		if (str.empty ())
+		if (str == ToDoMngr::NOTHING_TO_VIEW)
 			_first = true;
 	} else if (_time.get_date () != Time::DFLT_DATE) {
 		Time temp;
