@@ -128,6 +128,7 @@ private:
 	string mergeStringInput ();
 	void clearTaskElement ();
 	bool checkTaskElement (bool);
+	void check2ndQsCommand ();
 
 	void mergeAllQs ();
 	void activate2ndQs ();
