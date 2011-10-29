@@ -18,15 +18,16 @@ template <typename data_t>
 queue<data_t>& operator+= (queue<data_t>& Q1, queue<data_t> Q2);
 
 class CmdControl: public VldCmdCtrl {
-public:
-	enum prompt_t {ADDCLASHED, EDITCLASHED, CONTINUE, VLDINPUT, NEWINPUT, NOPROMPT};
-	
-	template <typename data_t>
-	void clear (queue<data_t>& Q);
-
+private:
 	typedef unsigned short int indx_t;
 	enum input_t {CMD, DATA, NONE};
+	enum prompt_t {ADDCLASHED, EDITCLASHED, VLDINPUT, VLDCMD, NOPROMPT};
 
+public:
+	template <typename data_t>
+	void clear (queue<data_t>* Q);
+	template <typename data_t>
+	void append (queue<data_t>* Q1, queue<data_t> Q2);
 	CmdControl (bool);
 	//Command will load CmdList from built-in file
 	//true if the user wants the '.' command
@@ -37,10 +38,6 @@ public:
 //	string getLeftOverInput ();
 	//return a string of input that could not be able to access
 	string executeCmd ();
-	input_t getErrorFlag ();
-	prompt_t getPromptFlag ();
-	string activatePrompt (bool);
-
 private:
 	Logging log;
 	string _input;
@@ -53,6 +50,7 @@ private:
 	queue<command>* _cmdInput;
 	queue<string>* _dataInput;
 	queue<input_t>* _sequence;
+	bool _2ndQs;
 
 	ToDoMngr _toDoMngr;
 //	ToDoMngr::search_t _search;
@@ -107,6 +105,7 @@ private:
 	string executeEditCmd (int);
 	string executeFunction (string (*function) (TimePeriod));
 	void executeSORT ();
+	string executePROMPT ();
 
 	void splitInput ();
 	command translateCmd (string);
@@ -119,12 +118,7 @@ private:
 	TimePeriod get_period ();
 	Time get_time ();
 	Time::date_t get_date ();
-	//Format:: DDMMYYYY || DDMMYY || MMDDYYYY || MMDDYY || DDMMMYYYY || MMMDDYYYY || YYYYMMMDD
-	//return INF_DATE and flag data error if unable to translate to date
 	Time::clk_t get_clock ();
-	//Format (24hrs):: HH.MM || HH:MM
-	//Format (12hrs):: HH.MM AM || HH:MM AM || HAM || HHAM || HH.MMAM || HH:MMAM
-	//return INF_CLOCK and flag data error if unable to translate to clock
 	bool notMorning (string);
 	bool notMorning ();
 	bool getTableName ();		// return false if the tableName is invalid
@@ -135,6 +129,7 @@ private:
 	void clearTaskElement ();
 	bool checkTaskElement (bool);
 
+	void mergeAllQs ();
 	void activate2ndQs ();
 	void deactivate2ndQs ();
 	void push (command);

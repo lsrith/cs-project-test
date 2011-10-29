@@ -129,7 +129,6 @@ VldCmdCtrl::command VldCmdCtrl::convertToCommand (int indx) {
 		case 12:	cmd = CNOTE;		break;
 		case 13:	cmd = CALERT;		break;
 		case 14:	cmd = CREPEAT;		break;
-		case 15:	cmd = CPRIORITY;	break;
 		case 16:	cmd = CHOUR;		break;
 		case 17:	cmd = CFORTNIGHT;	break;
 		case 18:	cmd = CYEAR;		break;
@@ -157,6 +156,9 @@ VldCmdCtrl::command VldCmdCtrl::convertToCommand (int indx) {
 		case 40:	cmd = CCLEAR;		break;
 		case 41:	cmd = CRESET;		break;
 		case 42:	cmd = CEXIT;		break;
+		case 43:	cmd = CDISCARD;		break;
+		case 44:	cmd = CREPLACE;		break;
+		case 45:	cmd = CINSERT;		break;
 		default:	cmd = CVOID;		break;
 	}
 
@@ -245,7 +247,7 @@ string VldCmdCtrl::convertToString (command cmd) {
 	case (CNOTE):		str = "NOTE";		break;
 	case (CALERT):		str = "ALERT";		break;
 	case (CREPEAT):		str = "REPEAT";		break;
-	case (CPRIORITY):	str = "PRIORITY";	break;
+	case (CPROMPT):		str = "PROMPT";		break;
 	case (CHOUR):		str = "HOUR";		break;
 	case (CFORTNIGHT):	str = "FORTNIGHT";	break;
 	case (CYEAR):		str = "YEAR";		break;
@@ -273,6 +275,9 @@ string VldCmdCtrl::convertToString (command cmd) {
 	case (CCLEAR):		str = "CLEAR";		break;
 	case (CRESET):		str = "RESET";		break;
 	case (CEXIT):		str = "EXIT";		break;
+	case (CDISCARD):	str = "DISCARD";	break;
+	case (CREPLACE):	str = "REPLACE";	break;
+	case (CINSERT):		str = "INSERT";		break;
 	default:			str = "VOID";		break;
 	}
 	return str;

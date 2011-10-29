@@ -81,11 +81,12 @@ void DataStorage::exit () {
 
 list<Task> DataStorage::get_alertTasks () {
 	list<Task> alertTasks;
-	Time dfltTime;
 	list<TaskNode*>::iterator iter;
 	list<TaskNode*>::iterator endIter = _indxTasks.end ();
+	Time currTime;
+	currTime.current_time ();
 	for (iter = _indxTasks.begin (); iter != endIter; iter++)
-		if ((*iter)->_active && (*iter)->_task.alert != dfltTime)
+		if ((*iter)->_active && !((*iter)->_task.alert < currTime))
 			alertTasks.push_back ((*iter)->_task);
 
 	sort (&alertTasks);

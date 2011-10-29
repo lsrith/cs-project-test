@@ -21,7 +21,6 @@
 12 note
 13 alert
 14 repeat
-15 priority
 16 hour
 16 hr
 17 fortnight
@@ -60,4 +59,7 @@
 40 clr
 42 exit
 42 quit
-43 .
+43 discard
+44 replace
+45 insert
+46 .

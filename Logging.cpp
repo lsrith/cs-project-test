@@ -22,13 +22,11 @@ void Logging::log (string file) {
 
 void Logging::start (string function) {
 	if (_inactive) return;
-	if (_func.empty () || (_func.top () != function)) {
-		_addLine ("starting: " + function + "()\n");
-		_func.push (function);
-		_history.push (START);
-		_start = true;
-		_loop = false;
-	}
+	_addLine ("starting: " + function + "()");
+	_func.push (function);
+	_history.push (START);
+	_start = true;
+	_loop = false;
 }
 
 void Logging::call (string function) {
@@ -36,14 +34,14 @@ void Logging::call (string function) {
 	if (_func.empty () || (_func.top () != function))
 		_start = false;
 
-	_addLine ("calling: " + function + "()...\n");
+	_addLine ("calling: " + function + "()...");
 	_func.push (function);
 	_history.push (CALL);
 }
 
 void Logging::loop (string name) {
 	if (_inactive || !_start) return;
-	_addLine ("looping: " + name + "...\n");	
+	_addLine ("looping: " + name + "...");	
 	_loop = true;
 	__iter.push (0);
 	_history.push (LOOP);
@@ -51,14 +49,14 @@ void Logging::loop (string name) {
 
 void Logging::cond (string name) {
 	if (_inactive || !_start) return;
-	_addLine ("checking: " + name + "...\n");
+	_addLine ("checking: " + name + "...");
 	_history.push (COND);
 }
 
 void Logging::cond (string name, int cond) {
 	if (_inactive || !_start) return;
 	ostringstream strStream;
-	strStream << "checking: " << name << " for " << cond << "...\n";
+	strStream << "checking: " << name << " for " << cond << "...";
 	_addLine (strStream.str ());
 	_history.push (COND);
 }
@@ -66,6 +64,8 @@ void Logging::cond (string name, int cond) {
 void Logging::end () {
 	if (_inactive || !_start) return;
 	if (_history.empty ()) return;
+	
+	__tab--;
 
 	if (_loop == true && _history.top () != LOOP) {
 		_history.pop ();
@@ -74,7 +74,7 @@ void Logging::end () {
 		_history.pop ();
 		_loop = false;
 		__iter.pop ();
-		_replaceLine (_tab () + "looping finished!");
+		_addLine ("looping finished!");
 	} else if (_loop == false && _history.top () == LOOP) {
 		_clearHistory ();
 		_addLine ("Logging System Error!");
@@ -83,14 +83,14 @@ void Logging::end () {
 		switch (_history.top ()) {
 		case START:
 			_func.pop ();
-			_replaceLine (_tab () + "function exit!");
+			_addLine ("function exit!");
 			break;
 		case COND:
-			_replaceLine (_tab () + "condition checked!");
+			_addLine ("condition checked!");
 			break;
 		case CALL:
 			_start = true;
-			_replaceLine (_tab () + "calling successed!");
+			_addLine ("calling successed!");
 			break;
 		default:
 			_clearHistory ();
@@ -133,9 +133,7 @@ void Logging::end () {
 
 void Logging::_addLine (string str) {
 	if (_loop) {
-		ostringstream strStream;
-		strStream << _tab () << __iter.top () << " iteration: " << str << "\n";
-		_replaceLine (strStream.str ());
+		_replaceLine (str);
 	} else {
 		ofstream outFile (_file, fstream::app);
 		outFile << _tab () << str << endl;
@@ -153,11 +151,11 @@ void Logging::_replaceLine (string Str) {
 	inFile.close ();
 	
 	ofstream outFile (_file);
-	while (lines.size () > 2) {
+	while (lines.size () > 1) {
 		outFile << lines.back () << endl;
 		lines.pop ();
 	}
-	outFile << Str;
+	outFile << _tab () << Str << endl;
 	outFile.close ();
 }
 
@@ -171,7 +169,7 @@ void Logging::_removeLine () {
 	inFile.close ();
 	
 	ofstream outFile (_file);
-	while (lines.size () > 2) {
+	while (lines.size () > 1) {
 		outFile << lines.back () << endl;
 		lines.pop ();
 	}

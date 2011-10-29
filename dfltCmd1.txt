@@ -40,8 +40,6 @@
 13 .alert
 14 .rep
 14 .repeat
-15 .prior
-15 .priority
 16 .hr
 16 .hour
 17 .2week
@@ -95,4 +93,7 @@
 42 .q
 42 .quit
 42 .x
-43 .
+43 .discard
+44 .replace
+45 .insert
+46 .
