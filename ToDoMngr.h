@@ -52,7 +52,7 @@ public:
 	// for each task shown, numering them from 1 to the end and save as a vector of address of template
 	// if user enter view 5, we execute view (templateVect[4]); 
 	string view (TimePeriod period);
-	string view (view_t viewType, string tableName);
+	string view (string tableName);
 	string viewTableNames ();
 	// view all the names of existing timetable
 	string reminder ();
