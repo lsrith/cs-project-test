@@ -58,6 +58,8 @@ void CmdControl::clearTaskElement () {
 	_taskElement._repeat = false;
 	_taskElement._time = false;
 	_taskElement._venue = false;
+	Task newTask;
+	_task = newTask;
 }
 
 bool CmdControl::checkTaskElement (bool condition) {
@@ -79,6 +81,8 @@ void CmdControl::updateInput (string& input) {
 	clear ();
 	_input = input;
 	_flagError = NONE;
+	_flagPrompt = NOPROMPT;
+	deactivate2ndQs ();
 	try {
 		splitInput ();
 	} catch (string message) {
@@ -87,10 +91,11 @@ void CmdControl::updateInput (string& input) {
 };
 
 void CmdControl::addInput (string& input) {
+	log.start ("addInput");
 	_input = input;
-log.start ("addInput");
+	_flagError = NONE;
+	_flagPrompt = NOPROMPT;
 	if (_2ndQs && !_input.empty ()) {
-cout << _2ndQs << " " << _input << endl;
 		string temp;
 		command cmd;
 		unsigned int end_pos = 0;
@@ -106,19 +111,18 @@ cout << _2ndQs << " " << _input << endl;
 			temp = _input.substr (0, end_pos);
 			cmd = translateCmd (temp);
 		}
-cout << temp << " " << cmd << endl;
+
 		if (_flagError != CMD && (cmd == CDISCARD || cmd == CREPLACE)) {
 			if (!_1stSeq.empty () && _1stSeq.front () == CMD) {
 				_1stSeq.pop ();
 				_1stCmd.pop ();
-			} else if (!_1stSeq.empty () && _1stSeq.front () == CMD) {
+			} else if (!_1stSeq.empty () && _1stSeq.front () == DATA) {
 				_1stSeq.pop ();
 				_1stData.pop ();
 			} else;
 		} else if (_flagError != CMD && (cmd == CINSERT)) {
 		} else {
 			specialCmd = false;
-			deactivate2ndQs ();
 		}
 
 		if (specialCmd) {
@@ -127,7 +131,7 @@ cout << temp << " " << cmd << endl;
 			else
 				_input.erase (0, end_pos + 1);
 		}
-cout << _input << endl;
+//cout <<"addInput " << _input << endl;
 	}
 
 	try {
@@ -135,21 +139,22 @@ cout << _input << endl;
 	} catch (string message) {
 		throw (message);
 	}
-log.end ();
+	log.end ();
 };
 
 void CmdControl::splitInput () {
-log.start ("splitInput");
+	log.start ("splitInput");
 	string temp;
 	command cmd;
 	unsigned int end_pos = 0;
 
-log.cond ("_dotCmd", _dotCmd);
+	log.cond ("_dotCmd", _dotCmd);
 	if (_dotCmd) {
-log.call ("checkIfStandAlone");
+		log.call ("checkIfStandAlone");
 		checkIfStandAloneCmd ();
-log.end ();
-log.loop ("_input");
+		log.end ();
+		
+		log.loop ("_input");
 		while (!_input.empty ()) {
 			if (_input[0] == '.' || _input[0] == '-') {
 				end_pos = _input.find_first_of (" .-", 1);
@@ -176,9 +181,9 @@ log.loop ("_input");
 					_input.erase (0, end_pos);
 			}
 		}
-log.end ();
+		log.end ();
 	} else {
-log.loop ("_input");
+		log.loop ("_input");
 		while (!_input.empty ()) {
 			if (_input[0] == '\"') {
 				end_pos = _input.find_first_of ('\"', 1);
@@ -196,20 +201,19 @@ log.loop ("_input");
 					push (cmd);
 				}
 			}
-cout << "split " << temp << " " << cmd << endl;
+
 			if (end_pos != string::npos)
 				_input.erase (0, end_pos + 1);
 			else
 				_input.erase (0, end_pos);
 		}
-log.end ();
+		log.end ();
 	}
-log.end ();
-log.end ();
+	log.end ();
+	log.end ();
 }
 
 string CmdControl::executeCmd () {
-log.start ("executeCmd");
 	string str;
 	if (_2ndQs)
 		mergeAllQs ();
@@ -217,98 +221,35 @@ log.start ("executeCmd");
 	_flagError = NONE;
 	_flagPrompt = NOPROMPT;
 	command cmd;
-log.loop ("_sequence");
-	while (_sequence->empty () == false && _sequence->front () == CMD) {
-		cmd  = _cmdInput->front ();
-cout << convertToString (cmd) << endl;
-		pop ();
-		str = executeCmd (cmd);
+	while (_sequence->empty () == false) {
+		if (_sequence->front () == CMD) {
+			cmd  = _cmdInput->front ();
+			pop ();
+			str += executeCmd (cmd) + "\n";
 
-		if (_flagError != NONE || _flagPrompt != NOPROMPT)
-			break;
-	}
-log.end ();
-log.cond ("prompt", _flagPrompt);
-	switch (_flagPrompt ) {
-	case ADDCLASHED:
-	case EDITCLASHED:
-		deactivate2ndQs ();
-		activate2ndQs ();
-		push (CPROMPT);
-		str = "Do you still want to continue? (Y/N)";
-		break;
-	case VLDINPUT:
-	case VLDCMD:
-		str = "TaskCal cannot translate this following input:";
-log.cond ("_sequence");
-		if (_sequence->empty ()) {
-			str += "Please enter more input:";
-		} else if (_sequence->front () == CMD) {
-			str += "This command [" + convertToString (_cmdInput->front ()) + "]";
-		} else if (_sequence->front () == DATA) {
-			str += "This data [" + _dataInput->front () + "]";
-		} else;
-log.end ();
-		str += " may be invalid";
-
-		_sequence = new queue<input_t>;
-		_dataInput = new queue<string>;
-		_cmdInput = new queue<command>;
-
-		*_sequence = _2ndSeq;
-		*_dataInput = _2ndData;
-		*_cmdInput = _2ndCmd;
-log.loop ("copy message");
-		while (!_sequence->empty ()) {
-			switch (_sequence->front ()) {
-			case DATA:
-				str += _dataInput->front ();
-				_dataInput->pop ();
-				_sequence->pop ();
-				if (!_sequence->empty () && _sequence->front () == CMD)
-					str += "\" ";
-				else
-					str += " ";
+			if (_flagError != NONE || _flagPrompt != NOPROMPT)
 				break;
-			case CMD:
-				str += convertToString (_cmdInput->front ());
-				_cmdInput->pop ();
-				_sequence->pop ();
-				if (!_sequence->empty () && _sequence->front () == DATA)
-					str += " \"";
-				else
-					str += " ";
-				break;
-			default:
-				break;
-			}
+		} else {
+			pop ();
 		}
-log.end ();
-log.cond ("_sequence");
-		if (_1stSeq.empty ()) {
-			str += "";
-		} else if (_1stSeq.front () == CMD) {
-			str += "|| " + convertToString (_1stCmd.front ()) + "\n";
-		} else if (_1stSeq.front () == DATA) {
-			str += "|| " + _1stData.front () + "\n";
-		} else;
-log.end ();
-		str += "Do you want to Discard/Replace/Insert?";
-log.call ("active2ndQs");
-		activate2ndQs ();
-log.end ();
-log.end ();
-		break;
-	default:
-		break;
 	}
-log.end ();
-log.end ();
+
+	str += checkPrompt ();
 	return str;
 }
 
 string CmdControl::executeCmd (command cmd) {
 	string str;
+
+	switch (cmd) {
+	case CDISCARD:
+	case CREPLACE:
+	case CINSERT:
+		break;
+	default:
+		deactivate2ndQs ();
+		break;
+	}
 
 	switch (cmd) {
 	case CFIRST:
@@ -419,11 +360,97 @@ string CmdControl::executeCmd (command cmd) {
 	return str;
 }
 
+string CmdControl::checkPrompt () {
+	string str;
+	switch (_flagPrompt ) {
+	case ADDCLASHED:
+		clear (&_2ndData);
+		clear (&_2ndSeq);
+		clear (&_2ndCmd);
+		activate2ndQs ();
+		push (CPROMPT);
+		push (CADD);
+		str = "Do you still want to continue? (Y/N)\n";
+		break;
+	case EDITCLASHED:
+		clear (&_2ndData);
+		clear (&_2ndSeq);
+		clear (&_2ndCmd);
+		activate2ndQs ();
+		push (CPROMPT);
+		push (CEDIT);
+		str = "Do you still want to continue? (Y/N)\n";
+		break;
+	case VLDINPUT:
+	case VLDCMD:
+		str = "TaskCal cannot translate this following instruction:\n";
+		
+		log.cond ("_sequence");
+		if (_sequence->empty ()) {
+			str += "More instruction is required.\n";
+		} else if (_sequence->front () == CMD) {
+			str += "This command [" + convertToString (_cmdInput->front ()) + "] may be invalid.\n";
+		} else if (_sequence->front () == DATA) {
+			str += "This data [" + _dataInput->front () + "] may be invalid.\n";
+		} else;
+
+		_sequence = new queue<input_t>;
+		_dataInput = new queue<string>;
+		_cmdInput = new queue<command>;
+
+		*_sequence = _2ndSeq;
+		*_dataInput = _2ndData;
+		*_cmdInput = _2ndCmd;
+		
+		while (!_sequence->empty ()) {
+			switch (_sequence->front ()) {
+			case DATA:
+				str += _dataInput->front ();
+				_dataInput->pop ();
+				_sequence->pop ();
+				if (!_sequence->empty () && _sequence->front () == CMD)
+					str += "\" ";
+				else
+					str += " ";
+				break;
+			case CMD:
+				str += convertToString (_cmdInput->front ());
+				_cmdInput->pop ();
+				_sequence->pop ();
+				if (!_sequence->empty () && _sequence->front () == DATA)
+					str += " \"";
+				else
+					str += " ";
+				break;
+			default:
+				break;
+			}
+		}
+
+		if (_1stSeq.empty ()) {
+			str += "|| [??]\nmore instruction:\n";
+		} else if (_1stSeq.front () == CMD) {
+			str += "|| " + convertToString (_1stCmd.front ()) + "\n";
+			str += "Do you want to discard/replace/insert?\n";
+		} else if (_1stSeq.front () == DATA) {
+			str += "|| " + _1stData.front () + "\n";
+			str += "Do you want to discard/replace/insert?\n";
+		} else;
+
+		activate2ndQs ();
+		break;
+	default:
+		break;
+	}
+
+	return str;
+}
+
+//to be edited
 string CmdControl::executeEditCmd (int indx) {
 	cmd_pair pair;
 	pair.enum_cmd = convertToCommand (indx);
 	string str;
-//	promptToGetNewInput (str);
 	str.erase ();
 
 	if (_sequence->front () == DATA) {
@@ -442,6 +469,7 @@ string CmdControl::executeEditCmd (int indx) {
 	return str;
 }
 
+//to be edited
 string CmdControl::checkAlert () {
 	string str;
 /*
@@ -468,7 +496,7 @@ string CmdControl::executeHELP () {
 		pop ();
 		str = _toDoMngr.help ("cmd");
 	} else if (_sequence->empty () == false && _sequence->front () == DATA) {
-		str = _toDoMngr.help (_dataInput->front ());
+		str = _toDoMngr.help (mergeStringInput ());
 		pop ();
 	} else {
 		str = _toDoMngr.help ("");
@@ -477,34 +505,31 @@ string CmdControl::executeHELP () {
 	return str;
 }
 
+//to be edited
 string CmdControl::executeTABLE () {
 	string str;
-
-	pop ();
-
 	if (_sequence->empty () == false && _sequence->front () == DATA && !getTableName ()) {
-		string tableName = _dataInput->front ();
+		string tableName = mergeStringInput ();
 		pop ();
 
 		if (_sequence->empty () == false && _sequence->front () == CMD && (_cmdInput->front () == CFROM || _cmdInput->front () == CTO)) {
 			TimePeriod period = get_period ();
 			
-			if (_flagError != DATA) {
+			if (_flagError == NONE) {
 				_toDoMngr.newTable (tableName, period);
-//str += "_toDoMngr.newTable (tableName, period)";
 				_tableName = tableName;
 			}
 		} else {
 			_tableName = tableName;
 		}
 	} else {
-//		str = _toDoMngr.viewTableNames ();
-//str = "_toDoMngr.viewTableNames ()";
+		str = _toDoMngr.viewTableNames ();
 	}
 
 	return str;
 }
 
+//to be edited
 string CmdControl::executeDELETE () {
 	string str;
 	Task task;
@@ -551,6 +576,7 @@ string CmdControl::executeDELETE () {
 	return str;
 }
 
+//to be edited
 string CmdControl::executeVIEW () {
 	string str;
 
@@ -626,6 +652,7 @@ string CmdControl::executeVIEW () {
 	return str;
 }
 
+//to be edited
 string CmdControl::executeSEARCH () {
 	string str;
 	if (_sequence->empty ())
@@ -674,7 +701,6 @@ string CmdControl::executeADD () {
 	case NONE:
 		_taskList = new list<Task>;
 		*_taskList = _toDoMngr.add (_tableName, _task, _force);
-
 		if (!_force && !_taskList->empty ()) {
 			str = ToDoMngr::view (_task) + MSG_CLASH + ToDoMngr::view (*_taskList);
 			_flagPrompt = ADDCLASHED;
@@ -682,6 +708,7 @@ string CmdControl::executeADD () {
 			str = MSG_ERROR;
 		} else {
 			str = ToDoMngr::view (_task) + MSG_ADDED;
+			clearTaskElement ();
 		}
 
 		delete _taskList;
@@ -696,7 +723,6 @@ string CmdControl::executeADD () {
 	return str;
 }
 
-//edit to be modified
 string CmdControl::executeEDIT () {
 	string str;
 
@@ -710,7 +736,7 @@ string CmdControl::executeEDIT () {
 	} else;
 
 	if (_flagError == NONE && _sequence->front () == CMD) {
-		Task task = get_task ();
+		update_task (&_task);
 
 		list<Task> taskList = (_toDoMngr.edit (_taskId, &_taskElement, &_task, _force));
 		_taskList = &taskList;
@@ -722,28 +748,12 @@ string CmdControl::executeEDIT () {
 			str = MSG_ERROR;
 		} else {
 			str = ToDoMngr::view (_task) + MSG_EDITED;
+			clearTaskElement ();
 		}
 	
 		if (!_taskList->empty ()) {
 			_taskList->clear ();
 		}
-	}
-
-	return str;
-}
-
-string CmdControl::executeFunction (string (*function) (TimePeriod)) {
-	string str;
-
-	getPeriod:
-		TimePeriod period = get_period ();
-			
-	if (_flagError != DATA) {
-//		str = function (period);
-str = "function (period)";
-	} else {
-//		if (promptToGetValidInput (MSG_WRONG_PERIOD))
-//			goto getPeriod;  
 	}
 
 	return str;
@@ -891,9 +901,11 @@ void CmdControl::update_task (Task* taskPtr) {
 	TimePeriod period;
 	taskPtr->note = mergeStringInput ();
 	bool reachExeCmd = false;
-	while (!reachExeCmd && _flagError == NONE && _sequence->empty () == false) {
-		if (_sequence->front () == DATA)
+	while (!reachExeCmd && _flagError == NONE && !_sequence->empty ()) {
+		if (_sequence->front () != CMD) {
 			_flagError = DATA;
+			break;
+		}
 
 		Time time;
 		TimePeriod period;
@@ -1004,6 +1016,7 @@ string CmdControl::mergeStringInput () {
 		str += _dataInput->front () + " ";
 		pop ();
 	}
+	str = str.substr (0, str.size () - 1);
 	return str;
 }
 
@@ -1053,9 +1066,9 @@ TimePeriod CmdControl::get_period () {
 	return period;
 }
 
-//if date is not specified but clock is, currDate will be used
+//if date is not specified but clock is, current date will be used
 //if date and clock are not specified, _flagError is from get_date ()
-//if date is specified but no clock, _flagError is from get_clock ()
+//if date is specified but no clock, clock store its default, no _flagError
 Time CmdControl::get_time () {
 	Time time;
 	Time dfltTime;
@@ -1075,10 +1088,11 @@ Time CmdControl::get_time () {
 		_flagError = NONE;
 
 		time.modify_date (get_date ());
-		if (_flagError == NONE)
+		if (_flagError == NONE) {
 			time.modify_clock (get_clock ());
+			_flagError = NONE;
+		}
 	}
-
 	return time;
 }
 
@@ -1540,33 +1554,34 @@ bool CmdControl::notMorning () {
 }
 
 string CmdControl::executePROMPT () {
-cout << "here" << endl;
 	string str;
-	if (_sequence->empty ()) {
-		push (CPROMPT);
-		return str;
-	} else if (_sequence->front () == DATA) {
-		switch (_flagPrompt) {
-		case ADDCLASHED:
-			if (_dataInput->front () == "Y" || _dataInput->front () == "y") {
-				_toDoMngr.add (_task, true);
+	if (!_sequence->empty () && _sequence->front () == CMD) {
+		switch (_cmdInput->front ()) {
+		case CADD:
+			pop ();
+			if ((!_sequence->empty () && _sequence->front () == DATA) &&
+				(_dataInput->front () == "Y" || _dataInput->front () == "y")) {
+				_toDoMngr.add (_tableName, _task, true);
 				str = ToDoMngr::view (_task) + MSG_ADDED;
 				clearTaskElement ();
 			} else;
+			pop ();
 			break;
-		case EDITCLASHED:
-			if (_dataInput->front () == "Y" || _dataInput->front () == "y") {
+		case CEDIT:
+			pop ();
+			if ((!_sequence->empty () && _sequence->front () == DATA) &&
+				(_dataInput->front () == "Y" || _dataInput->front () == "y")) {
 				_toDoMngr.edit (_taskId, &_taskElement, &_task, true);
 				str = ToDoMngr::view (_task) + MSG_EDITED;
 				clearTaskElement ();
 			}
+			pop ();
 			break;
 		default:
 			break;
 		}	
 	} else;
 
-	_flagPrompt = NOPROMPT;
 	deactivate2ndQs ();
 	return str;
 }
@@ -1607,52 +1622,30 @@ VldCmdCtrl::command CmdControl::translateCmd (string str) {
 
 void CmdControl::mergeAllQs () {
 	if (!_2ndQs) return;
-cout << "_1D " << _1stData.size ();
-cout << "_1C " << _1stCmd.size ();
-cout << "_1S " << _1stSeq.size ();
 
 	queue<string> dataQ = _1stData;
 	queue<input_t> seqQ = _1stSeq;
 	queue<command> cmdQ = _1stCmd;
 
-cout << "_d " << dataQ.size ();
-cout << "_c " << cmdQ.size ();
-cout << "_s " << seqQ.size ();
-
 	_sequence = &_1stSeq;
 	_cmdInput = &_1stCmd;
 	_dataInput = &_1stData;
-
-cout << "_D " << _dataInput->size ();
-cout << "_C " << _cmdInput->size ();
-cout << "_S " << _sequence->size ();
 
 	*_sequence = _2ndSeq;
 	*_cmdInput = _2ndCmd;
 	*_dataInput = _2ndData;
 
-cout << "_D " << _dataInput->size ();
-cout << "_C " << _cmdInput->size ();
-cout << "_S " << _sequence->size ();
-
 	append (_sequence, seqQ);
 	append (_cmdInput, cmdQ);
 	append (_dataInput, dataQ);
 
-cout << "_D " << _dataInput->size ();
-cout << "_C " << _cmdInput->size ();
-cout << "_S " << _sequence->size ();
-cout << "_1D " << _1stData.size ();
-cout << "_1C " << _1stCmd.size ();
-cout << "_1S " << _1stSeq.size ();
+//cout << "size of _1st " << _1stSeq.size () << " " << _1stCmd.size () << " " << _1stData.size () << endl;
 
 	clear (&_2ndSeq);
 	clear (&_2ndCmd);
 	clear (&_2ndData);
 
-cout << "_2D " << _2ndData.size ();
-cout << "_2C " << _2ndCmd.size ();
-cout << "_2S " << _2ndSeq.size ();
+//cout << "size of _2nd " << _2ndSeq.size () << " " << _2ndCmd.size () << " " << _2ndData.size () << endl;
 
 	_2ndQs = false;
 }
@@ -1686,15 +1679,19 @@ void CmdControl::push (string data) {
 }
 
 bool CmdControl::pop () {
-//cout << "start popping:: empty seq = " << boolalpha << _sequence->empty () << endl;
 	if (!_sequence->empty ()) {
+
+//cout << _2ndQs << " " << _sequence->front () << " ";
+
 		switch (_sequence->front ()) {
 		case DATA:
+//cout << _dataInput->front () << endl;
 			if (!_2ndQs)
 				_2ndData.push (_dataInput->front ());
 			_dataInput->pop ();
 			break;
 		case CMD:
+//cout << convertToString (_cmdInput->front ()) << endl;
 			if (!_2ndQs)
 				_2ndCmd.push (_cmdInput->front ());
 			_cmdInput->pop ();
@@ -1707,10 +1704,8 @@ bool CmdControl::pop () {
 			_2ndSeq.push (_sequence->front ());
 		_sequence->pop ();
 
-		if (_sequence->empty ())
+		if (_sequence->empty () && _2ndQs)
 			deactivate2ndQs ();
-
-//cout << "end popping:: empty seq = " << boolalpha << _sequence->empty () << endl;
 
 		return true;
 	} else

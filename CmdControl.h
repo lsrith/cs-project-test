@@ -102,8 +102,8 @@ private:
 	string executeFIRST ();
 	string executeLAST ();
 	string checkAlert ();
+	string checkPrompt ();
 	string executeEditCmd (int);
-	string executeFunction (string (*function) (TimePeriod));
 	void executeSORT ();
 	string executePROMPT ();
 

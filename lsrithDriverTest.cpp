@@ -79,37 +79,25 @@ int main () {
 */
 
 int main () {
-Logging log;
-log.log ("main");
-log.start ("main");
 	string str;
 	bool dotCmd;
 	cout << "dotCmd = ";
 	cin >> dotCmd;
 	try {
-log.call ("cmdControl");
 		CmdControl cmdControl (dotCmd);
-log.loop ("while (true)");
 		while (true) {
 			cout << "command: ";
 			getline (cin, str);
-//			cout << str << endl;
 			try {
-log.call ("addInput");
 				cmdControl.addInput (str);
-log.end ();
-log.call ("executeCmd");
 				cout << cmdControl.executeCmd () << endl;
-log.end ();
 			} catch (string xcpt) {
 				cout << "INV" << endl;
 			}
 		}
-log.end ();
 	} catch (string xcpt) {
 		cout << "INV" + xcpt << endl;
 	}
-log.end ();
 	return 0;
 }
 
