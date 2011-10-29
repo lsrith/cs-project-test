@@ -289,6 +289,8 @@ string CmdControl::executeCmd (command cmd) {
 			pop ();
 		}
 		break;
+	case CPROMPT:
+		break;
 	default:
 		clearTaskElement ();
 		break;
