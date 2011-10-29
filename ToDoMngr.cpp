@@ -7,9 +7,12 @@
 #include <ctime>
 #include <iomanip>
 #include <iostream>
+#include <windows.h>
 using namespace std;
 
-string ToDoMngr::NOTHING_TO_VIEW = "";
+
+ToDoMngr::ToDoMngr () {	
+}
 
 list<Task> ToDoMngr::get_active_list () {
 	return _activeTaskList;
@@ -172,17 +175,31 @@ string ToDoMngr:: view(list<Task> tasklist){
 		temp_month=" ";
 		temp_year=0;
 		int year;
-	
-        std::ostringstream oss;
+	   
+		
+        std::ostringstream oss,index_convert;
         list<Task> taskl=tasklist;
-    list<Task>::iterator l;
+		
+		if(taskl.size()==1)
+			index_convert<<10;
+		else
+		    index_convert<<taskl.size();
+       
+		list<Task>::iterator l;
         int index=1;
         if(tasklist.empty())
-                oss<<" ";
+                oss<<"\n"<<" No Tasks To View During The Particular Period Or Time "<<"\n";
         else{
 
         for(l =taskl.begin (); l !=taskl.end (); l++)
-                {   
+                { 
+					
+
+
+					/*index_convert.clear();//clear any bits set
+                    index_convert.str(std::string());
+					index_convert<<index;*/
+		            
 					
 
 
@@ -194,38 +211,124 @@ string ToDoMngr:: view(list<Task> tasklist){
 					month=l->get_time().display_month((full_date % 1000000) / 10000);
 					year=full_date%10000;
 				
-							if(temp_month==month){
+							/*if(temp_month==month){
 							}
 							else{
 								oss<<"\n";
-                             oss<<month<<" ";
+                             oss<<setw(40)<<setfill(' ')<<right<<month<<" ";
 							 
 							 if(temp_year==year)
 							oss<<temp_year<<"\n";
 							 else
 						    oss<<year<<"\n";
 							
-							 oss<<"--------"<<"\n";
+							 oss<<setw(45)<<setfill(' ')<<right<<"--------"<<"\n";
 							temp_month=month;
 							temp_year=year;
 							temp_date=0;
-						}
+						}*/
 
-									if(temp_date==_date){
+									if(temp_date==_date&&temp_month==month&&temp_year==year){
+                                  
+							   oss<<setw(index_convert.str().length())<<setfill(' ')<<right<<index<<"."<<" ";
+							   oss<<"Start :"<<" "<<l->get_period().get_start_time().string_clock();
+							   oss<<"    "<<"Note :"<<" ";
+							   oss<<l->note<<endl;
+							   oss<<setw(31)<<setfill(' ')<<right<<"Venue :"<<" "<<l->venue<<"\n";
+							   oss<<setw(29)<<setfill(' ')<<right<<"End :"<<" "<<l->get_time().display_day(l->get_period().get_end_time().get_day());
+							   oss<<" "<<((l->get_period().get_end_time().get_date())/1000000)<<" ";
+							   oss<<l->get_period().get_end_time().display_month((((l->get_period().get_end_time().get_date())% 1000000) / 10000))<<" ";
+							   oss<<((l->get_period().get_end_time().get_date())%10000)<<" ";
+							   oss<<l->get_period().get_end_time().string_clock()<<"\n";
+							   oss<<setw(31)<<setfill(' ')<<right<<"Alert :"<<" ";
+							   l->alert.display_day(l->alert.get_day());
+							   oss<<" "<<((l->alert.get_date())/1000000)<<" ";
+							   oss<<l->alert.display_month((((l->alert.get_date())% 1000000) / 10000))<<" ";
+							   oss<<((l->alert.get_date())%10000)<<" ";
+							   oss<<l->alert.string_clock()<<"\n";
+
+							   oss<<"\n";
 									
-									oss<<index<<"."<<" ";
+								/*oss<<setw(2)<<setfill(' ')<<right<<index<<"."<<" "<<"|"<<" ";
 								oss<<l->get_period().get_start_time().string_clock()<<" "<<"-"<<" "<<l->get_period().get_end_time().string_clock();
-								oss<<" "<<l->note<<" "<<"at"<<" "<<l->venue<<endl;
+								oss<<"("<<((l->get_period().get_end_time().get_date())/1000000)<<" "<<l->get_period().get_end_time().display_month((((l->get_period().get_end_time().get_date())% 1000000) / 10000))<<")";
+								//if(l->venue.length()>10)
+                          /* {
+	                           std::ostringstream line_divider;
+	                           line_divider<<" "<<"|"<<" "<<l->venue.substr(0,11)<<"|"<<"\n";
+	                            line_divider<<setw(35)<<setfill(' ')<<"|"<<" "<<setw(10)<<setfill(' ')<<left<<l->venue.substr(11,l->venue.length());
+                                string	modified_venue=line_divider.str();
+	                           oss<<modified_venue;
+                            }
+
+								/*else
+								oss<<" "<<"|"<<" "<<setw(10)<<setfill(' ')<<left<<l->venue;
+								
+								oss<<" "<<"|"<<" "<<setw(28)<<setfill(' ')<<left<<l->note<<endl;*/
 									}
 									else
 									{
-								oss<<"\n";		
-								oss<<_date<<" "<<l->get_time().display_day(l->get_period().get_start_time().get_day())<<"\n";
 								oss<<"\n";
-								oss<<index<<"."<<" ";
+								oss<<setw(38)<<setfill(' ')<<"-------------------"<<"\n";
+								oss<<setw(20)<<setfill(' ')<<"|"<<" "<<l->get_time().display_day(l->get_period().get_start_time().get_day())<<" "<<_date<<" ";
+								
+								if(temp_month==month){
+
+									    oss<<temp_month<<" ";
+							}
+							else{
+								//oss<<"\n";
+                             oss<<month<<" ";
+							 temp_month=month;
+							
+							 temp_date=0;
+
+							}
+							
+							 if(temp_year==year){
+							oss<<temp_year<<" "<<"|"<<"\n";
+							 //oss<<"\n";
+							 }
+							 else{
+						    oss<<year<<" "<<"|"<<"\n";
+							 //oss<<"\n";
+							  temp_year=year;
+							 
+							 }
+							 oss<<setw(38)<<setfill(' ')<<"-------------------"<<"\n";
+							 oss<<"\n";
+							//oss<<setw(45)<<setfill(' ')<<right<<"--------"<<"\n";
+							/*temp_month=month;
+							temp_year=year;
+							temp_date=0;*/
+						
+                              
+							   oss<<setw(index_convert.str().length())<<setfill(' ')<<right<<index<<"."<<" ";
+								   oss<<"Start :"<<" "<<l->get_period().get_start_time().string_clock();
+							   oss<<"    "<<"Note :"<<" ";
+							   oss<<l->note<<endl;
+							   oss<<setw(31)<<setfill(' ')<<right<<"Venue :"<<" "<<l->venue<<"\n";
+							   oss<<setw(29)<<setfill(' ')<<right<<"End :"<<" "<<l->get_time().display_day(l->get_period().get_end_time().get_day());
+							   oss<<" "<<((l->get_period().get_end_time().get_date())/1000000)<<" ";
+							   oss<<l->get_period().get_end_time().display_month((((l->get_period().get_end_time().get_date())% 1000000) / 10000))<<" ";
+							   oss<<((l->get_period().get_end_time().get_date())%10000)<<" ";
+							   oss<<l->get_period().get_end_time().string_clock()<<"\n";
+							   oss<<setw(31)<<setfill(' ')<<right<<"Alert :"<<" ";
+							   oss<<l->alert.display_day(l->alert.get_day());
+							   oss<<" "<<((l->alert.get_date())/1000000)<<" ";
+							   oss<<l->alert.display_month((((l->alert.get_date())% 1000000) / 10000))<<" ";
+							   oss<<((l->alert.get_date())%10000)<<" ";
+							   oss<<l->alert.string_clock()<<"\n";
+							   oss<<"\n";
+							   	temp_date=_date;
+								/*oss<<setw(40)<<setfill(' ')<<right<<_date<<" "<<l->get_time().display_day(l->get_period().get_start_time().get_day())<<"\n";
+								oss<<"\n";
+								oss<<setw(2)<<setfill(' ')<<right<<index<<"."<<" "<<"|"<<" ";
 								oss<<l->get_period().get_start_time().string_clock()<<" "<<"-"<<" "<<l->get_period().get_end_time().string_clock();
-								oss<<" "<<l->note<<" "<<"at"<<" "<<l->venue<<endl;
-								temp_date=_date;
+								oss<<"("<<((l->get_period().get_end_time().get_date())/1000000)<<" "<<l->get_period().get_end_time().display_month((((l->get_period().get_end_time().get_date())% 1000000) / 10000))<<")";
+								oss<<" "<<"|"<<" "<<setw(10)<<setfill(' ')<<left<<l->venue;
+								oss<<" "<<"|"<<" "<<setw(28)<<setfill(' ')<<left<<l->note<<endl;*/
+							
                                /* oss<<l->get_period().string_time_period()<<"\n"<<index<<"."
                                 <<" "<<l->note<<" "<<"at"<<" "<<l->venue<<endl;*/
 							}
@@ -242,39 +345,93 @@ string ToDoMngr:: view(list<Task> tasklist){
 					month=l->get_time().display_month((full_date % 1000000) / 10000);
 					year=full_date%10000;
 				
-							if(temp_month==month){
-							}
-							else{
-								oss<<"\n";
-                             oss<<month<<" "<<year<<"\n";
-							oss<<"--------"<<"\n";
-							temp_month=month;
-							temp_date=0;
-						}
-
-									if(temp_date==_date){
+							if(temp_date==_date&&temp_month==month&&temp_year==year){
+                                  
+								oss<<setw(index_convert.str().length())<<setfill(' ')<<index<<"."<<" "<<"Start :"<<" "<<l->get_time().string_clock()<<" ";
+							   oss<<"   "<<"Note :"<<" ";
+							   oss<<l->note<<endl;
+							   oss<<setw(31)<<setfill(' ')<<"Venue :"<<" "<<l->venue<<"\n";
+							   //oss<<setw(29)<<setfill(' ')<<"End :"<<" "<<l->get_time().display_day(l->get_time().get_day());
+							   //oss<<" "<<((l->get_period().get_end_time().get_date())/1000000)<<" ";
+							  // oss<<l->get_period().get_end_time().display_month((((l->get_period().get_end_time().get_date())% 1000000) / 10000))<<" ";
+							   //oss<<((l->get_period().get_end_time().get_date())%10000)<<"\n";
+							   oss<<setw(31)<<setfill(' ')<<"Alert :"<<" ";
+							   oss<<l->alert.display_day(l->alert.get_day());
+							   oss<<" "<<((l->alert.get_date())/1000000)<<" ";
+							   oss<<l->alert.display_month((((l->alert.get_date())% 1000000) / 10000))<<" ";
+							   oss<<((l->alert.get_date())%10000)<<"\n";
+							   oss<<"\n";
 									
-									oss<<index<<"."<<" ";
-									oss<<l->get_time().string_clock();
-								    oss<<" "<<l->note<<" "<<"at"<<" "<<l->venue<<endl;
+								/*oss<<setw(2)<<setfill(' ')<<right<<index<<"."<<" "<<"|"<<" ";
+								oss<<l->get_period().get_start_time().string_clock()<<" "<<"-"<<" "<<l->get_period().get_end_time().string_clock();
+								oss<<"("<<((l->get_period().get_end_time().get_date())/1000000)<<" "<<l->get_period().get_end_time().display_month((((l->get_period().get_end_time().get_date())% 1000000) / 10000))<<")";
+								//if(l->venue.length()>10)
+                          /* {
+	                           std::ostringstream line_divider;
+	                           line_divider<<" "<<"|"<<" "<<l->venue.substr(0,11)<<"|"<<"\n";
+	                            line_divider<<setw(35)<<setfill(' ')<<"|"<<" "<<setw(10)<<setfill(' ')<<left<<l->venue.substr(11,l->venue.length());
+                                string	modified_venue=line_divider.str();
+	                           oss<<modified_venue;
+                            }
+
+								/*else
+								oss<<" "<<"|"<<" "<<setw(10)<<setfill(' ')<<left<<l->venue;
+								
+								oss<<" "<<"|"<<" "<<setw(28)<<setfill(' ')<<left<<l->note<<endl;*/
 									}
 									else
 									{
-								oss<<"\n";		
-								oss<<_date<<" "<<l->get_time().display_day(l->get_time().get_day())<<"\n";
 								oss<<"\n";
-								oss<<index<<"."<<" ";
-								oss<<l->get_time().string_clock();
-								oss<<" "<<l->note<<" "<<"at"<<" "<<l->venue<<endl;
-								temp_date=_date;
-                               /* oss<<l->get_period().string_time_period()<<"\n"<<index<<"."
-                                <<" "<<l->note<<" "<<"at"<<" "<<l->venue<<endl;*/
+								oss<<setw(20)<<setfill(' ')<<l->get_time().display_day(l->get_time().get_day())<<" "<<_date<<" ";
+								if(temp_month==month){
+
+									    oss<<temp_month<<" ";
+							}
+							else{
+								//oss<<"\n";
+                             oss<<month<<" ";
+							 temp_month=month;
+							
+							 temp_date=0;
+
 							}
 							
+							 if(temp_year==year){
+							oss<<temp_year<<"\n";
+							 oss<<"\n";
+							 }
+							 else{
+						    oss<<year<<"\n";
+							 oss<<"\n";
+							  temp_year=year;
+							 
+							 }
+							//oss<<setw(45)<<setfill(' ')<<right<<"--------"<<"\n";
+							/*temp_month=month;
+							temp_year=year;
+							temp_date=0;*/
+						
+                              
+							 oss<<setw(index_convert.str().length())<<setfill(' ')<<index<<"."<<" "<<"Start :"<<" "<<l->get_time().string_clock()<<" ";
+							   oss<<"   "<<"Note :"<<" ";
+							   oss<<l->note<<endl;
+							   oss<<setw(31)<<setfill(' ')<<"Venue :"<<" "<<l->venue<<"\n";
+							   //oss<<setw(29)<<setfill(' ')<<"End :"<<" "<<l->get_time().display_day(l->get_period().get_end_time().get_day());
+							   //oss<<" "<<((l->get_period().get_end_time().get_date())/1000000)<<" ";
+							   //oss<<l->get_period().get_end_time().display_month((((l->get_period().get_end_time().get_date())% 1000000) / 10000))<<" ";
+							   //oss<<((l->get_period().get_end_time().get_date())%10000)<<"\n";
+							   oss<<setw(31)<<setfill(' ')<<"Alert :"<<" ";
+							   l->alert.display_day(l->alert.get_day());
+							   oss<<" "<<((l->alert.get_date())/1000000)<<" ";
+							   oss<<l->alert.display_month((((l->alert.get_date())% 1000000) / 10000))<<" ";
+							   oss<<((l->alert.get_date())%10000)<<"\n";
+							   oss<<"\n";
+							   	temp_date=_date;
                                                        /* oss<<l->get_time().string_date() << " at " <<l->get_time().string_clock()<<"\n"<<index<<"."
                                 <<" "<<l->note<<" "<<"at"<<" "<<l->venue<<endl;*/
 
                         }
+							}
                                                 index++;
         }
         }
@@ -392,7 +549,7 @@ string ToDoMngr::view(view_t viewType, Time time){
                 }
         }
         
-    newStartDate=atoi(date.c_str()) -_index;
+        newStartDate=atoi(date.c_str()) -_index;
         newMonth=atoi(Month.c_str());
         
         if(atoi(Year.c_str())%400 ==0 || (atoi(Year.c_str())%100 != 0 && atoi(Year.c_str())%4 == 0)     ){ 
@@ -407,7 +564,7 @@ string ToDoMngr::view(view_t viewType, Time time){
                 }
 
                 start_date<<std::setfill('0') << std::setw(2)<<newStartDate;
-            start_date<<std::setfill('0') << std::setw(2)<<newMonth;
+                start_date<<std::setfill('0') << std::setw(2)<<newMonth;
                 start_date<<Year;
                 Time start(atoi((start_date.str()).c_str()),000);
                         
@@ -449,6 +606,8 @@ string ToDoMngr::view (TimePeriod period){
 
 
 _activeTaskList= _dataStorage.load(period);
+
+//cout << ToDoMngr::view (_activeTaskList) << endl;
  
 return view(_activeTaskList);
 
@@ -486,12 +645,24 @@ string ToDoMngr::reminder(){
 
         Time time(atoi(Date.c_str()),t);
 		string newline="\n";
-	   
-		_format<<"\n"<<setw(47)<<setfill(' ')<<"AGENDA  FOR  TODAY"<<"\n";
+	   _format<<setw(42)<<setfill(' ')<<"--------------------------";
+		_format<<"\n"<<setw(20)<<setfill(' ')<<"| "<<"AGENDA  FOR  TODAY"<<" |"<<"\n";
+		_format<<setw(42)<<setfill(' ')<<"--------------------------"<<"\n";
+		
 	   _format<<"\n";
-	   _format<<"Your Tasks for the day are as follows -->"<<"\n";
+	   //_format<<"Your Tasks for the day are as follows -->"<<"\n";
 	   _format<<view(DAILY,time);
+	   
         return _format.str();//+view(DAILY,time);   //pass to view() to search for the tasks on that particular date and display it...year is not taken into account at present.
+}
+
+/*pos = str.find_first_of (" ", 0)
+	str[pos]*/
+string ToDoMngr::view (string tableName){
+
+	_activeTaskList=_dataStorage.load(tableName);
+
+	return view(_activeTaskList);
 }
 
 string ToDoMngr::view (view_t viewType, string tableName) {
