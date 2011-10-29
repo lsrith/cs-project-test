@@ -10,9 +10,7 @@
 #include <windows.h>
 using namespace std;
 
-
-ToDoMngr::ToDoMngr () {	
-}
+string ToDoMngr::NOTHING_TO_VIEW = "";
 
 list<Task> ToDoMngr::get_active_list () {
 	return _activeTaskList;
@@ -663,10 +661,6 @@ string ToDoMngr::view (string tableName){
 	_activeTaskList=_dataStorage.load(tableName);
 
 	return view(_activeTaskList);
-}
-
-string ToDoMngr::view (view_t viewType, string tableName) {
-	return "viewTypetab";
 }
 
 string ToDoMngr::viewTableNames () {
