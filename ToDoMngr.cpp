@@ -671,6 +671,10 @@ string ToDoMngr::alert () {
 	return "alert";
 }
 
+bool ToDoMngr::ifExistedTable (string tableName) {
+	return false;
+}
+
 list<Task> ToDoMngr::add(Task task, bool forceAdd)                                                                      
 {
  list<Task> _addList;

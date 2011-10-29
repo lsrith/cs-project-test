@@ -60,6 +60,7 @@ void CmdControl::clearTaskElement () {
 	_taskElement._venue = false;
 	Task newTask;
 	_task = newTask;
+	_force = false;
 }
 
 bool CmdControl::checkTaskElement (bool condition) {
@@ -282,9 +283,9 @@ string CmdControl::executeCmd (command cmd) {
 	case CNOTE:
 	case CALERT:
 	case CREPEAT:
-		if (!checkTaskElement (false)) {
+		if (!checkTaskElement (true)) {
 			_toDoMngr.undo ();
-			str = executeCmd (CADD);
+			str = executeADD ();
 		} else {
 			pop ();
 		}
@@ -301,9 +302,11 @@ string CmdControl::executeCmd (command cmd) {
 		str = executePROMPT ();
 		break;
 	case CADD:
+		_force = false;
 		str = executeADD ();
 		break;
 	case CEDIT:
+		_force = false;
 		str = executeEDIT ();
 		break;
 	case CDELETE:
@@ -510,19 +513,25 @@ string CmdControl::executeHELP () {
 //to be edited
 string CmdControl::executeTABLE () {
 	string str;
-	if (_sequence->empty () == false && _sequence->front () == DATA && !getTableName ()) {
+	if (_sequence->empty () == false && _sequence->front () == DATA) {
 		string tableName = mergeStringInput ();
-		pop ();
-
-		if (_sequence->empty () == false && _sequence->front () == CMD && (_cmdInput->front () == CFROM || _cmdInput->front () == CTO)) {
+		if (_sequence->empty () == false && _sequence->front () == CMD && _cmdInput->front () == CFROM) {
 			TimePeriod period = get_period ();
 			
 			if (_flagError == NONE) {
 				_toDoMngr.newTable (tableName, period);
 				_tableName = tableName;
+			} else if (_flagError == CMD) {
+				_flagPrompt = VLDCMD;
+			} else {
+				_flagPrompt = VLDINPUT;
 			}
 		} else {
-			_tableName = tableName;
+			if (_toDoMngr.ifExistedTable (tableName)) {
+				_tableName = tableName;
+			} else {
+				_flagPrompt = VLDTABLE;
+			}
 		}
 	} else {
 		str = _toDoMngr.viewTableNames ();
@@ -602,8 +611,16 @@ string CmdControl::executeVIEW () {
 		}
 	}
 
-	if (_sequence->empty ())
-		return _toDoMngr.view (_period);
+	if (_sequence->empty ()) {
+		if (_tableName.empty ()) {
+			TimePeriod period;
+			str = _toDoMngr.view (period);
+		} else {
+			str = _toDoMngr.view (_tableName);
+		}
+
+		return str;
+	}
 
 	switch (_sequence->front ()) {
 	case DATA:
@@ -620,34 +637,39 @@ string CmdControl::executeVIEW () {
 		case CFROM:
 			_period = get_period ();
 			
-			if (_flagError != DATA) {
+			if (_flagError == NONE) {
 				str = _toDoMngr.view (_period);
 			}
 			break;
 		case CTIME:
 		case CDATE:
 			pop ();
-			_time.modify_date (get_date ());
-			if (_flagError != DATA) {
+		case CTODAY:
+		case CTMR:
+			_time = get_time ();
+			if (_flagError == NONE) {
 				str = _toDoMngr.view (_viewType, _time);
 			}
 			break;
 		case CTABLE:
 			pop ();
-			while (!getTableName ()) {
-//				promptToGetValidInput (MSG_WRONG_TABLE);
-			}	
-//			str = _toDoMngr.view (viewType, _tableName);
-//str = "_toDoMngr.view (viewType, _tableName)";
+			if (!_sequence->empty () && _sequence->front () == DATA) {
+				str = _toDoMngr.view (mergeStringInput ());
+			} else {
+				_flagError = DATA;
+			}
 			break;
 		default:
 			break;
 		}
 		break;
 	default:
-		if (!_tableName.empty ())
-//			str = _toDoMngr.view (viewType, _tableName);
-//str = "_toDoMngr.view (viewType, _tableName)";
+		if (_tableName.empty ()) {
+			TimePeriod period;
+			str = _toDoMngr.view (period);
+		} else {
+			str = _toDoMngr.view (_tableName);
+		}
 		break;
 	}
 
@@ -689,13 +711,11 @@ string CmdControl::executeSEARCH () {
 
 string CmdControl::executeADD () {
 	string str;
-	_force = false;
-
 	if (_sequence->front () == CMD && _cmdInput->front () == CFORCE) {
 		pop ();
 		_force = true;
 	}
-
+cout << "add" << _task.stringConvert () << endl;
 	update_task (&_task);
 	
 	switch (_flagError) {
@@ -709,7 +729,8 @@ string CmdControl::executeADD () {
 			str = MSG_ERROR;
 		} else {
 			str = ToDoMngr::view (_task) + MSG_ADDED;
-			clearTaskElement ();
+			if (checkTaskElement (true))
+				clearTaskElement ();
 		}
 
 		delete _taskList;
@@ -749,7 +770,8 @@ string CmdControl::executeEDIT () {
 			str = MSG_ERROR;
 		} else {
 			str = ToDoMngr::view (_task) + MSG_EDITED;
-			clearTaskElement ();
+			if (checkTaskElement (true))
+				clearTaskElement ();
 		}
 	
 		if (!_taskList->empty ()) {
@@ -894,13 +916,11 @@ string CmdControl::executeLAST () {
 	return str;
 }
 
-bool CmdControl::getTableName () {
-	return false;
-}
-
 void CmdControl::update_task (Task* taskPtr) {
 	TimePeriod period;
-	taskPtr->note = mergeStringInput ();
+	if (!_sequence->empty () && _sequence->front () == DATA)
+		taskPtr->note = mergeStringInput ();
+	
 	bool reachExeCmd = false;
 	while (!reachExeCmd && _flagError == NONE && !_sequence->empty ()) {
 		if (_sequence->front () != CMD) {
@@ -910,19 +930,14 @@ void CmdControl::update_task (Task* taskPtr) {
 
 		Time time;
 		TimePeriod period;
-cout << convertToString (_cmdInput->front ()) << endl;
+//cout << convertToString (_cmdInput->front ()) << endl;
 		switch (_cmdInput->front ()) {
+		case CDATE:
+		case CTIME:
+			pop ();
 		case CTODAY:
 		case CTMR:
 		case CNOW:
-			time = get_time ();
-			if (_flagError == NONE) {
-				taskPtr->modify_time (time);
-				_taskElement._time = true;
-			}
-			break;
-		case CTIME:
-			pop ();
 			time = get_time ();
 			if (_flagError == NONE) {
 				taskPtr->modify_time (time);
@@ -941,12 +956,12 @@ cout << convertToString (_cmdInput->front ()) << endl;
 			break;
 		case CVENUE:
 			pop ();
-			taskPtr->venue = mergeStringInput ();
+			taskPtr->venue = mergeSimStringInput ();
 			_taskElement._venue = true;
 			break;
 		case CNOTE:
 			pop ();
-			taskPtr->note = mergeStringInput ();
+			taskPtr->note = mergeSimStringInput ();
 			_taskElement._note = true;
 			break;
 		case CALERT:
@@ -1007,6 +1022,20 @@ cout << convertToString (_cmdInput->front ()) << endl;
 			if (taskPtr->repeat != 0)
 				_taskElement._repeat = true;
 			break;
+		case CFORCE:
+		case CCOSTOM:
+		case CEXACT:
+		case CSIMILAR:
+		case CEACH:
+		case CCOMMAND:
+		case CHOUR:
+		case CFORTNIGHT:
+		case CYEAR:
+		case CDAY:
+		case CWEEK:
+		case CMONTH:
+			_flagError = CMD;
+			break;
 		default:
 			reachExeCmd = true;
 			break;
@@ -1028,6 +1057,43 @@ string CmdControl::mergeStringInput () {
 		pop ();
 	}
 	str = str.substr (0, str.size () - 1);
+	return str;
+}
+
+string CmdControl::mergeSimStringInput () {
+	string str;
+	bool finish = false;
+	while (_sequence->empty () == false && !finish) {
+		if (_sequence->front () == DATA) {
+			str += _dataInput->front () + " ";
+			pop ();
+		} else if (_sequence->front () == CMD) {
+			switch (_cmdInput->front ()) {
+			case CFORCE:
+			case CCOSTOM:
+			case CEXACT:
+			case CSIMILAR:
+			case CEACH:
+			case CCOMMAND:
+			case CHOUR:
+			case CFORTNIGHT:
+			case CYEAR:
+			case CDAY:
+			case CWEEK:
+			case CMONTH:
+			case CDISCARD:
+			case CREPLACE:
+			case CINSERT:
+				str += convertToString (_cmdInput->front ());
+				pop ();
+				break;
+			default:
+				finish = true;
+				break;
+			}
+		}
+	}
+
 	return str;
 }
 

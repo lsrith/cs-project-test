@@ -54,7 +54,7 @@ public:
 	// if the tableName is the existing one, check the period
 	// if the period is the same, add more index inside; else, overwrite the old one
 	list<Task> load (string tableName);
-	// return a list of templates of the timetable
+	// return a list of tasks of the timetable
 	vector<string> load_table_name ();
 	// return a list of names of existing timetable
 

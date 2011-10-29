@@ -21,7 +21,7 @@ class CmdControl: public VldCmdCtrl {
 private:
 	typedef unsigned short int indx_t;
 	enum input_t {CMD, DATA, NONE};
-	enum prompt_t {ADDCLASHED, EDITCLASHED, VLDINPUT, VLDCMD, NOPROMPT};
+	enum prompt_t {ADDCLASHED, EDITCLASHED, VLDINPUT, VLDCMD, VLDTABLE, NOPROMPT};
 
 public:
 	template <typename data_t>
@@ -121,11 +121,11 @@ private:
 	Time::clk_t get_clock ();
 	bool notMorning (string);
 	bool notMorning ();
-	bool getTableName ();		// return false if the tableName is invalid
 	void get_date (int&, int&, int&);
 	void convertToInt (string, int&, int&);
 	int convertToInt (string);	// return -1 if the whole string is not an integer
 	string mergeStringInput ();
+	string mergeSimStringInput ();
 	void clearTaskElement ();
 	bool checkTaskElement (bool);
 	void check2ndQsCommand ();

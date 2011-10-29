@@ -68,6 +68,8 @@ public:
 	static list<string> tableNames ();
 	// return all the names of the existing timetable
 
+	bool ifExistedTable (string tableNames);
+
 //Ben:
 	list<Task> add (Task task, bool forceAdd);
 	// add a task to the dataStorage
