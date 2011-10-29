@@ -95,52 +95,51 @@ void CmdControl::addInput (string& input) {
 	_input = input;
 	_flagError = NONE;
 	_flagPrompt = NOPROMPT;
-	if (_2ndQs && !_input.empty ()) {
-		string temp;
-		command cmd;
-		unsigned int end_pos = 0;
-		bool specialCmd = true;
-		if (_dotCmd) {
-			if (_input[0] == '.' || _input[0] == '-') {
-				end_pos = _input.find_first_of (" .-", 1);
-				temp = _input.substr (0, end_pos);
-				cmd = translateCmd (temp);
-			}
-		} else {
-			end_pos = _input.find_first_of (' ', 0);
+
+	if (_2ndQs && !_input.empty ())
+		check2ndQsCommand ();
+
+	splitInput ();
+	log.end ();
+};
+
+void CmdControl::check2ndQsCommand () {
+	string temp;
+	command cmd;
+	unsigned int end_pos = 0;
+	bool specialCmd = true;
+	if (_dotCmd) {
+		if (_input[0] == '.' || _input[0] == '-') {
+			end_pos = _input.find_first_of (" .-", 1);
 			temp = _input.substr (0, end_pos);
 			cmd = translateCmd (temp);
 		}
-
-		if (_flagError != CMD && (cmd == CDISCARD || cmd == CREPLACE)) {
-			if (!_1stSeq.empty () && _1stSeq.front () == CMD) {
-				_1stSeq.pop ();
-				_1stCmd.pop ();
-			} else if (!_1stSeq.empty () && _1stSeq.front () == DATA) {
-				_1stSeq.pop ();
-				_1stData.pop ();
-			} else;
-		} else if (_flagError != CMD && (cmd == CINSERT)) {
-		} else {
-			specialCmd = false;
-		}
-
-		if (specialCmd) {
-			if (end_pos == string::npos || _input[end_pos] != ' ')
-				_input.erase (0, end_pos);
-			else
-				_input.erase (0, end_pos + 1);
-		}
-//cout <<"addInput " << _input << endl;
+	} else {
+		end_pos = _input.find_first_of (' ', 0);
+		temp = _input.substr (0, end_pos);
+		cmd = translateCmd (temp);
 	}
 
-	try {
-		splitInput ();
-	} catch (string message) {
-		throw (message);
+	if (_flagError != CMD && (cmd == CDISCARD || cmd == CREPLACE)) {
+		if (!_1stSeq.empty () && _1stSeq.front () == CMD) {
+			_1stSeq.pop ();
+			_1stCmd.pop ();
+		} else if (!_1stSeq.empty () && _1stSeq.front () == DATA) {
+			_1stSeq.pop ();
+			_1stData.pop ();
+		} else;
+	} else if (_flagError != CMD && (cmd == CINSERT)) {
+	} else {
+		specialCmd = false;
 	}
-	log.end ();
-};
+
+	if (specialCmd) {
+		if (end_pos == string::npos || _input[end_pos] != ' ')
+			_input.erase (0, end_pos);
+		else
+			_input.erase (0, end_pos + 1);
+	}
+}
 
 void CmdControl::splitInput () {
 	log.start ("splitInput");
@@ -167,8 +166,9 @@ void CmdControl::splitInput () {
 					else
 						_input.erase (0, end_pos + 1);
 					break;
-				} else
-					throw (INV_CMD);
+				} else {
+					push (temp);
+				}
 			} else {
 				end_pos = _input.find_first_of (" .\n");
 				while (end_pos != string::npos && _input[end_pos] == '.' && _input[end_pos - 1] != ' ')
@@ -654,7 +654,6 @@ string CmdControl::executeVIEW () {
 	return str;
 }
 
-//to be edited
 string CmdControl::executeSEARCH () {
 	string str;
 	if (_sequence->empty ())
@@ -911,7 +910,17 @@ void CmdControl::update_task (Task* taskPtr) {
 
 		Time time;
 		TimePeriod period;
+cout << convertToString (_cmdInput->front ()) << endl;
 		switch (_cmdInput->front ()) {
+		case CTODAY:
+		case CTMR:
+		case CNOW:
+			time = get_time ();
+			if (_flagError == NONE) {
+				taskPtr->modify_time (time);
+				_taskElement._time = true;
+			}
+			break;
 		case CTIME:
 			pop ();
 			time = get_time ();

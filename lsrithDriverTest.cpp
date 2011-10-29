@@ -88,15 +88,11 @@ int main () {
 		while (true) {
 			cout << "command: ";
 			getline (cin, str);
-			try {
-				cmdControl.addInput (str);
-				cout << cmdControl.executeCmd () << endl;
-			} catch (string xcpt) {
-				cout << "INV" << endl;
-			}
+			cmdControl.addInput (str);
+			cout << cmdControl.executeCmd () << endl;
 		}
 	} catch (string xcpt) {
-		cout << "INV" + xcpt << endl;
+		cout << xcpt << endl;
 	}
 	return 0;
 }
