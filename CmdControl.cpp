@@ -497,9 +497,9 @@ string CmdControl::checkAlert () {
 string CmdControl::executeHELP () {
 	string str;
 
-	if (_sequence->empty () == false && _sequence->front () == CMD && _cmdInput->front () == CCOMMAND) {
+	if (_sequence->empty () == false && _sequence->front () == CMD) {
+		str = _toDoMngr.help (convertToString (_cmdInput->front ()));
 		pop ();
-		str = _toDoMngr.help ("cmd");
 	} else if (_sequence->empty () == false && _sequence->front () == DATA) {
 		str = _toDoMngr.help (mergeStringInput ());
 		pop ();
@@ -916,6 +916,7 @@ string CmdControl::executeLAST () {
 	return str;
 }
 
+//some elements are unexpectedly modified :(
 void CmdControl::update_task (Task* taskPtr) {
 	TimePeriod period;
 	if (!_sequence->empty () && _sequence->front () == DATA)
