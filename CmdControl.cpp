@@ -1,4 +1,5 @@
 #include "CmdControl.h"
+#include "ExecuteCmd.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -40,15 +41,14 @@ CmdControl::CmdControl (bool dotCmd) {
 	_force = false;
 	_activeListAccessible = false;
 	clearTaskElement ();
-//	_search = ToDoMngr::search_t::SEACH;
-// these two following parts are to be modified
-	string str = get_vldCmdList (_validCmd, standAloneCmdEndPos);
+	try {
+		get_vldCmdList (_validCmd, standAloneCmdEndPos);
+	} catch (string message) {
+		throw (message);
+	}
+	
 	_dayMonth = get_dayMonth ();
 	log.log ("cmdControl");
-/*
-	if (_validCmd.empty ())
-		cout << "empty" << endl;
-*/
 }
 
 void CmdControl::clearTaskElement () {
@@ -711,7 +711,7 @@ string CmdControl::executeSEARCH () {
 
 string CmdControl::executeADD () {
 	string str;
-	if (_sequence->front () == CMD && _cmdInput->front () == CFORCE) {
+		if (_sequence->front () == CMD && _cmdInput->front () == CFORCE) {
 		pop ();
 		_force = true;
 	}
