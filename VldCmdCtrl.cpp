@@ -8,30 +8,49 @@ using namespace std;
 string VldCmdCtrl::LOST_FILE = "unable to find a file: ";
 string VldCmdCtrl::LOAD_DFLT_CMD = "Loaded default command!";
 
-string VldCmdCtrl::get_vldCmdList (vector<cmd_pair>& validCmd, int& endPos) {
-	string str;
+VldCmdCtrl::VldCmdCtrl () {
+}
 
+VldCmdCtrl::VldCmdCtrl (bool dotCmd) {
+	if (dotCmd) {
+		_validCmdFile = "vldCmd1.txt";
+		_dfltCmdFile = "dfltCmd1.txt";
+		_dotCmd = true;
+	} else {
+		_validCmdFile = "vldCmd2.txt";
+		_dfltCmdFile = "dfltCmd2.txt";
+		_dotCmd = false;
+	}
+	_validDayMnth = "vldDM.txt";
+
+	try {
+		get_vldCmdList (_validCmd, standAloneCmdEndPos);
+	} catch (string message) {
+		throw message;
+	}
+}
+
+void VldCmdCtrl::get_vldCmdList (vector<cmd_pair>& validCmd, int& endPos) {
 	try {
 		validCmd = get_vldCmdList (_validCmdFile, endPos);
 		if (validCmd.empty ()) {
 			try {
 				resetCmd ();
-				str = get_vldCmdList (validCmd, endPos);
 			} catch (string Message) {
-				str = Message;
+				throw (Message);
 			}
+			
+			get_vldCmdList (validCmd, endPos);
 		}
 	} catch (string message) {
 		try {
 			resetCmd ();
-			str = message + "\n" + LOAD_DFLT_CMD +"\n";
-			str += get_vldCmdList (validCmd, endPos);
 		} catch (string Message) {
-			str = message + "\n" + Message;
+			throw (Message);
 		}
+			
+		get_vldCmdList (validCmd, endPos);
 	}
-
-	return str;
 }
 
 vector<VldCmdCtrl::cmd_pair> VldCmdCtrl::get_vldCmdList (string cmdFile, int& endPos){
@@ -162,6 +181,12 @@ VldCmdCtrl::command VldCmdCtrl::convertToCommand (int indx) {
 		default:	cmd = CVOID;		break;
 	}
 
+	return cmd;
+}
+
+VldCmdCtrl::command VldCmdCtrl::convertToCommand (string str) {
+	command cmd;
+	bool found = search_vldCmd (str, cmd);
 	return cmd;
 }
 

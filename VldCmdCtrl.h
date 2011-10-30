@@ -21,7 +21,9 @@ public:
 		command enum_cmd;
 	};
 
-	string get_vldCmdList (vector<cmd_pair>&, int&);
+	VldCmdCtrl ();
+	VldCmdCtrl (bool);
+	void get_vldCmdList (vector<cmd_pair>&, int&);
 	bool get_dayMonth ();
 	void update_vldCmdList (vector<cmd_pair>&);
 	void update_dayMonth (bool&);
@@ -29,7 +31,10 @@ public:
 	void resetDateType ();
 	void reset ();
 
-	string convertToString (command);
+	static string convertToString (command);
+	static command convertToCommand (int);	
+	command convertToCommand (string);
+	
 	bool search_vldCmd (string&, vector<cmd_pair>::iterator);
 	bool search_vldCmd (string, command&);
 	bool search_standAloneCmd (string, command&);
@@ -46,7 +51,6 @@ protected:
 	static string LOAD_DFLT_CMD;
 
 	vector<cmd_pair> get_vldCmdList (string, int&);
-	command convertToCommand (int);
 	bool checkIfVldExtension (command, command);
 };
 #endif

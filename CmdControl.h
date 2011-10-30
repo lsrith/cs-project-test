@@ -18,7 +18,7 @@ template <typename data_t>
 queue<data_t>& operator+= (queue<data_t>& Q1, queue<data_t> Q2);
 
 class CmdControl: public VldCmdCtrl {
-private:
+protected:
 	typedef unsigned short int indx_t;
 	enum input_t {CMD, DATA, NONE};
 	enum prompt_t {ADDCLASHED, EDITCLASHED, VLDINPUT, VLDCMD, VLDTABLE, NOPROMPT};
@@ -38,7 +38,7 @@ public:
 //	string getLeftOverInput ();
 	//return a string of input that could not be able to access
 	string executeCmd ();
-private:
+protected:
 	Logging log;
 	string _input;
 	queue<command> _1stCmd;
