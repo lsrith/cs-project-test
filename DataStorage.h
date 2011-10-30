@@ -30,8 +30,6 @@ public:
 	DataStorage ();
 
 	void updateStorageName (string storageName);
-	
-	static void sort (list<Task>* taskList);
 
 	void save (list<Task> taskList);
 	void save (list<Task>* taskList);

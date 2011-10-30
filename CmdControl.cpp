@@ -919,8 +919,10 @@ string CmdControl::executeLAST () {
 //some elements are unexpectedly modified :(
 void CmdControl::update_task (Task* taskPtr) {
 	TimePeriod period;
-	if (!_sequence->empty () && _sequence->front () == DATA)
+	if (!_sequence->empty () && _sequence->front () == DATA) {
 		taskPtr->note = mergeStringInput ();
+		_taskElement._note = true;
+	}
 	
 	bool reachExeCmd = false;
 	while (!reachExeCmd && _flagError == NONE && !_sequence->empty ()) {

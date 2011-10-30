@@ -51,7 +51,6 @@ list<Task> DataStorage::load (TimePeriod period)
 		}
 	}
 
-	sort (&taskList);
 	return taskList;
 }
 
@@ -89,7 +88,6 @@ list<Task> DataStorage::get_alertTasks () {
 		if ((*iter)->_active && !((*iter)->_task.alert < currTime))
 			alertTasks.push_back ((*iter)->_task);
 
-	sort (&alertTasks);
 	return alertTasks;
 }
 
@@ -156,44 +154,6 @@ void DataStorage::clear () {
 	taskFile.close ();
 	ofstream tableFile (_tableFile);
 	tableFile.close ();
-}
-
-void DataStorage::sort (list<Task>* taskList) {
-	if (taskList->empty ()) return;
-
-	list<Task>::iterator currIter, prevIter;
-	list<Task>::iterator endIter = taskList->end ();
-	Time prev, curr;
-	Task temp;
-	int i, size = taskList->size ();
-
-	for (i = 0; i < size; i++) {
-		bool is_sorted = true;
-		for (currIter = ++(taskList->begin ()); currIter != endIter; currIter++) {
-			prevIter = --currIter;
-			currIter++;
-
-			if (prevIter->timeTask)
-				prev = prevIter->get_time ();
-			else
-				prev = prevIter->get_period ().get_start_time ();
-
-			if (currIter->timeTask)
-				curr = currIter->get_time ();
-			else
-				curr = currIter->get_period ().get_start_time ();
-
-			if (prev > curr) {
-				temp = *prevIter;
-				*prevIter = *currIter;
-				*currIter = temp;
-
-				is_sorted = false;
-			}
-		}
-		endIter--;
-		if (is_sorted) return;
-	}
 }
 
 void DataStorage::save (list<Task>* taskList) {
@@ -487,7 +447,6 @@ list<Task> DataStorage::exactSearch (string searchedWord) {
 		taskFile.close ();
 	}
 
-	sort (&taskList);
 	return taskList;
 }
 
@@ -531,7 +490,6 @@ list<Task> DataStorage::eachSearch (string searchedWord) {
 	}
 	taskFile.close ();
 	
-	sort (&taskList);
 	return taskList;
 }
 

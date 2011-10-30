@@ -125,15 +125,15 @@ void Task::modify_period (TimePeriod period) {
 	}
 }
 
-Time Task::get_time () {
+Time Task::get_time () const {
 	return _time;
 }
 
-TimePeriod Task::get_period () {
+TimePeriod Task::get_period () const {
 	return _period;
 }
 
-unsigned int Task::get_index () {
+unsigned int Task::get_index () const {
 	return _index;
 }
 
@@ -154,4 +154,45 @@ int Task::findPosition (string str, string subStr, int init_pos) {
 		return i;
 	else
 		return size1;
+}
+
+bool Task::compareByStartTime (Task task1, Task task2) {
+	if (task1.timeTask && task2.timeTask)
+		return task1._time < task2._time;
+	else if (task1.timeTask && !task2.timeTask)
+		return task1._time < task2._period.get_start_time ();
+	else if (!task1.timeTask && task2.timeTask)
+		return task1._period.get_start_time () < task2._time;
+	else
+		return task1._period.get_start_time () < task2._period.get_start_time ();
+}
+
+bool Task::compareByEndTime (Task task1, Task task2) {
+	if (task1.timeTask && task2.timeTask)
+		return task1._time < task2._time;
+	else if (task1.timeTask && !task2.timeTask)
+		return false;
+	else if (!task1.timeTask && task2.timeTask)
+		return true;
+	else
+		return task1._period.get_end_time () < task2._period.get_end_time ();
+}
+
+bool Task::compareByAlert (Task task1, Task task2) {
+	return task1.alert < task2.alert;
+}
+
+bool Task::compareByVenue (Task task1, Task task2) {
+	string venue1 = task1.venue;
+	string venue2 = task2.venue;
+
+	if (venue1.size () != venue2.size ()) {
+		return venue1.size () < venue2.size ();
+	} else {
+		for (int i = 0; i < venue1.size (); i++) {
+			venue1[i] = tolower (venue1[i]);
+			venue2[i] = tolower (venue2[i]);
+		}
+		return venue1 < venue2;
+	}
 }

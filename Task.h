@@ -29,10 +29,14 @@ public:
 	void modify_time (Time);
 	void modify_period (TimePeriod);
 
-	Time get_time ();
-	TimePeriod get_period ();
-	unsigned int get_index ();
+	Time get_time () const;
+	TimePeriod get_period () const;
+	unsigned int get_index () const;
 
+	static bool compareByStartTime (Task task1, Task task2);
+	static bool compareByEndTime (Task task1, Task task2);
+	static bool compareByAlert (Task task1, Task task2);
+	static bool compareByVenue (Task task1, Task task2);
 private:
 	Time _time;
 	TimePeriod _period;
