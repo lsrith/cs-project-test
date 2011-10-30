@@ -836,8 +836,88 @@ list<Task> ToDoMngr::add(string tableName, Task task, bool forceAdd)
  }
 }
 
-list<Task> ToDoMngr::edit (int taskId, TaskElement* taskElem, Task* task, bool forceEdit) {
-	return _clashList;
+
+ Task ToDoMngr::edit(int taskId, TaskElement* taskElem, Task* task, bool forceEdit)
+{
+ list<Task> _blankList;
+ // get the task that will be edited
+ list<Task>iterator taskIterator = _activeTaskList.begin();
+ for(int i=1;i==taskId; i++)
+ {
+  taskIterator++;
+ }
+ 
+ // check taskElem for what to edit
+ if(taskElem->_time == true)
+ {
+  //edit time
+  taskIterator->modifiy_time(task->get_time());
+  return _blankList;
+ }
+ else if(taskElem->_period == true)   
+ {
+  //edit period when forcEdit == true
+  if(forceEdit == true)
+  {
+   taskIterator->modify_period(task->get_period());
+   return _blankList;
+  }
+  else
+  {
+   //check for clash
+   bool clash false;
+   list<Task> checkList;
+   checkList = _dataStorage.load(taskIterator->get_period());
+   if(checkList.empty() == true)
+   {
+    clash = false;
+   }
+   else
+   {
+    list<Task>::iterator li = checkList.begin();
+    for(int i=1; i<= checkList.size();i++)
+    {
+     TimePeriod taskPeriod = checkList.begin()->get_period();
+     if(taskIterator->get_period()== taskPeriod)
+     {
+      clash = true;
+      _clashList.push_back(*li);
+     }
+    }
+   }
+   if(clash == true)
+   {
+    return _clashList;
+   }  
+   else
+   {
+    taskIterator->modify_period(task->get_period());
+    return _blankList;
+   }
+  }
+ }
+ else if(taskElem->_note == true)
+ {
+  //edit note
+  taskIterator->note = task->note;
+  return _blankList;
+ }
+ else if(taskElem->_venue == true)
+ {
+  //edit venue
+  taskIterator->venue = task->venue;
+  return _blankList;
+ }
+ else if(taskElem->_alert== true)
+ {
+  taskIterator->alert = task->alert;
+  return _blankList;
+ }
+ else if(taskElem->_repeat== true)    
+ {
+  taskIterator->repeat = task->repeat;
+  return _blankList;
+ }
 }
 
 void ToDoMngr::undo () {
