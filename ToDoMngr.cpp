@@ -166,13 +166,20 @@ string ToDoMngr::view(Task taskId){
 }
 
 string ToDoMngr:: view(list<Task> tasklist){
-        Time obj;
+         Time obj;
 		int full_date,_date,temp_date,temp_year;
 		temp_date=0;
 		string month,temp_month;
 		temp_month=" ";
 		temp_year=0;
 		int year;
+		int pos=0;
+        int endpos=0;
+        int end_word=40;
+		int pos_venue=0;
+        int endpos_venue=0;
+        int end_word_venue=40;
+	   
 	   
 		
         std::ostringstream oss,index_convert;
@@ -209,30 +216,45 @@ string ToDoMngr:: view(list<Task> tasklist){
 					month=l->get_time().display_month((full_date % 1000000) / 10000);
 					year=full_date%10000;
 				
-							/*if(temp_month==month){
-							}
-							else{
-								oss<<"\n";
-                             oss<<setw(40)<<setfill(' ')<<right<<month<<" ";
-							 
-							 if(temp_year==year)
-							oss<<temp_year<<"\n";
-							 else
-						    oss<<year<<"\n";
-							
-							 oss<<setw(45)<<setfill(' ')<<right<<"--------"<<"\n";
-							temp_month=month;
-							temp_year=year;
-							temp_date=0;
-						}*/
+						
 
 									if(temp_date==_date&&temp_month==month&&temp_year==year){
                                   
 							   oss<<setw(index_convert.str().length())<<setfill(' ')<<right<<index<<"."<<" ";
 							   oss<<"Start :"<<" "<<l->get_period().get_start_time().string_clock();
 							   oss<<"    "<<"Note :"<<" ";
-							   oss<<l->note<<endl;
-							   oss<<setw(31)<<setfill(' ')<<right<<"Venue :"<<" "<<l->venue<<"\n";
+							   while( pos<l->note.length())      
+
+							   {   
+	                            if(pos<end_word){
+	
+	pos=l->note.find_first_of(' ',endpos+1);
+	oss<<l->note.substr(endpos,pos-endpos)<<" ";
+	endpos=pos+1;
+	}
+	else{
+	oss<<"\n"<<"                               ";
+	  end_word+=40;
+	  }
+							   }
+							   oss<<"\n";
+							   //oss<<l->note<<endl;
+							   oss<<setw(31)<<setfill(' ')<<right<<"Venue :"<<" ";//<<l->venue<<"\n";
+							   while( pos_venue<l->venue.length())      
+
+							   {   
+	                            if(pos_venue<end_word_venue){
+	                                pos_venue=l->venue.find_first_of(' ',endpos_venue+1);
+                                    oss<<l->venue.substr(endpos_venue,pos_venue-endpos_venue)<<" ";
+									endpos_venue=pos_venue+1;
+	                               }
+	                          else{
+	                              oss<<"\n"<<"                                ";
+	                              end_word_venue+=40;
+	                              }
+                                }
+							   
+                               oss<<"\n";
 							   oss<<setw(29)<<setfill(' ')<<right<<"End :"<<" "<<l->get_time().display_day(l->get_period().get_end_time().get_day());
 							   oss<<" "<<((l->get_period().get_end_time().get_date())/1000000)<<" ";
 							   oss<<l->get_period().get_end_time().display_month((((l->get_period().get_end_time().get_date())% 1000000) / 10000))<<" ";
@@ -304,8 +326,71 @@ string ToDoMngr:: view(list<Task> tasklist){
 							   oss<<setw(index_convert.str().length())<<setfill(' ')<<right<<index<<"."<<" ";
 								   oss<<"Start :"<<" "<<l->get_period().get_start_time().string_clock();
 							   oss<<"    "<<"Note :"<<" ";
-							   oss<<l->note<<endl;
-							   oss<<setw(31)<<setfill(' ')<<right<<"Venue :"<<" "<<l->venue<<"\n";
+
+							   while( pos<l->note.length())      
+
+							   {   
+	                            if(pos<end_word)
+	
+								{
+	
+									pos=l->note.find_first_of(' ',endpos+1);
+	
+									oss<<l->note.substr(endpos,pos-endpos)<<" ";
+	
+									endpos=pos+1;
+	
+								}
+	
+	
+								else
+	
+								{
+      
+									oss<<"\n"<<"                               ";
+									
+	  
+									end_word+=40;//l->note.length();
+	  
+	}
+}
+							   //oss<<l->note<<endl;
+							   oss<<"\n";
+							   oss<<setw(31)<<setfill(' ')<<right<<"Venue :"<<" ";
+							    while( pos_venue<l->venue.length())      
+
+							   {   
+	                            if(pos_venue<end_word_venue)
+	
+								{
+	
+									pos_venue=l->venue.find_first_of(' ',endpos_venue+1);
+	
+									oss<<l->venue.substr(endpos_venue,pos_venue-endpos_venue)<<" ";
+	
+									endpos_venue=pos_venue+1;
+	
+								}
+	
+	
+								else
+	
+								{
+      
+									oss<<"\n"<<"                                ";
+	  
+									end_word_venue+=40;
+	  
+	}
+}
+							  
+
+
+
+							   
+							   
+							   oss<<"\n";
+							   //;<<l->venue<<"\n";
 							   oss<<setw(29)<<setfill(' ')<<right<<"End :"<<" "<<l->get_time().display_day(l->get_period().get_end_time().get_day());
 							   oss<<" "<<((l->get_period().get_end_time().get_date())/1000000)<<" ";
 							   oss<<l->get_period().get_end_time().display_month((((l->get_period().get_end_time().get_date())% 1000000) / 10000))<<" ";
@@ -319,16 +404,7 @@ string ToDoMngr:: view(list<Task> tasklist){
 							   oss<<l->alert.string_clock()<<"\n";
 							   oss<<"\n";
 							   	temp_date=_date;
-								/*oss<<setw(40)<<setfill(' ')<<right<<_date<<" "<<l->get_time().display_day(l->get_period().get_start_time().get_day())<<"\n";
-								oss<<"\n";
-								oss<<setw(2)<<setfill(' ')<<right<<index<<"."<<" "<<"|"<<" ";
-								oss<<l->get_period().get_start_time().string_clock()<<" "<<"-"<<" "<<l->get_period().get_end_time().string_clock();
-								oss<<"("<<((l->get_period().get_end_time().get_date())/1000000)<<" "<<l->get_period().get_end_time().display_month((((l->get_period().get_end_time().get_date())% 1000000) / 10000))<<")";
-								oss<<" "<<"|"<<" "<<setw(10)<<setfill(' ')<<left<<l->venue;
-								oss<<" "<<"|"<<" "<<setw(28)<<setfill(' ')<<left<<l->note<<endl;*/
-							
-                               /* oss<<l->get_period().string_time_period()<<"\n"<<index<<"."
-                                <<" "<<l->note<<" "<<"at"<<" "<<l->venue<<endl;*/
+								
 							}
 							
 								
@@ -347,12 +423,42 @@ string ToDoMngr:: view(list<Task> tasklist){
                                   
 								oss<<setw(index_convert.str().length())<<setfill(' ')<<index<<"."<<" "<<"Start :"<<" "<<l->get_time().string_clock()<<" ";
 							   oss<<"   "<<"Note :"<<" ";
-							   oss<<l->note<<endl;
-							   oss<<setw(31)<<setfill(' ')<<"Venue :"<<" "<<l->venue<<"\n";
-							   //oss<<setw(29)<<setfill(' ')<<"End :"<<" "<<l->get_time().display_day(l->get_time().get_day());
-							   //oss<<" "<<((l->get_period().get_end_time().get_date())/1000000)<<" ";
-							  // oss<<l->get_period().get_end_time().display_month((((l->get_period().get_end_time().get_date())% 1000000) / 10000))<<" ";
-							   //oss<<((l->get_period().get_end_time().get_date())%10000)<<"\n";
+							    while( pos<l->note.length())      
+
+							   {   
+	                            if(pos<end_word){
+	
+	pos=l->note.find_first_of(' ',endpos+1);
+	oss<<l->note.substr(endpos,pos-endpos)<<" ";
+	endpos=pos+1;
+	}
+	else{
+	oss<<"\n"<<"                               ";
+	  end_word+=40;
+	  }
+
+								}
+
+							   
+							   oss<<"\n";
+							 
+							   oss<<setw(31)<<setfill(' ')<<"Venue :"<<" ";
+							    while( pos_venue<l->venue.length())      
+
+							   {   
+	                            if(pos_venue<end_word_venue){
+	                                pos_venue=l->venue.find_first_of(' ',endpos_venue+1);
+                                    oss<<l->venue.substr(endpos_venue,pos_venue-endpos_venue)<<" ";
+									endpos_venue=pos_venue+1;
+	                               }
+	                          else{
+	                              oss<<"\n"<<"                                ";
+	                              end_word_venue+=40;
+	                              }
+                                }
+								oss<<"\n";
+							   //<<l->venue<<"\n";
+							 
 							   oss<<setw(31)<<setfill(' ')<<"Alert :"<<" ";
 							   oss<<l->alert.display_day(l->alert.get_day());
 							   oss<<" "<<((l->alert.get_date())/1000000)<<" ";
@@ -380,7 +486,8 @@ string ToDoMngr:: view(list<Task> tasklist){
 									else
 									{
 								oss<<"\n";
-								oss<<setw(20)<<setfill(' ')<<l->get_time().display_day(l->get_time().get_day())<<" "<<_date<<" ";
+								oss<<setw(38)<<setfill(' ')<<"-------------------"<<"\n";
+								oss<<setw(20)<<setfill(' ')<<"|"<<" "<<l->get_time().display_day(l->get_period().get_start_time().get_day())<<" "<<_date<<" ";
 								if(temp_month==month){
 
 									    oss<<temp_month<<" ";
@@ -395,15 +502,17 @@ string ToDoMngr:: view(list<Task> tasklist){
 							}
 							
 							 if(temp_year==year){
-							oss<<temp_year<<"\n";
-							 oss<<"\n";
+							oss<<temp_year<<" "<<"|"<<"\n";
+							
 							 }
 							 else{
-						    oss<<year<<"\n";
-							 oss<<"\n";
+						    oss<<year<<" "<<"|"<<"\n";
+							
 							  temp_year=year;
 							 
 							 }
+							  oss<<setw(38)<<setfill(' ')<<"-------------------"<<"\n";
+							 oss<<"\n";
 							//oss<<setw(45)<<setfill(' ')<<right<<"--------"<<"\n";
 							/*temp_month=month;
 							temp_year=year;
@@ -412,14 +521,43 @@ string ToDoMngr:: view(list<Task> tasklist){
                               
 							 oss<<setw(index_convert.str().length())<<setfill(' ')<<index<<"."<<" "<<"Start :"<<" "<<l->get_time().string_clock()<<" ";
 							   oss<<"   "<<"Note :"<<" ";
-							   oss<<l->note<<endl;
-							   oss<<setw(31)<<setfill(' ')<<"Venue :"<<" "<<l->venue<<"\n";
-							   //oss<<setw(29)<<setfill(' ')<<"End :"<<" "<<l->get_time().display_day(l->get_period().get_end_time().get_day());
-							   //oss<<" "<<((l->get_period().get_end_time().get_date())/1000000)<<" ";
-							   //oss<<l->get_period().get_end_time().display_month((((l->get_period().get_end_time().get_date())% 1000000) / 10000))<<" ";
-							   //oss<<((l->get_period().get_end_time().get_date())%10000)<<"\n";
+
+							   while( pos<l->note.length())      
+
+							   {   
+	                            if(pos<end_word){
+	
+	pos=l->note.find_first_of(' ',endpos+1);
+	oss<<l->note.substr(endpos,pos-endpos)<<" ";
+	endpos=pos+1;
+	}
+	else{
+	oss<<"\n"<<"                               ";
+	  end_word+=40;
+	  }
+
+								}
+							   oss<<"\n";
+							   
+							   oss<<setw(31)<<setfill(' ')<<"Venue :"<<" ";//<<l->venue<<"\n";
+
+							    while( pos_venue<l->venue.length())      
+
+							   {   
+	                            if(pos_venue<end_word_venue){
+	                                pos_venue=l->venue.find_first_of(' ',endpos_venue+1);
+                                    oss<<l->venue.substr(endpos_venue,pos_venue-endpos_venue)<<" ";
+									endpos_venue=pos_venue+1;
+	                               }
+	                          else{
+	                              oss<<"\n"<<"                                ";
+	                              end_word_venue+=40;
+	                              }
+                                }
+								oss<<"\n";
+							   
 							   oss<<setw(31)<<setfill(' ')<<"Alert :"<<" ";
-							   l->alert.display_day(l->alert.get_day());
+							   oss<<l->alert.display_day(l->alert.get_day());
 							   oss<<" "<<((l->alert.get_date())/1000000)<<" ";
 							   oss<<l->alert.display_month((((l->alert.get_date())% 1000000) / 10000))<<" ";
 							   oss<<((l->alert.get_date())%10000)<<"\n";
@@ -436,6 +574,7 @@ string ToDoMngr:: view(list<Task> tasklist){
    return oss.str();
         
 }
+
 
 string ToDoMngr::view (int taskId){
             Time obj;
