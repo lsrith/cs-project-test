@@ -980,12 +980,12 @@ list<Task> ToDoMngr::add(string tableName, Task task, bool forceAdd)
 }
 
 
- Task ToDoMngr::edit(int taskId, TaskElement* taskElem, Task* task, bool forceEdit)
+ list<Task> ToDoMngr::edit(int taskId, TaskElement* taskElem, Task* task, bool forceEdit)
 {
  list<Task> _blankList;
  // get the task that will be edited
- list<Task>iterator taskIterator = _activeTaskList.begin();
- for(int i=1;i==taskId; i++)
+ list<Task>::iterator taskIterator = _activeTaskList.begin();
+ for(int i=1;i<=taskId; i++)
  {
   taskIterator++;
  }
@@ -994,7 +994,7 @@ list<Task> ToDoMngr::add(string tableName, Task task, bool forceAdd)
  if(taskElem->_time == true)
  {
   //edit time
-  taskIterator->modifiy_time(task->get_time());
+  taskIterator->modify_time(task->get_time());
   return _blankList;
  }
  else if(taskElem->_period == true)   
@@ -1008,7 +1008,7 @@ list<Task> ToDoMngr::add(string tableName, Task task, bool forceAdd)
   else
   {
    //check for clash
-   bool clash false;
+   bool clash = false;
    list<Task> checkList;
    checkList = _dataStorage.load(taskIterator->get_period());
    if(checkList.empty() == true)
