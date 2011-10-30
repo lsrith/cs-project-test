@@ -1,0 +1,138 @@
+Command:
+(nth)		add
+.a			add
+.a.c		check-for-clash add
+.a.f		force add
+.add	-	add
+.ac 		check-for-clash add
+.acc	-	user account
+.af			force add
+.al		-	alert
+.alert	-	alert
+.b 			by
+.back	-	back	
+.by 		by
+.c 			copy
+.c.a		check-for-clash add
+.c.e		check-for-clash edit
+.c.s		costom search
+.c.v		costom view
+.cl			clear
+.cla		clash
+.clash		clash
+.clear		clear	
+.cmd	-	view all command
+.copy		copy	
+.costom		costom
+.command-	view all command
+.cp			copy
+.cut		cut
+.d 			delete
+.day		daily
+.date		date
+.del		delete
+.delete		delete
+.des		description
+.descript	description
+.e 			edit
+.e.c		check-for-clash edit
+.ec			check-for-clash edit
+.edit		edit
+.ef			force edit
+.en			enter
+.enter		enter
+.exit	-	exit
+.f 			from
+.f.a		force add
+.f.e		force edit
+.force		force
+.from		from
+.g
+.h 			help
+.help	-	help
+.high		highly importance (priority)
+.i
+.impt		importance (priority)
+.importance	importance (priority)
+.j
+.k
+.l 			last
+.loc		location (venue)
+.log		switch user (log off)
+.last	-	last
+.m 			move
+.mon		monthly
+.month		monthly
+.mov		move
+.move		move
+.mth		monthly
+.mv 		move
+.n 			new
+.name		name
+.new		new
+.next	-	next
+.note		description
+.nx 		next
+.o 			open
+.on			on
+.open	-	open
+.p 			paste
+.paste		paste
+.per		period
+.period		period
+.pre	-	preview
+.prev		previous
+.previous	previous
+.pri		priority
+.print		print
+.prior		priority
+.priority	priority
+.q 			quit
+.quit	-	quit
+.r 			replace
+.re			redo
+.redo	-	redo
+.rem	-	reminder
+.reminder	reminder
+.rep		repeat
+.repeat		repeat
+.replace	replace
+.s 			search
+.s.c		costom search
+.s.e		search exact match
+.s.i		search individual match
+.s.s		search similar match
+.sc			costom search
+.se 		search exact match
+.search		search
+.si 		search individual match
+.sort		sort
+.ss 		search similar match
+.switch	-	switch user
+.t 			to
+.t.t		timetable
+.tab		timetable
+.table		timetable
+.time		time
+.tip		tip
+.to			to
+.tt			timetable
+.u 			switch user
+.u.s		switch user
+.u.a		user account
+.un			undo
+.undo	-	undo
+.user	-	user account
+.v 			venue
+.v.c		costom view
+.venue		venue
+.vc			costom view
+.view		view
+.w			weekly
+.wk			weekly
+.week		weekly
+.x 			exit
+.y 			redo
+.year		yearly
+.yr			yearly
+.z 			undo
