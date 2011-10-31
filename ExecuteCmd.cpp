@@ -991,3 +991,231 @@ void Edit::insertBreakPoint () {
 	_splitedInput = temp;
 }
 
+//----------------------------------------------------------------
+string View::MSG_NO_NEXT = "This is the last!";
+string View::MSG_NO_PREV = "This is the first!";
+string View::MSG_WRONG_ID = "Invalid index entered!";
+
+View::View (vector<cmd_pair> validCmd, ToDoMngr* toDoMngr) {
+	_validCmd = validCmd;
+	_toDoMngr = toDoMngr;
+	_taskId = 0;
+	_first = false;
+	_last = false;
+	_viewType = DAILY;
+	_activeListAccessible = false;
+	_sequence = NULL;
+	_dataInput = NULL;
+	_cmdInput = NULL;
+	_splitedInput = NULL;
+}
+
+View::~View () {
+	clear ();
+}
+
+bool View::execute () {
+	bool done;
+	if (!_sequence->empty () && _sequence->front () == CMD && _cmdInput->front () == CVIEW) {
+		pop ();
+	} else {
+		done = true;
+	}
+
+	if (!_sequence->empty () && _sequence->front () == CMD) {
+		switch (_cmdInput->front ()) {
+		case CDAY:
+			_viewType = DAILY;
+			pop ();
+			break;
+		case CWEEK:
+			_viewType = WEEKLY;	
+			pop ();
+			break;
+		case CMONTH:
+			_viewType = MONTHLY;
+			pop ();
+			break;
+		default:
+			break;
+		}
+	}
+
+	if (_sequence->empty ()) {
+		TimePeriod period;
+		_result = _toDoMngr->view (period);
+		return true;
+	}
+
+	done = true;
+
+	switch (_sequence->front ()) {
+	case DATA:
+		_taskId = convertToInt (_dataInput->front ());
+		if (_activeListAccessible && _taskId > 0) {
+			_result = _toDoMngr->view (_taskId);
+			pop ();
+		} else {
+			done = false;
+			_flagError = DATA;
+		}
+		break;
+	case CMD:
+		switch (_cmdInput->front ()) {
+		case CFROM:
+			_period = get_period ();
+			
+			if (_flagError == NONE) {
+				_result = _toDoMngr->view (_period);
+			}
+			break;
+		case CTIME:
+		case CDATE:
+			pop ();
+		case CTODAY:
+		case CTMR:
+			_time = get_time ();
+			if (_flagError == NONE) {
+				_result = _toDoMngr->view (_viewType, _time);
+			}
+			break;
+		case CTABLE:
+			pop ();
+			if (!_sequence->empty () && _sequence->front () == DATA) {
+				_result = _toDoMngr->view (mergeStringInput ());
+			} else {
+				_flagError = DATA;
+			}
+			break;
+		default:
+			break;
+		}
+		break;
+	default:
+		done = false;
+		_flagError = CMD;
+		break;
+	}
+
+	return done;
+}
+
+void View::next () {
+	_first = false;
+
+	if (_taskId != 0) {
+		_taskId++;
+		_result = _toDoMngr->view (_taskId);
+		if (_result == ToDoMngr::NOTHING_TO_VIEW) {
+			_last = true;
+		}
+	} else if (_time.get_date () != Time::DFLT_DATE) {
+		Time temp;
+		switch (_viewType) {
+		case DAILY:
+			temp = _time + Time::DAY;
+			break;
+		case WEEKLY:
+			temp = _time + 7 * Time::DAY;
+			break;
+		case MONTHLY:
+			if (++_time)
+				temp = _time;
+			else
+				temp.modify_date (Time::INF_DATE);
+			break;
+		}
+
+		if (_time.get_date () == Time::INF_DATE) {
+ 			_last = true;
+		} else {
+			_time = temp;
+			_result = _toDoMngr->view (_viewType, _time);
+		}
+	} else if (_period.get_start_time ().get_date () != Time::DFLT_DATE) {
+		TimePeriod temp;
+		temp.modify_start_time (_period.get_end_time () + Time::DAY);
+		temp.modify_end_time (_period.get_end_time () + (_period.get_end_time () - _period.get_start_time ()) + Time::DAY);
+
+		if (temp.get_end_time ().get_date () != Time::DFLT_DATE && temp.get_end_time ().get_date () != Time::INF_DATE) {
+			_period = temp;
+			_result = _toDoMngr->view (_period);
+		} else {
+			_last = true;
+		}
+	} else;
+
+	if (_last)
+		_result = MSG_NO_NEXT;
+}
+
+void View::prev () {
+	_last = false;
+
+	if (_taskId != 0) {
+		_taskId--;
+		_result = _toDoMngr->view (_taskId);
+		if (_result == ToDoMngr::NOTHING_TO_VIEW)
+			_first = true;
+	} else if (_time.get_date () != Time::DFLT_DATE) {
+		Time temp;
+		switch (_viewType) {
+		case DAILY:
+			temp = _time - Time::DAY;
+			break;
+		case WEEKLY:
+			temp = _time - 7 * Time::DAY;
+			break;
+		case MONTHLY:
+			if (--_time)
+				temp = _time;
+			else
+				temp.modify_date (Time::INF_DATE);
+			break;
+		}
+
+		if (_time.get_date () == Time::INF_DATE) {
+ 			_first = true;
+		} else {
+			_time = temp;
+			_result = _toDoMngr->view (_viewType, _time);
+		}
+	} else if (_period.get_end_time ().get_date () != Time::DFLT_DATE) {
+		TimePeriod temp;
+		temp.modify_end_time (_period.get_start_time () - Time::DAY);
+		temp.modify_start_time (_period.get_start_time () - (_period.get_end_time () - _period.get_start_time ()) - Time::DAY);
+
+		if (temp.get_start_time ().get_date () != Time::DFLT_DATE && temp.get_start_time ().get_date () != Time::INF_DATE) {
+			_period = temp;
+			_result = _toDoMngr->view (_period);
+		} else {
+			_first = true;
+		}
+	} else;
+
+	if (_first)
+		_result = MSG_NO_PREV;
+}
+
+void View::first () {
+	string temp;
+	
+	while (!_first) {
+		prev ();
+		if (!_first)
+			temp = _result;
+	}
+	_result = temp;
+}
+
+void View::last () {
+	string str;
+	string temp;
+	
+	while (!_last) {
+		next ();
+		if (!_last)
+			temp = _result;
+	}
+	_result = temp;
+}

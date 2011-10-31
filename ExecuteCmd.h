@@ -76,6 +76,7 @@ private:
 	void insertBreakPoint ();
 };
 
+//think of wrong id??
 class Edit: public ExecuteCmd {
 public:
 	Edit (vector<cmd_pair>, ToDoMngr*);
@@ -85,5 +86,29 @@ public:
 private:
 	static string MSG_EDITED;
 	void insertBreakPoint ();
+};
+
+class View: public ExecuteCmd {
+public:
+	View (vector<cmd_pair>, ToDoMngr*);
+	~View ();
+	bool execute ();
+	void next ();
+	void prev ();
+	void last ();
+	void first ();
+
+private:
+	static string MSG_NO_NEXT;
+	static string MSG_NO_PREV;
+	static string MSG_WRONG_ID;
+
+	int _taskId;
+	bool _first;
+	bool _last;
+	TimePeriod _period;
+	Time _time;
+	view_t _viewType;
+	bool _activeListAccessible;
 };
 #endif
