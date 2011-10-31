@@ -1,5 +1,4 @@
 #include "ExecuteCmd.h"
-#include "CmdControl.h"
 #include "DataStorage.h"
 #include <iostream>
 #include <string>
@@ -7,26 +6,15 @@
 using namespace std;
 
 int main () {
-cout << "A";
-	VldCmdCtrl vldCmdCtrl (false);
-cout << "B";
+	VldCmdCtrl vldCmdCtrl;
 	vector<VldCmdCtrl::cmd_pair> vldCmd = vldCmdCtrl.get_vldCmdList ();
-cout << "\nsize" << vldCmd.size () << endl;
-cout << "C";
 	ToDoMngr toDo;
-cout << "D";
-	bool force = true;
-cout << "E";
-	Add add (vldCmd, force, &toDo);
-cout << "F";
-	string input = "add sth on now at sw on now";
-cout << "G";
+	Add add (vldCmd, &toDo);
+	string input = "add sth on now at sw on from now";
 	add.updateInput (input);
-cout << "H";
 	cout << add.execute () << endl;
-cout << "I";
 	cout << add.result () << endl;
-cout << "I";
+	cout << add.get_input () << endl;
 
 	return 0;
 }

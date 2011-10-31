@@ -22,7 +22,6 @@ public:
 	};
 
 	VldCmdCtrl ();
-	VldCmdCtrl (bool);
 	vector<cmd_pair> get_vldCmdList ();
 	void load_vldCmdList ();
 	void update_vldCmdList (vector<cmd_pair>&);
@@ -32,21 +31,17 @@ public:
 	static command convertToCommand (int);	
 	command convertToCommand (string);
 	
-	bool search_vldCmd (string&, vector<cmd_pair>::iterator);
 	bool search_vldCmd (string, command&);
-	bool search_standAloneCmd (string, command&);
 
 protected:
 	bool _dotCmd;
 	string _validCmdFile;
 	string _dfltCmdFile;
 	vector<cmd_pair> _validCmd;
-	int standAloneCmdEndPos;
 
 	static string LOST_FILE;
 	static string LOAD_DFLT_CMD;
 
-	vector<cmd_pair> get_vldCmdList (string, int&);
-	bool checkIfVldExtension (command, command);
+	vector<cmd_pair> load_vldCmdList (string);
 };
 #endif

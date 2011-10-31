@@ -4,6 +4,9 @@
 #include "ToDoMngr.h"
 using namespace std;
 
+template <typename data_t>
+void append_back (list<data_t>* main, list<data_t> sub);
+
 class ExecuteCmd: public VldCmdCtrl {
 protected:
 	typedef unsigned short int indx_t;
@@ -35,15 +38,11 @@ protected:
 	queue<input_t>* _sequence;
 	list<string>* _splitedInput;
 	input_t _flagError;
-	bool _dayMonth;
 	ToDoMngr* _toDoMngr;
-
-	virtual void insertBreakPoint ();
 
 	void splitInput ();
 	command translateCmd (string);
 	//return an fresh command and flag command error if command is not valid
-	void checkIfStandAloneCmd ();
 
 	int get_int ();
 	Task get_task ();
@@ -67,7 +66,7 @@ protected:
 
 class Add: public ExecuteCmd {
 public:
-	Add (vector<cmd_pair>, bool&, ToDoMngr*);
+	Add (vector<cmd_pair>, ToDoMngr*);
 	~Add ();
 	bool execute ();
 
@@ -77,4 +76,14 @@ private:
 
 	void insertBreakPoint ();
 };
+
+class Edit: public ExecuteCmd {
+public:
+	Edit (vector<cmd_pair>, ToDoMngr*);
+	~Edit ();
+	bool execute ();
+
+private:
+	static string MSG_EDITED;
+}
 #endif
