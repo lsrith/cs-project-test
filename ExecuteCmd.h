@@ -69,11 +69,10 @@ public:
 	Add (vector<cmd_pair>, ToDoMngr*);
 	~Add ();
 	bool execute ();
+	static string MSG_CLASH;
 
 private:
-	static string MSG_CLASH;
 	static string MSG_ADDED;
-
 	void insertBreakPoint ();
 };
 
@@ -85,5 +84,6 @@ public:
 
 private:
 	static string MSG_EDITED;
-}
+	void insertBreakPoint ();
+};
 #endif

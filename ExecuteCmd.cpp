@@ -913,3 +913,81 @@ void Add::insertBreakPoint () {
 	delete _splitedInput;
 	_splitedInput = temp;
 }
+
+//-----------------------------------------------------------------
+
+string Edit::MSG_EDITED = " is edited.";
+
+Edit::Edit (vector<cmd_pair> validCmd, ToDoMngr* toDoMngr) {
+	_validCmd = validCmd;
+	_toDoMngr = toDoMngr;
+	_sequence = NULL;
+	_dataInput = NULL;
+	_cmdInput = NULL;
+	_splitedInput = NULL;
+}
+
+Edit::~Edit () {
+	clear ();
+}
+
+bool Edit::execute () {
+	bool done;
+	bool force = false;
+	if (!_sequence->empty () && _sequence->front () == CMD && _cmdInput->front () == CEDIT) {
+		pop ();
+	} else {
+		done = true;
+	}
+
+	if (_sequence->empty ()) {
+		return false;
+		_flagError = DATA;
+	}
+
+	if (_sequence->front () == CMD && _cmdInput->front () == CFORCE) {
+		pop ();
+		force = true;
+	}
+
+	int taskId;
+	if (!_sequence->empty () && _sequence->front () == DATA) {
+		taskId = convertToInt (_dataInput->front ());
+		if (taskId < 1) {
+			_flagError = DATA;
+		}
+	} else {
+		_flagError = DATA;
+		return false;
+	}
+
+	Task task = get_task ();
+	if (_flagError == NONE) {
+		list<Task> taskList = _toDoMngr->edit (taskId, task, force);
+		if (!force && !taskList.empty ()) {
+			_result = ToDoMngr::view (task) + Add::MSG_CLASH + ToDoMngr::view (taskList);
+			insertBreakPoint ();
+			done = false;
+		} else {
+			_result = ToDoMngr::view (task) + MSG_EDITED;
+			done = true;
+		}
+	} else {
+		done = false;
+	}
+
+	return done;
+}
+
+void Edit::insertBreakPoint () {
+	list<string>* temp = new list<string>;
+
+	temp->push_back (_splitedInput->front ());
+	_splitedInput->pop_front ();
+	temp->push_back (BREAK);
+	temp->splice (temp->end (), *_splitedInput);
+	
+	delete _splitedInput;
+	_splitedInput = temp;
+}
+

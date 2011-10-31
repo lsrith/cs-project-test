@@ -1100,3 +1100,43 @@ void ToDoMngr::updateStorageName (string storageName) {
 	_clashList.clear ();
 	_dataStorage.updateStorageName (storageName);
 }
+
+list<Task> ToDoMngr::edit (int taskId, Task task, bool forceEdit) {
+	TaskElement taskElem;
+	setTaskElem (&taskElem, &task);
+	return edit (taskId, &taskElem, &task, forceEdit);
+}
+
+
+void ToDoMngr::setTaskElem (ToDoMngr::TaskElement* taskElem, Task* task) {
+	Time dfltTime;
+	if (task->get_time () != dfltTime)
+		taskElem->_time = true;
+	else
+		taskElem->_time = false;
+
+	if (task->get_period ().get_start_time () != dfltTime || task->get_period ().get_end_time () != dfltTime)
+		taskElem->_period = true;
+	else
+		taskElem->_period = false;
+
+	if (!task->note.empty ())
+		taskElem->_note = true;
+	else
+		taskElem->_note = false;
+
+	if (!task->venue.empty ())
+		taskElem->_venue = true;
+	else
+		taskElem->_venue = false;
+
+	if (task->alert != dfltTime)
+		taskElem->_alert = true;
+	else
+		taskElem->_alert = false;
+
+	if (task->repeat != 0)
+		taskElem->_repeat = true;
+	else
+		taskElem->_repeat = false;
+}
