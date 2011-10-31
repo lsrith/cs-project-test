@@ -2,6 +2,7 @@
 #include <sstream>
 #include <vector>
 #include <list>
+#include <cassert>
 #include <iostream>
 using namespace std;
 
@@ -17,27 +18,16 @@ string ExecuteCmd::BREAK = "[break]";
 string ExecuteCmd::MORE = "[more]";
 
 ExecuteCmd::ExecuteCmd () {
-	_sequence = NULL;
-	_dataInput = NULL;
-	_cmdInput = NULL;
-	_splitedInput = NULL;
-}
-
-ExecuteCmd::ExecuteCmd (bool dotCmd) {
-	_validCmdFile = "vldCmd2.txt";
-	_dfltCmdFile = "dfltCmd2.txt";
-
-	_flagError = NONE;
 	try {
 		load_vldCmdList ();
 	} catch (string message) {
 		throw (message);
 	}
 
-	_sequence = new queue<input_t>;
-	_dataInput = new queue<string>;
-	_cmdInput = new queue<command>;
-	_splitedInput = new list<string>;
+	_sequence = NULL;
+	_dataInput = NULL;
+	_cmdInput = NULL;
+	_splitedInput = NULL;
 }
 
 ExecuteCmd::~ExecuteCmd () {
@@ -46,12 +36,8 @@ ExecuteCmd::~ExecuteCmd () {
 
 void ExecuteCmd::clear () {
 	if (_sequence != NULL) {
-cout << "-CA";
-cout << _sequence << endl;
 		delete _sequence;
 		_sequence = NULL;
-	} else {
-cout << "-CB";
 	}
 
 	if (_dataInput != NULL) {
@@ -853,6 +839,7 @@ string Add::MSG_CLASH = " is clashed with the following:\n";
 string Add::MSG_ADDED = " is added.";
 
 Add::Add (vector<cmd_pair> validCmd, ToDoMngr* toDoMngr) {
+	assert (toDoMngr != NULL);
 	_validCmd = validCmd;
 	_toDoMngr = toDoMngr;
 	_sequence = NULL;
@@ -891,6 +878,8 @@ bool Add::execute () {
 			_result = ToDoMngr::view (task) + MSG_CLASH + ToDoMngr::view (taskList);
 			insertBreakPoint ();
 			done = false;
+		} else if (force && !taskList.empty ()) {
+			assert (force == taskList.empty ());
 		} else {
 			_result = ToDoMngr::view (task) + MSG_ADDED;
 			done = true;
@@ -919,6 +908,7 @@ void Add::insertBreakPoint () {
 string Edit::MSG_EDITED = " is edited.";
 
 Edit::Edit (vector<cmd_pair> validCmd, ToDoMngr* toDoMngr) {
+	assert (toDoMngr != NULL);
 	_validCmd = validCmd;
 	_toDoMngr = toDoMngr;
 	_sequence = NULL;
@@ -998,12 +988,14 @@ string View::MSG_NO_PREV = "This is the first!";
 string View::MSG_WRONG_ID = "Invalid index entered!";
 
 View::View (vector<cmd_pair> validCmd, ToDoMngr* toDoMngr) {
+	assert (toDoMngr != NULL);
 	_validCmd = validCmd;
 	_toDoMngr = toDoMngr;
 	_taskId = 0;
 	_first = false;
 	_last = false;
 	_viewType = DAILY;
+	_traverse = true;
 	_activeListAccessible = false;
 	_sequence = NULL;
 	_dataInput = NULL;
@@ -1044,6 +1036,7 @@ bool View::execute () {
 
 	if (_sequence->empty ()) {
 		TimePeriod period;
+		_activeListAccessible = true;
 		_result = _toDoMngr->view (period);
 		return true;
 	}
@@ -1067,6 +1060,7 @@ bool View::execute () {
 			_period = get_period ();
 			
 			if (_flagError == NONE) {
+				_activeListAccessible = true;
 				_result = _toDoMngr->view (_period);
 			}
 			break;
@@ -1077,12 +1071,14 @@ bool View::execute () {
 		case CTMR:
 			_time = get_time ();
 			if (_flagError == NONE) {
+				_activeListAccessible = true;
 				_result = _toDoMngr->view (_viewType, _time);
 			}
 			break;
 		case CTABLE:
 			pop ();
 			if (!_sequence->empty () && _sequence->front () == DATA) {
+				_activeListAccessible = true;
 				_result = _toDoMngr->view (mergeStringInput ());
 			} else {
 				_flagError = DATA;
@@ -1101,7 +1097,10 @@ bool View::execute () {
 	return done;
 }
 
-void View::next () {
+string View::next () {
+	if (!_traverse)
+		return _result;
+
 	_first = false;
 
 	if (_taskId != 0) {
@@ -1148,9 +1147,14 @@ void View::next () {
 
 	if (_last)
 		_result = MSG_NO_NEXT;
+
+	return _result;
 }
 
-void View::prev () {
+string View::prev () {
+	if (!_traverse)
+		return _result;
+
 	_last = false;
 
 	if (_taskId != 0) {
@@ -1196,9 +1200,14 @@ void View::prev () {
 
 	if (_first)
 		_result = MSG_NO_PREV;
+
+	return _result;
 }
 
-void View::first () {
+string View::first () {
+	if (!_traverse)
+		return _result;
+
 	string temp;
 	
 	while (!_first) {
@@ -1206,10 +1215,13 @@ void View::first () {
 		if (!_first)
 			temp = _result;
 	}
-	_result = temp;
+	return _result = temp;
 }
 
-void View::last () {
+string View::last () {
+	if (!_traverse)
+		return _result;
+	
 	string str;
 	string temp;
 	
@@ -1218,38 +1230,13 @@ void View::last () {
 		if (!_last)
 			temp = _result;
 	}
-	_result = temp;
+	return _result = temp;
 }
 
-//---------------------------------------------------------------
-
-Reminder::Reminder (ToDoMngr* toDoMngr) {
-	_toDoMngr = toDoMngr;
-}
-
-bool Reminder::execute () {
-	_result = _toDoMngr->reminder ();
-	return true;
-}
-
-//---------------------------------------------------------------
-
-History::History (ToDoMngr* toDoMngr) {
-	_toDoMngr = toDoMngr;
-	_undo = true;
-}
-
-void History::undo (bool __undo) {
-	_undo = __undo;
-}
-
-bool History::execute () {
-	if (_undo) {
-		_toDoMngr->undo ();
-	} else {
-		_toDoMngr->redo ();
-	}
-	return true;
+void View::deactivateTraverse () {
+	_traverse = false;
+	if (_result.size ())
+		_result.erase (0, string::npos);
 }
 
 //---------------------------------------------------------------
@@ -1257,6 +1244,7 @@ bool History::execute () {
 string Delete::MSG_DELETED = " is deleted.";
 
 Delete::Delete (vector<cmd_pair> validCmd, ToDoMngr* toDoMngr) {
+	assert (toDoMngr != NULL);
 	_validCmd = validCmd;
 	_toDoMngr = toDoMngr;
 	_sequence = NULL;

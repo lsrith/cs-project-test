@@ -14,7 +14,6 @@ protected:
 
 public:
 	ExecuteCmd ();
-	ExecuteCmd (bool);
 	~ExecuteCmd ();
 	//Command will load CmdList from built-in file
 	//true if the user wants the '.' command
@@ -93,10 +92,11 @@ public:
 	View (vector<cmd_pair>, ToDoMngr*);
 	~View ();
 	bool execute ();
-	void next ();
-	void prev ();
-	void last ();
-	void first ();
+	void deactivateTraverse ();
+	string next ();
+	string prev ();
+	string last ();
+	string first ();
 
 private:
 	static string MSG_NO_NEXT;
@@ -109,23 +109,8 @@ private:
 	TimePeriod _period;
 	Time _time;
 	view_t _viewType;
+	bool _traverse;
 	bool _activeListAccessible;
-};
-
-class Reminder: public ExecuteCmd {
-public:
-	Reminder (ToDoMngr*);
-	bool execute ();
-};
-
-class History: public ExecuteCmd {
-public:
-	History (ToDoMngr*);
-	void undo (bool);
-	bool execute ();
-
-private:
-	bool _undo;
 };
 
 class Delete: public ExecuteCmd {

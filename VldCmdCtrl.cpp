@@ -2,7 +2,6 @@
 #include <string>
 #include <vector>
 #include <fstream>
-#include <iostream>
 using namespace std;
 
 string VldCmdCtrl::LOST_FILE = "unable to find a file: ";
@@ -128,7 +127,7 @@ VldCmdCtrl::command VldCmdCtrl::convertToCommand (int indx) {
 		case 38:	cmd = CSORT;		break;
 		case 39:	cmd = CSEARCH;		break;
 		case 40:	cmd = CCLEAR;		break;
-		case 41:	cmd = CRESET;		break;
+		case 41:	cmd = CUSER;		break;
 		case 42:	cmd = CEXIT;		break;
 		case 43:	cmd = CDISCARD;		break;
 		case 44:	cmd = CREPLACE;		break;
@@ -202,7 +201,7 @@ string VldCmdCtrl::convertToString (command cmd) {
 	case (CSORT):		str = "sort";		break;
 	case (CSEARCH):		str = "search";		break;
 	case (CCLEAR):		str = "clear";		break;
-	case (CRESET):		str = "reset";		break;
+	case (CUSER):		str = "user";		break;
 	case (CEXIT):		str = "exit";		break;
 	case (CDISCARD):	str = "discard";	break;
 	case (CREPLACE):	str = "replace";	break;

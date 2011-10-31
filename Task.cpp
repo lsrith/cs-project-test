@@ -1,6 +1,5 @@
 #include "Task.h"
 #include <sstream>
-#include <iostream>
 using namespace std;
 
 string Task::spaceMarker = " _' ";

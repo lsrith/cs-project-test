@@ -4,9 +4,7 @@
 #include <string>
 #include <sstream>
 #include <fstream>
-#include <ctime>
 #include <iomanip>
-#include <iostream>
 #include <windows.h>
 using namespace std;
 
@@ -912,8 +910,6 @@ bool ToDoMngr::ifExistedTable (string tableName) {
 
 list<Task> ToDoMngr::add(Task task, bool forceAdd)                                                                      
 {
-cout << "A" << endl;
-cout << task.stringConvert () << endl;
  list<Task> _addList;
  if(forceAdd == true || task.timeTask == true)
  { 
