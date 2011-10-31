@@ -992,6 +992,7 @@ void Edit::insertBreakPoint () {
 }
 
 //----------------------------------------------------------------
+
 string View::MSG_NO_NEXT = "This is the last!";
 string View::MSG_NO_PREV = "This is the first!";
 string View::MSG_WRONG_ID = "Invalid index entered!";
@@ -1218,4 +1219,93 @@ void View::last () {
 			temp = _result;
 	}
 	_result = temp;
+}
+
+//---------------------------------------------------------------
+
+Reminder::Reminder (ToDoMngr* toDoMngr) {
+	_toDoMngr = toDoMngr;
+}
+
+bool Reminder::execute () {
+	_result = _toDoMngr->reminder ();
+	return true;
+}
+
+//---------------------------------------------------------------
+
+History::History (ToDoMngr* toDoMngr) {
+	_toDoMngr = toDoMngr;
+	_undo = true;
+}
+
+void History::undo (bool __undo) {
+	_undo = __undo;
+}
+
+bool History::execute () {
+	if (_undo) {
+		_toDoMngr->undo ();
+	} else {
+		_toDoMngr->redo ();
+	}
+	return true;
+}
+
+//---------------------------------------------------------------
+
+string Delete::MSG_DELETED = " is deleted.";
+
+Delete::Delete (vector<cmd_pair> validCmd, ToDoMngr* toDoMngr) {
+	_validCmd = validCmd;
+	_toDoMngr = toDoMngr;
+	_sequence = NULL;
+	_dataInput = NULL;
+	_cmdInput = NULL;
+	_splitedInput = NULL;
+}
+
+Delete::~Delete () {
+	clear ();
+}
+
+bool Delete::execute () {
+	Task task;
+	TimePeriod period;
+	int taskId;
+
+	if (_sequence->empty () == false) {
+		switch (_sequence->front ()) {
+		case DATA:
+			taskId = convertToInt (_dataInput->front ());
+			task = _toDoMngr->erase (taskId);
+			if (task.get_index () != 0) {
+				_result = ToDoMngr::view (task) + MSG_DELETED;
+				pop ();
+			}
+			break;
+		case CMD:
+			switch (_cmdInput->front ()) {
+			case CFROM:
+			case CTO:
+				period = get_period ();
+				if (_flagError == NONE)
+					_toDoMngr->erase (period);
+				break;
+			case CTABLE:
+				pop ();
+				_toDoMngr->erase(mergeSimStringInput ());
+				break;
+			default:
+				break;
+			}
+		default:
+			break;
+		}
+	}
+
+	if (_flagError == NONE)
+		return true;
+	else
+		return false;
 }
