@@ -16,35 +16,20 @@ int main () {
 	ToDoMngr toDoMngr;
 	ToDoMngr* toDo = &toDoMngr;
 
-	//logging in the program
-	input = VldCmdCtrl::convertToString (VldCmdCtrl::CUSER);
-	AccCtrl userAcc (toDo);
-	while (!userAcc.execute ()) {
-		input = userAcc.get_input ();
-		output = userAcc.result ();
-		cout << output;
-		getline (cin, newInput);
-		input += newInput;
-	}
-
 	VldCmdCtrl cmdCtrl;
-	input.erase (0, string::npos);
-	output.erase (0, string::npos);
 	bool prompt;
-	VldCmdCtrl::command cmd;
+	VldCmdCtrl::command cmd = VldCmdCtrl::CUSER;
 //	Merge merge (cmdCtrl.get_vldCmdList ());
 	ExecuteCmd* exeCmd = NULL;
+	AccCtrl userAcc (toDo);
 	Add add (cmdCtrl.get_vldCmdList (), toDo);
 	Edit edit (cmdCtrl.get_vldCmdList (), toDo);
 	View view (cmdCtrl.get_vldCmdList (), toDo);
 	Delete erase (cmdCtrl.get_vldCmdList (), toDo);
-	do {
-		cout << ">> ";
-		getline (cin, newInput);
 
-//		merge.update (input, newInput);
-//		input = merge.execute ();
-		input = newInput;
+	input = VldCmdCtrl::convertToString (VldCmdCtrl::CUSER);
+
+	do {
 		prompt = false;
 		while (!input.empty () && !prompt) {
 			cmd = getFirstCmd (&input, &cmdCtrl);
@@ -141,6 +126,12 @@ int main () {
 		}
 		cout << output << endl;
 		output.erase (0, string::npos);
+		cout << ">> ";
+		getline (cin, newInput);
+
+//		merge.update (input, newInput);
+//		input = merge.execute ();
+		input = newInput;
 	} while (cmd != VldCmdCtrl::CEXIT);
 	return 0;
 }
