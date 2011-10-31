@@ -23,6 +23,13 @@ CmdTrans::~CmdTrans () {
 }
 
 void CmdTrans::splitInput (string& _input) {
+	_sequence = new (nothrow) queue<input_t>;
+	_dataInput = new (nothrow) queue<string>;
+	_cmdInput = new (nothrow) queue<command>;
+	_splitedInput = new (nothrow) list<string>;
+
+	assert (_sequence != NULL && _dataInput != NULL && _cmdInput != NULL && _splitedInput != NULL);
+
 	string temp;
 	command cmd;
 	unsigned int end_pos = 0;

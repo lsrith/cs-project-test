@@ -50,6 +50,9 @@ Add::~Add () {
 bool Add::execute () {
 	bool done;
 	bool force = false;
+	
+	splitInput (_input);
+
 	if (!_sequence->empty () && _sequence->front () == CMD && _cmdInput->front () == CADD) {
 		pop ();
 	} else {
@@ -65,7 +68,6 @@ bool Add::execute () {
 		pop ();
 		force = true;
 	}
-
 	Task task = get_task ();
 	if (_flagError == NONE) {
 		list<Task> taskList = _toDoMngr->add (task, force);
@@ -83,6 +85,7 @@ bool Add::execute () {
 		done = false;
 	}
 
+	_input = getLeftOverInput ();
 	return done;
 }
 
@@ -119,6 +122,9 @@ Edit::~Edit () {
 bool Edit::execute () {
 	bool done;
 	bool force = false;
+
+	splitInput (_input);
+
 	if (!_sequence->empty () && _sequence->front () == CMD && _cmdInput->front () == CEDIT) {
 		pop ();
 	} else {
@@ -161,6 +167,7 @@ bool Edit::execute () {
 		done = false;
 	}
 
+	_input = getLeftOverInput ();
 	return done;
 }
 
@@ -204,6 +211,9 @@ View::~View () {
 
 bool View::execute () {
 	bool done;
+	
+	splitInput (_input);
+
 	if (!_sequence->empty () && _sequence->front () == CMD && _cmdInput->front () == CVIEW) {
 		pop ();
 	} else {
@@ -289,6 +299,7 @@ bool View::execute () {
 		break;
 	}
 
+	_input = getLeftOverInput ();
 	return done;
 }
 
@@ -457,6 +468,9 @@ bool Delete::execute () {
 	TimePeriod period;
 	int taskId;
 
+	splitInput (_input);
+
+
 	if (_sequence->empty () == false) {
 		switch (_sequence->front ()) {
 		case DATA:
@@ -486,6 +500,8 @@ bool Delete::execute () {
 			break;
 		}
 	}
+
+	_input = getLeftOverInput ();
 
 	if (_flagError == NONE)
 		return true;
