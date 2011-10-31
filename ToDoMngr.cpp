@@ -1140,3 +1140,14 @@ void ToDoMngr::setTaskElem (ToDoMngr::TaskElement* taskElem, Task* task) {
 	else
 		taskElem->_repeat = false;
 }
+
+bool ToDoMngr::activateTable (string tableName) {
+	return false;
+}
+
+void ToDoMngr::deactivateTable () {
+}
+
+bool ToDoMngr::getTableActivationStatus () {
+	return false;
+}

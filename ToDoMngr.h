@@ -36,6 +36,9 @@ public:
 	void clear ();
 	// delete everything in the dataStorage
 	string search (search_t, string);
+	bool activateTable (string tableName);
+	void deactivateTable ();
+	bool getTableActivationStatus ();
 
 //Ris:
 	static string view (Task taskId);
