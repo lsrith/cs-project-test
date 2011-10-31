@@ -111,4 +111,30 @@ private:
 	view_t _viewType;
 	bool _activeListAccessible;
 };
+
+class Reminder: public ExecuteCmd {
+public:
+	Reminder (ToDoMngr*);
+	bool execute ();
+};
+
+class History: public ExecuteCmd {
+public:
+	History (ToDoMngr*);
+	void undo (bool);
+	bool execute ();
+
+private:
+	bool _undo;
+};
+
+class Delete: public ExecuteCmd {
+public:
+	Delete (vector<cmd_pair>, ToDoMngr*);
+	~Delete ();
+	bool execute ();
+
+private:
+	static string MSG_DELETED;
+};
 #endif
