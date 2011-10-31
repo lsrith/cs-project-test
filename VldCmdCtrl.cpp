@@ -21,36 +21,39 @@ VldCmdCtrl::VldCmdCtrl (bool dotCmd) {
 		_dfltCmdFile = "dfltCmd2.txt";
 		_dotCmd = false;
 	}
-	_validDayMnth = "vldDM.txt";
 
 	try {
-		get_vldCmdList (_validCmd, standAloneCmdEndPos);
+		load_vldCmdList ();
 	} catch (string message) {
 		throw message;
 	}
 }
 
-void VldCmdCtrl::get_vldCmdList (vector<cmd_pair>& validCmd, int& endPos) {
+void VldCmdCtrl::load_vldCmdList () {
 	try {
-		validCmd = get_vldCmdList (_validCmdFile, endPos);
-		if (validCmd.empty ()) {
+		_validCmd = get_vldCmdList (_validCmdFile, standAloneCmdEndPos);
+		if (_validCmd.empty ()) {
 			try {
-				resetCmd ();
+				reset ();
 			} catch (string Message) {
 				throw (Message);
 			}
 			
-			get_vldCmdList (validCmd, endPos);
+			get_vldCmdList ();
 		}
 	} catch (string message) {
 		try {
-			resetCmd ();
+			reset ();
 		} catch (string Message) {
 			throw (Message);
 		}
 			
-		get_vldCmdList (validCmd, endPos);
+		get_vldCmdList ();
 	}
+}
+
+vector<VldCmdCtrl::cmd_pair> VldCmdCtrl::get_vldCmdList () {
+	return _validCmd;
 }
 
 vector<VldCmdCtrl::cmd_pair> VldCmdCtrl::get_vldCmdList (string cmdFile, int& endPos){
@@ -79,17 +82,6 @@ vector<VldCmdCtrl::cmd_pair> VldCmdCtrl::get_vldCmdList (string cmdFile, int& en
 	return validCmd;
 }
 
-bool VldCmdCtrl::get_dayMonth () {
-	bool dayMonth;
-	ifstream inFile (_validDayMnth);
-	if (inFile.is_open ())
-		inFile >> dayMonth;
-	else
-		dayMonth = true;
-	
-	return dayMonth;
-}
-
 void VldCmdCtrl::update_vldCmdList (vector<cmd_pair>& validCmd) {
 	ofstream outFile (_validCmdFile);
 	int size = validCmd.size ();
@@ -98,18 +90,7 @@ void VldCmdCtrl::update_vldCmdList (vector<cmd_pair>& validCmd) {
 	outFile.close ();
 }
 
-void VldCmdCtrl::update_dayMonth (bool& dayMnth) {
-	ofstream outFile (_validDayMnth);
-	outFile << dayMnth;
-	outFile.close ();
-}
-
 void VldCmdCtrl::reset () {
-	resetCmd ();
-	resetDateType ();
-}
-
-void VldCmdCtrl::resetCmd () {
 	ifstream inFile (_dfltCmdFile);
 	ofstream outFile (_validCmdFile);
 
@@ -121,12 +102,6 @@ void VldCmdCtrl::resetCmd () {
 		throw (LOST_FILE + _dfltCmdFile);
 
 	inFile.close ();
-	outFile.close ();
-}
-
-void VldCmdCtrl::resetDateType () {
-	ofstream outFile (_validDayMnth);
-	outFile << 1;
 	outFile.close ();
 }
 

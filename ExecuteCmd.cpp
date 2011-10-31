@@ -5,7 +5,13 @@
 #include <iostream>
 using namespace std;
 
+string ExecuteCmd::BREAK = "[break]";
+string ExecuteCmd::MORE = "[more]";
+
 ExecuteCmd::ExecuteCmd () {
+	_sequence = NULL;
+	_dataInput = NULL;
+	_cmdInput = NULL;
 }
 
 ExecuteCmd::ExecuteCmd (bool dotCmd) {
@@ -18,106 +24,142 @@ ExecuteCmd::ExecuteCmd (bool dotCmd) {
 		_dfltCmdFile = "dfltCmd2.txt";
 		_dotCmd = false;
 	}
-	_validDayMnth = "vldDM.txt";
 
 	_flagError = NONE;
 	try {
-		get_vldCmdList (_validCmd, standAloneCmdEndPos);
+		get_vldCmdList ();
 	} catch (string message) {
 		throw (message);
 	}
-	_dayMonth = get_dayMonth ();
 
 	_sequence = new queue<input_t>;
 	_dataInput = new queue<string>;
 	_cmdInput = new queue<command>;
-	_splitedInput = new queue<string>;
+	_splitedInput = new list<string>;
 }
 
 ExecuteCmd::~ExecuteCmd () {
-	if (_sequence != NULL)
+	clear ();
+}
+
+void ExecuteCmd::clear () {
+	if (_sequence != NULL) {
+cout << "-CA";
+cout << _sequence << endl;
 		delete _sequence;
+		_sequence = NULL;
+	} else {
+cout << "-CB";
+	}
 
-	if (_dataInput != NULL)
+	if (_dataInput != NULL) {
 		delete _dataInput;
+		_dataInput = NULL;
+	}
 
-	if (_cmdInput != NULL)
+	if (_cmdInput != NULL) {
 		delete _cmdInput;
+		_cmdInput = NULL;
+	}
 
-	if (_splitedInput != NULL)
+	if (_splitedInput != NULL) {
 		delete _splitedInput;
+		_splitedInput = NULL;
+	}
 }
 
 void ExecuteCmd::updateInput (string& input) {
+cout << "A";
 	clear ();
+cout << "B";
+	_sequence = new queue<input_t>;
+	_dataInput = new queue<string>;
+	_cmdInput = new queue<command>;
+	_splitedInput = new list<string>;
+cout << "C";
 	_input = input;
 	_flagError = NONE;
-
+cout << "D";
 	try {
 		splitInput ();
+cout << "E";
 	} catch (string message) {
+cout << "F";
 		throw (message);
 	}
 };
+
+string ExecuteCmd::get_input () {
+	string input;
+	int size = _sequence->size ();
+	if (_flagError == NONE) {
+		while (_splitedInput->size () > size) {
+			_splitedInput->pop_front ();
+		}
+
+		while (!_splitedInput->empty ()) {
+			input += _splitedInput->front ();
+			_splitedInput->pop_front ();
+		}
+	} else {		
+		while (!_splitedInput->empty () > size) {
+			input += _splitedInput->front ();
+			_splitedInput->pop_front ();
+		}
+
+		if (size > 0)
+			input += BREAK + " ";
+		else
+			input += MORE + " ";
+
+		while (!_splitedInput->empty ()) {
+			input += _splitedInput->front ();
+			_splitedInput->pop_front ();
+		}		
+	}
+	return input.substr (0, input.size () - 1);
+}
+
+string ExecuteCmd::result () {
+	return _result;
+}
+
+bool ExecuteCmd::execute () {
+	return false;
+}
+
+void ExecuteCmd::insertBreakPoint () {
+}
 
 void ExecuteCmd::splitInput () {
 	string temp;
 	command cmd;
 	unsigned int end_pos = 0;
 
-	if (_dotCmd) {
-		checkIfStandAloneCmd ();
-		while (!_input.empty ()) {
-			if (_input[0] == '.' || _input[0] == '-') {
-				end_pos = _input.find_first_of (" .-", 1);
-				temp = _input.substr (0, end_pos);
-				cmd = translateCmd (temp);
-				if (_flagError != CMD) {
-					push (cmd);
-					if (end_pos == string::npos || _input[end_pos] != ' ')
-						_input.erase (0, end_pos);
-					else
-						_input.erase (0, end_pos + 1);
-					break;
-				} else {
-					push (temp);
-				}
-			} else {
-				end_pos = _input.find_first_of (" .\n");
-				while (end_pos != string::npos && _input[end_pos] == '.' && _input[end_pos - 1] != ' ')
-					end_pos = _input.find_first_of (" .\n", end_pos + 1);
-				temp = _input.substr (0, end_pos);
+	while (!_input.empty ()) {
+		if (_input[0] == '\"') {
+			end_pos = _input.find_first_of ('\"', 1);
+			temp = _input.substr (1, end_pos - 1);
+			push (temp);
+			end_pos++;
+		} else {
+			end_pos = _input.find_first_of (' ', 0);
+			temp = _input.substr (0, end_pos);
+			cmd = translateCmd (temp);
+			if (_flagError == CMD) {
 				push (temp);
-				if (end_pos != string::npos)
-					_input.erase (0, end_pos + 1);
-				else
-					_input.erase (0, end_pos);
+				_flagError = NONE;
+			} else {
+				push (cmd);
 			}
 		}
-	} else {
-		while (!_input.empty ()) {
-			if (_input[0] == '\"') {
-				end_pos = _input.find_first_of ('\"', 1);
-				temp = _input.substr (1, end_pos - 1);
-				push (temp);
-				end_pos++;
-			} else {
-				end_pos = _input.find_first_of (' ', 0);
-				temp = _input.substr (0, end_pos);
-				cmd = translateCmd (temp);
-				if (_flagError == CMD) {
-					push (temp);
-					_flagError = NONE;
-				} else {
-					push (cmd);
-				}
-			}
 
-			if (end_pos != string::npos)
-				_input.erase (0, end_pos + 1);
-			else
-				_input.erase (0, end_pos);
-		}
+		if (end_pos != string::npos)
+			_input.erase (0, end_pos + 1);
+		else
+			_input.erase (0, end_pos);
+
+		_splitedInput->push_back (temp);
 	}
 }
 
@@ -828,11 +870,6 @@ VldCmdCtrl::command ExecuteCmd::translateCmd (string str) {
 		command prev = CVOID;
 		if (!_cmdInput->empty ())
 			prev = _cmdInput->back ();
-
-		bool vldExt = checkIfVldExtension (cmd, prev);
-
-		if (!vldExt)
-			_flagError = CMD;
 	}
 
 	return cmd;
@@ -868,22 +905,82 @@ bool ExecuteCmd::pop () {
 		return false;
 }
 
-void ExecuteCmd::clear () {
-	clear (_sequence);
-	clear (_cmdInput);
-	clear (_dataInput);
+//-----------------------------------------------------------------
+
+string Add::MSG_CLASH = " is clashed with the following:\n";
+string Add::MSG_ADDED = " is added.";
+
+Add::Add (vector<cmd_pair> validCmd, bool& dayMonth, ToDoMngr* toDoMngr) {
+	_validCmd = validCmd;
+	_dayMonth = dayMonth;
+	_toDoMngr = toDoMngr;
+	_sequence = NULL;
+	_dataInput = NULL;
+	_cmdInput = NULL;
+	_splitedInput = NULL;
 }
 
-template <typename data_t>
-void clear (queue<data_t>* Q) {
-	while (!Q->empty ())
-		Q->pop ();
+Add::~Add () {
+	clear ();
 }
 
-template <typename data_t>
-void append (queue<data_t>* Q1, queue<data_t> Q2) {
-	while (!Q2.empty ()) {
-		Q1->push (Q2.front ());
-		Q2.pop ();
+bool Add::execute () {
+	bool done;
+	bool force = false;
+cout << "\nAA";
+	if (!_sequence->empty () && _sequence->front () == CMD && _cmdInput->front () == CADD) {
+		pop ();
+	} else {
+		done = true;
 	}
+cout << "\nAB";
+	if (_sequence->empty ()) {
+		return false;
+		_flagError = DATA;
+	}
+cout << "\nAC";
+	if (_sequence->front () == CMD && _cmdInput->front () == CFORCE) {
+		pop ();
+		force = true;
+	}
+cout << "\nAD";
+	Task task = get_task ();
+cout << task.stringConvert () << endl;
+cout << "\nAE";	
+	if (_flagError == NONE) {
+_toDoMngr->exit ();
+cout << "\ncase NONE";
+		string a;
+		list<Task> taskList;
+cout << "??";
+		taskList = _toDoMngr->add (task, force);
+cout << "\nAF";
+		if (!force && !taskList.empty ()) {
+cout << "force" << endl;
+			_result = ToDoMngr::view (task) + MSG_CLASH + ToDoMngr::view (taskList);
+			insertBreakPoint ();
+			done = false;
+		} else {
+cout << "iforce" << endl;
+			_result = ToDoMngr::view (task) + MSG_ADDED;
+			done = true;
+		}
+	} else {
+cout << "\ncase NOTNONE";
+		done = false;
+	}
+
+	return done;
+}
+
+void Add::insertBreakPoint () {
+	list<string>* temp = new list<string>;
+
+	temp->push_back (_splitedInput->front ());
+	_splitedInput->pop_front ();
+	temp->push_back (BREAK);
+	temp->splice (temp->end (), *_splitedInput);
+	
+	delete _splitedInput;
+	_splitedInput = temp;
 }

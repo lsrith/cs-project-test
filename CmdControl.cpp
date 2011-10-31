@@ -30,7 +30,6 @@ CmdControl::CmdControl (bool dotCmd) {
 		_dfltCmdFile = "dfltCmd2.txt";
 		_dotCmd = false;
 	}
-	_validDayMnth = "vldDM.txt";
 
 	_sequence = &_1stSeq;
 	_cmdInput = &_1stCmd;
@@ -42,12 +41,11 @@ CmdControl::CmdControl (bool dotCmd) {
 	_activeListAccessible = false;
 	clearTaskElement ();
 	try {
-		get_vldCmdList (_validCmd, standAloneCmdEndPos);
+		load_vldCmdList ();
 	} catch (string message) {
 		throw (message);
 	}
 	
-	_dayMonth = get_dayMonth ();
 	log.log ("cmdControl");
 }
 
@@ -348,7 +346,6 @@ string CmdControl::executeCmd (command cmd) {
 			pop ();
 			_tableName.erase ();
 		} else {
-			update_dayMonth (_dayMonth);
 			_toDoMngr.exit ();
 			exit (true);
 		}
@@ -715,7 +712,7 @@ string CmdControl::executeADD () {
 		pop ();
 		_force = true;
 	}
-cout << "add" << _task.stringConvert () << endl;
+
 	update_task (&_task);
 	
 	switch (_flagError) {
@@ -918,7 +915,6 @@ string CmdControl::executeLAST () {
 
 //some elements are unexpectedly modified :(
 void CmdControl::update_task (Task* taskPtr) {
-	TimePeriod period;
 	if (!_sequence->empty () && _sequence->front () == DATA) {
 		taskPtr->note = mergeStringInput ();
 		_taskElement._note = true;

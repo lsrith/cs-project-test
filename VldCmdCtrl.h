@@ -23,12 +23,9 @@ public:
 
 	VldCmdCtrl ();
 	VldCmdCtrl (bool);
-	void get_vldCmdList (vector<cmd_pair>&, int&);
-	bool get_dayMonth ();
+	vector<cmd_pair> get_vldCmdList ();
+	void load_vldCmdList ();
 	void update_vldCmdList (vector<cmd_pair>&);
-	void update_dayMonth (bool&);
-	void resetCmd ();
-	void resetDateType ();
 	void reset ();
 
 	static string convertToString (command);
@@ -43,7 +40,6 @@ protected:
 	bool _dotCmd;
 	string _validCmdFile;
 	string _dfltCmdFile;
-	string _validDayMnth;
 	vector<cmd_pair> _validCmd;
 	int standAloneCmdEndPos;
 

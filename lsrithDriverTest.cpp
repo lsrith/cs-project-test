@@ -1,3 +1,4 @@
+#include "ExecuteCmd.h"
 #include "CmdControl.h"
 #include "DataStorage.h"
 #include <iostream>
@@ -5,6 +6,52 @@
 #include <ctime>
 using namespace std;
 
+int main () {
+cout << "A";
+	VldCmdCtrl vldCmdCtrl (false);
+cout << "B";
+	vector<VldCmdCtrl::cmd_pair> vldCmd = vldCmdCtrl.get_vldCmdList ();
+cout << "\nsize" << vldCmd.size () << endl;
+cout << "C";
+	ToDoMngr toDo;
+cout << "D";
+	bool force = true;
+cout << "E";
+	Add add (vldCmd, force, &toDo);
+cout << "F";
+	string input = "add sth on now at sw on now";
+cout << "G";
+	add.updateInput (input);
+cout << "H";
+	cout << add.execute () << endl;
+cout << "I";
+	cout << add.result () << endl;
+cout << "I";
+
+	return 0;
+}
+
+/*
+int main () {
+	string str;
+	bool dotCmd;
+	cout << "dotCmd = ";
+	cin >> dotCmd;
+	try {
+		CmdControl cmdControl (dotCmd);
+		while (true) {
+			cout << "command: ";
+			getline (cin, str);
+			cmdControl.addInput (str);
+			cout << cmdControl.executeCmd () << endl;
+		}
+	} catch (string xcpt) {
+		cout << xcpt << endl;
+	}
+	return 0;
+}
+
+*/
 /*
 int main () {
 
@@ -70,6 +117,7 @@ cout << "finished viewing " << end - start << endl;
 	return 0;
 }
 */
+
 /*
 int main () {
 	CmdControl cmdControl;
@@ -77,25 +125,6 @@ int main () {
 	return 0;
 }
 */
-
-int main () {
-	string str;
-	bool dotCmd;
-	cout << "dotCmd = ";
-	cin >> dotCmd;
-	try {
-		CmdControl cmdControl (dotCmd);
-		while (true) {
-			cout << "command: ";
-			getline (cin, str);
-			cmdControl.addInput (str);
-			cout << cmdControl.executeCmd () << endl;
-		}
-	} catch (string xcpt) {
-		cout << xcpt << endl;
-	}
-	return 0;
-}
 
 /*
 int main ()

@@ -24,11 +24,8 @@ public:
 	virtual bool execute ();
 	string result ();
 
-	template <typename data_t>
-	void clear (queue<data_t>* Q);
-
-	template <typename data_t>
-	void append (queue<data_t>* Q1, queue<data_t> Q2);
+	static string BREAK;
+	static string MORE;
 
 protected:
 	string _input;
@@ -36,9 +33,12 @@ protected:
 	queue<command>* _cmdInput;
 	queue<string>* _dataInput;
 	queue<input_t>* _sequence;
-	queue<string>* _splitedInput;
+	list<string>* _splitedInput;
 	input_t _flagError;
 	bool _dayMonth;
+	ToDoMngr* _toDoMngr;
+
+	virtual void insertBreakPoint ();
 
 	void splitInput ();
 	command translateCmd (string);
@@ -63,5 +63,18 @@ protected:
 	void push (string);
 	void clear ();
 	bool pop ();
+};
+
+class Add: public ExecuteCmd {
+public:
+	Add (vector<cmd_pair>, bool&, ToDoMngr*);
+	~Add ();
+	bool execute ();
+
+private:
+	static string MSG_CLASH;
+	static string MSG_ADDED;
+
+	void insertBreakPoint ();
 };
 #endif
