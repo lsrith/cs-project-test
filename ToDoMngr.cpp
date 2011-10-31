@@ -1028,8 +1028,11 @@ list<Task> ToDoMngr::add(Task task, bool forceAdd)
  if(forceAdd == true || task.timeTask == true)
  { 
   // forceAdd is true or is timetask 
-  _addList.push_back(task);
-  _dataStorage.save(_addList); 
+  Task *ptr = &Task;
+  list<Task> *_newList;
+  _addList.push_back(ptr);
+  _dataStorage.save(_newList); 
+  
   
   // and return empty list
   _addList.clear();
@@ -1066,8 +1069,10 @@ list<Task> ToDoMngr::add(Task task, bool forceAdd)
   }
   else
   {
-  _addList.push_back(task);
-  _dataStorage.save(_addList); 
+  Task *ptr = &Task;
+  list<Task> *_newList;
+  _addList.push_back(ptr);
+  _dataStorage.save(_newList); 
   
   // and return empty list
   _addList.clear();
