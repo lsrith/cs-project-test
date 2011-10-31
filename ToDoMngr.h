@@ -76,6 +76,8 @@ public:
 	// if forceAdd is true, just add and return a fresh list
 	// else return the clashed tasks
 
+	list<Task> edit (int taskId, Task task, bool forceEdit);
+	void setTaskElem (TaskElement*, Task*);
 	list<Task> edit (int taskId, TaskElement* taskElem, Task* task, bool forceEdit);
 	// edit elements in the tasks, for any of the taskElem->element = true, edit task->element
 	// if forceEdit is true, just edit and return a fresh list
