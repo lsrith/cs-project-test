@@ -9,18 +9,8 @@ string VldCmdCtrl::LOST_FILE = "unable to find a file: ";
 string VldCmdCtrl::LOAD_DFLT_CMD = "Loaded default command!";
 
 VldCmdCtrl::VldCmdCtrl () {
-}
-
-VldCmdCtrl::VldCmdCtrl (bool dotCmd) {
-	if (dotCmd) {
-		_validCmdFile = "vldCmd1.txt";
-		_dfltCmdFile = "dfltCmd1.txt";
-		_dotCmd = true;
-	} else {
-		_validCmdFile = "vldCmd2.txt";
-		_dfltCmdFile = "dfltCmd2.txt";
-		_dotCmd = false;
-	}
+	_validCmdFile = "vldCmd2.txt";
+	_dfltCmdFile = "dfltCmd2.txt";
 
 	try {
 		load_vldCmdList ();
@@ -31,7 +21,7 @@ VldCmdCtrl::VldCmdCtrl (bool dotCmd) {
 
 void VldCmdCtrl::load_vldCmdList () {
 	try {
-		_validCmd = get_vldCmdList (_validCmdFile, standAloneCmdEndPos);
+		_validCmd = load_vldCmdList (_validCmdFile);
 		if (_validCmd.empty ()) {
 			try {
 				reset ();
@@ -56,25 +46,15 @@ vector<VldCmdCtrl::cmd_pair> VldCmdCtrl::get_vldCmdList () {
 	return _validCmd;
 }
 
-vector<VldCmdCtrl::cmd_pair> VldCmdCtrl::get_vldCmdList (string cmdFile, int& endPos){
+vector<VldCmdCtrl::cmd_pair> VldCmdCtrl::load_vldCmdList (string cmdFile) {
 	vector<cmd_pair> validCmd;
-	endPos = 0;
 	ifstream inFile (cmdFile);
 	if (inFile.is_open ()) {
 		cmd_pair cmd;
 		int cmdIndx;
-		if (_dotCmd) {
-			while (inFile >> cmdIndx && inFile >> cmd.str_cmd) {
-				cmd.enum_cmd = convertToCommand (cmdIndx);
-				validCmd.push_back (cmd);
-				if (cmd.str_cmd[0] != '-' && cmd.str_cmd[0] != '.')
-					endPos++;
-			}
-		} else {
-			while (inFile >> cmdIndx && inFile >> cmd.str_cmd) {
-				cmd.enum_cmd = convertToCommand (cmdIndx);
-				validCmd.push_back (cmd);
-			}
+		while (inFile >> cmdIndx && inFile >> cmd.str_cmd) {
+			cmd.enum_cmd = convertToCommand (cmdIndx);
+			validCmd.push_back (cmd);
 		}
 	} else
 		throw (LOST_FILE + cmdFile);
@@ -165,68 +145,17 @@ VldCmdCtrl::command VldCmdCtrl::convertToCommand (string str) {
 	return cmd;
 }
 
-bool VldCmdCtrl::search_vldCmd (string& str, vector<cmd_pair>::iterator iter) {
-	bool found = false;
-	vector<cmd_pair>::iterator endIter = _validCmd.end ();
-	for (iter = _validCmd.begin (); !found && iter != endIter; iter++)
-		if (str == iter->str_cmd)
-			found = true;
-	return found;
-}
-
 bool VldCmdCtrl::search_vldCmd (string str, command& cmd) {
 	int size = _validCmd.size ();
 	bool found = false;
 	cmd = CVOID;
-	for (int i = standAloneCmdEndPos; !found && i < size; i++) {
+	for (int i = 0; !found && i < size; i++) {
 		if (str == _validCmd[i].str_cmd) {
 			found = true;
 			cmd = _validCmd[i].enum_cmd;
 		}
 	}
 	return found;
-}
-
-bool VldCmdCtrl::search_standAloneCmd (string str, command& cmd) {
-	bool found = false;
-	cmd = CVOID;
-	for (int i = 0; !found && i < standAloneCmdEndPos; i++) {
-		if (str == _validCmd[i].str_cmd) {
-			found = true;
-			cmd = _validCmd[i].enum_cmd;
-		}
-	}
-	return found;
-}
-
-bool VldCmdCtrl::checkIfVldExtension (command ext, command cmd) {
-	bool vldExt = false;
-
-	switch (ext) {
-	case CCOSTOM:
-		if (cmd == CVIEW || cmd == CSEARCH)
-			vldExt = true;
-		break;
-	case CFORCE:
-		if (cmd == CADD || cmd == CEDIT)
-			vldExt = true;
-		break;
-	case CEXACT:
-	case CSIMILAR:
-	case CEACH:
-		if (cmd == CSEARCH)
-			vldExt = true;
-		break;
-	case CCOMMAND:
-		if (cmd == CHELP || cmd == CRESET)
-			vldExt = true;
-		break;
-	default:
-		vldExt = true;
-		break;
-	}
-
-	return vldExt;
 }
 
 string VldCmdCtrl::convertToString (command cmd) {

@@ -5,6 +5,14 @@
 #include <iostream>
 using namespace std;
 
+template <typename data_t>
+void append_back (list<data_t>* main, list<data_t> sub) {
+	while (!sub.empty ()) {
+		main->push_back (sub.front ());
+		sub.pop_front ();
+	}
+}
+
 string ExecuteCmd::BREAK = "[break]";
 string ExecuteCmd::MORE = "[more]";
 
@@ -12,22 +20,16 @@ ExecuteCmd::ExecuteCmd () {
 	_sequence = NULL;
 	_dataInput = NULL;
 	_cmdInput = NULL;
+	_splitedInput = NULL;
 }
 
 ExecuteCmd::ExecuteCmd (bool dotCmd) {
-	if (dotCmd) {
-		_validCmdFile = "vldCmd1.txt";
-		_dfltCmdFile = "dfltCmd1.txt";
-		_dotCmd = true;
-	} else {
-		_validCmdFile = "vldCmd2.txt";
-		_dfltCmdFile = "dfltCmd2.txt";
-		_dotCmd = false;
-	}
+	_validCmdFile = "vldCmd2.txt";
+	_dfltCmdFile = "dfltCmd2.txt";
 
 	_flagError = NONE;
 	try {
-		get_vldCmdList ();
+		load_vldCmdList ();
 	} catch (string message) {
 		throw (message);
 	}
@@ -69,24 +71,14 @@ cout << "-CB";
 }
 
 void ExecuteCmd::updateInput (string& input) {
-cout << "A";
 	clear ();
-cout << "B";
 	_sequence = new queue<input_t>;
 	_dataInput = new queue<string>;
 	_cmdInput = new queue<command>;
 	_splitedInput = new list<string>;
-cout << "C";
 	_input = input;
 	_flagError = NONE;
-cout << "D";
-	try {
-		splitInput ();
-cout << "E";
-	} catch (string message) {
-cout << "F";
-		throw (message);
-	}
+	splitInput ();
 };
 
 string ExecuteCmd::get_input () {
@@ -98,12 +90,12 @@ string ExecuteCmd::get_input () {
 		}
 
 		while (!_splitedInput->empty ()) {
-			input += _splitedInput->front ();
+			input += _splitedInput->front () + " ";
 			_splitedInput->pop_front ();
 		}
-	} else {		
-		while (!_splitedInput->empty () > size) {
-			input += _splitedInput->front ();
+	} else {
+		while (_splitedInput->size () > size) {
+			input += _splitedInput->front () + " ";
 			_splitedInput->pop_front ();
 		}
 
@@ -113,7 +105,7 @@ string ExecuteCmd::get_input () {
 			input += MORE + " ";
 
 		while (!_splitedInput->empty ()) {
-			input += _splitedInput->front ();
+			input += _splitedInput->front () + " ";
 			_splitedInput->pop_front ();
 		}		
 	}
@@ -126,9 +118,6 @@ string ExecuteCmd::result () {
 
 bool ExecuteCmd::execute () {
 	return false;
-}
-
-void ExecuteCmd::insertBreakPoint () {
 }
 
 void ExecuteCmd::splitInput () {
@@ -447,15 +436,6 @@ Time::date_t ExecuteCmd::get_date () {
 		else {
 			if (tempDay != -1 && mnth == -1)
 				mnth = tempDay;
-			
-			if (mnth != -1 && mnth > 12 && day != -1 && day <= 12)
-				_dayMonth = false;
-
-			if (!_dayMonth) {
-				tempDay = day;
-				day = mnth;
-				mnth = tempDay;
-			}
 		}
 
 		if (mnth == -1 && tempMnth != -1)
@@ -663,29 +643,17 @@ void ExecuteCmd::get_date (int& day, int& mnth, int& year) {
 		} else {
 			date = convertToInt (strDate);
 			if (date <= Time::INF_DATE) {
-				if (_dayMonth) {
-					day = date / 1000000;
-					mnth = date / 10000 - day * 100;
-					year = date % 10000;					
-				} else {
-					mnth = date / 1000000;
-					day = date / 10000 - mnth * 100;
-					year = date % 10000;
-				}
+				day = date / 1000000;
+				mnth = date / 10000 - day * 100;
+				year = date % 10000;					
 			}
 		}
 		break;
 	case 6:
 		date = convertToInt (strDate);
 		if (date <= Time::INF_DATE) {
-			if (_dayMonth) {
-				day = date / 10000;
-				mnth = date / 100 - day * 100;
-			} else {
-				mnth = date / 10000;
-				day = date / 100 - mnth * 100;
-			}
-			
+			day = date / 10000;
+			mnth = date / 100 - day * 100;			
 			year = date % 100;
 			if (year < 70)
 				year += 2000;
@@ -746,18 +714,6 @@ void ExecuteCmd::get_date (int& day, int& mnth, int& year) {
 		break;
 	default:
 		break;
-	}
-
-	switch (size) {
-	case 10:
-	case 8:
-	case 6:
-		if (_flagError != DATA && mnth > 12 && day <= 12) {
-			int temp = mnth;
-			mnth = day;
-			day = temp;
-			_dayMonth = !_dayMonth;
-		}
 	}
 }
 
@@ -846,20 +802,6 @@ bool ExecuteCmd::notMorning () {
 	return false;
 }
 
-void ExecuteCmd::checkIfStandAloneCmd () {
-	command cmd;
-	bool found = search_standAloneCmd (_input, cmd);
-
-	if (found && cmd != CCOMMAND) {
-		push (cmd);
-		_input.erase ();
-	} else if (cmd == CCOMMAND) {
-		push (CHELP);
-		push (CCOMMAND);
-		_input.erase ();
-	} else;
-}
-
 VldCmdCtrl::command ExecuteCmd::translateCmd (string str) {
 	command cmd;
 	bool found = search_vldCmd (str, cmd);
@@ -910,9 +852,8 @@ bool ExecuteCmd::pop () {
 string Add::MSG_CLASH = " is clashed with the following:\n";
 string Add::MSG_ADDED = " is added.";
 
-Add::Add (vector<cmd_pair> validCmd, bool& dayMonth, ToDoMngr* toDoMngr) {
+Add::Add (vector<cmd_pair> validCmd, ToDoMngr* toDoMngr) {
 	_validCmd = validCmd;
-	_dayMonth = dayMonth;
 	_toDoMngr = toDoMngr;
 	_sequence = NULL;
 	_dataInput = NULL;
@@ -927,46 +868,34 @@ Add::~Add () {
 bool Add::execute () {
 	bool done;
 	bool force = false;
-cout << "\nAA";
 	if (!_sequence->empty () && _sequence->front () == CMD && _cmdInput->front () == CADD) {
 		pop ();
 	} else {
 		done = true;
 	}
-cout << "\nAB";
+
 	if (_sequence->empty ()) {
 		return false;
 		_flagError = DATA;
 	}
-cout << "\nAC";
+
 	if (_sequence->front () == CMD && _cmdInput->front () == CFORCE) {
 		pop ();
 		force = true;
 	}
-cout << "\nAD";
+
 	Task task = get_task ();
-cout << task.stringConvert () << endl;
-cout << "\nAE";	
 	if (_flagError == NONE) {
-_toDoMngr->exit ();
-cout << "\ncase NONE";
-		string a;
-		list<Task> taskList;
-cout << "??";
-		taskList = _toDoMngr->add (task, force);
-cout << "\nAF";
+		list<Task> taskList = _toDoMngr->add (task, force);
 		if (!force && !taskList.empty ()) {
-cout << "force" << endl;
 			_result = ToDoMngr::view (task) + MSG_CLASH + ToDoMngr::view (taskList);
 			insertBreakPoint ();
 			done = false;
 		} else {
-cout << "iforce" << endl;
 			_result = ToDoMngr::view (task) + MSG_ADDED;
 			done = true;
 		}
 	} else {
-cout << "\ncase NOTNONE";
 		done = false;
 	}
 
