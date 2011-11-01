@@ -961,7 +961,7 @@ return view(_activeTaskList);
 string ToDoMngr::help (string command)
 {
 	ifstream myhelpfile;
-	myhelpfile.open("help.txt");
+	myhelpfile.open("HELP.txt");
 	string HELP_LINE;
 	ostringstream oss;
 	
