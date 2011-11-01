@@ -8,7 +8,7 @@
 #include <windows.h>
 using namespace std;
 
-string ToDoMngr::NOTHING_TO_VIEW = "";
+string ToDoMngr::NOTHING_TO_VIEW = "Sorry!Please try again!";
 
 list<Task> ToDoMngr::get_active_list () {
         return _activeTaskList;
@@ -23,7 +23,7 @@ string ToDoMngr::view(Task taskId){
        int endpos_venue=0;
        int end_word_venue=65;
 								
-                
+         Time _t;       
 						
 		int full_date,_date,temp_date;
 		temp_date=0;
@@ -43,11 +43,19 @@ string ToDoMngr::view(Task taskId){
 					year=full_date%10000;
 				
 								oss<<"\n";
+								 if(taskId.get_period().get_start_time().get_clock()!=-1){
                                 oss<<month<<" "<<year<<"  ";
 							    oss<<_date<<" "<<taskId.get_time().display_day(taskId.get_period().get_start_time().get_day())<<"\n";
 								oss<<"\n";
-							
 								oss<<taskId.get_period().get_start_time().string_clock()<<" "<<"-"<<" "<<taskId.get_period().get_end_time().string_clock()<<"\n";
+								 }
+								 else{
+								oss<<"\n";
+								
+								 }
+
+							
+								
 								oss<<"Note :"<<" ";  
 								while( pos<taskId.note.length())      
 
@@ -100,7 +108,7 @@ string ToDoMngr::view(Task taskId){
 							   pos_venue=0;
        endpos_venue=0;
         end_word_venue=40;
-								
+							oss<<"\n";	
 							}
 							
                         
@@ -113,11 +121,19 @@ string ToDoMngr::view(Task taskId){
 				
 							
 								oss<<"\n";
+								 if(taskId.get_time()!=_t){
                                 oss<<month<<" "<<year<<"  ";
 							    oss<<_date<<" "<<taskId.get_time().display_day(taskId.get_time().get_day())<<"\n";
 								oss<<"\n";
-								
 								oss<<taskId.get_time().string_clock();
+								 }
+								 else
+								 {
+									 oss<<"\n";
+								 }
+								
+								
+								
 								oss<<"Note :"<<" ";  
 								while( pos<taskId.note.length())      
 
@@ -170,7 +186,7 @@ string ToDoMngr::view(Task taskId){
 							   pos_venue=0;
        endpos_venue=0;
         end_word_venue=40;
-								
+						oss<<"\n";		
                                /* oss<<l->get_period().string_time_period()<<"\n"<<index<<"."
                                 <<" "<<l->note<<" "<<"at"<<" "<<l->venue<<endl;*/
 							}
@@ -787,6 +803,7 @@ string ToDoMngr::view (int taskId){
                 string month,temp_month;
                 temp_month=" ";
                 int year;
+				Time _time;
         std::ostringstream oss;
         int i=1;
               // list<Task> _activeTasklist;
@@ -800,7 +817,7 @@ string ToDoMngr::view (int taskId){
                                         if(_taskpointer!=_activeTaskList.end())
                                      _taskpointer++;
                                   }
-				   }
+				   
                 
                         if(_taskpointer->get_time()==obj){
                 
@@ -810,13 +827,19 @@ string ToDoMngr::view (int taskId){
                                         year=full_date%10000;
                                 
                                                                 oss<<"\n";
-                                oss<<month<<" "<<year<<"\n";
+																if(_taskpointer->get_period().get_start_time().get_clock()!=-1){
+                                                            oss<<month<<" "<<year<<"\n";
                                                             oss<<"--------"<<"\n";
                                                         oss<<_date<<" "<<_taskpointer->get_time().display_day(_taskpointer->get_period().get_start_time().get_day())<<"\n";
+																}
                                                                 oss<<"\n";
+
                                                                 oss<<taskId<<"."<<" ";
+
+																if(_taskpointer->get_period().get_start_time().get_clock()!=-1)
                                                                 oss<<_taskpointer->get_period().get_start_time().string_clock()<<" "<<"-"<<" "<<_taskpointer->get_period().get_end_time().string_clock();
-                                                                oss<<" "<<_taskpointer->note<<" "<<"at"<<" "<<_taskpointer->venue<<endl;
+                                                                
+																oss<<" "<<_taskpointer->note<<" "<<"at"<<" "<<_taskpointer->venue<<"\n\n";
                                                                 
                                                         }
                                                         
@@ -830,20 +853,26 @@ string ToDoMngr::view (int taskId){
                                 
                                                         
                                                                 oss<<"\n";
+																 if(_taskpointer->get_time()!=_time){
+
                                 oss<<month<<" "<<year<<"\n";
                                                             oss<<"--------"<<"\n";
                                                         oss<<"\n";              
                                                                 oss<<_date<<" "<<_taskpointer->get_time().display_day(_taskpointer->get_time().get_day())<<"\n";
+																 }
                                                                 oss<<"\n";
                                                                 oss<<taskId<<"."<<" ";
+																 
+																if(_taskpointer->get_time()!=_time)
                                                                 oss<<_taskpointer->get_time().string_clock();
-                                                                oss<<" "<<_taskpointer->note<<" "<<"at"<<" "<<_taskpointer->venue<<endl;
+                                                                
+																oss<<" "<<_taskpointer->note<<" "<<"at"<<" "<<_taskpointer->venue<<"\n\n";
                                                                 temp_date=_date;
                                /* oss<<l->get_period().string_time_period()<<"\n"<<index<<"."
                                 <<" "<<l->note<<" "<<"at"<<" "<<l->venue<<endl;*/
                                                         }
                         
-
+				   }
                          return oss.str();
                 
         }   // return a string of the view of the specific task
@@ -958,63 +987,21 @@ return view(_activeTaskList);
 
 }
 
-string ToDoMngr::help (string command)
-{
-	ifstream myhelpfile;
-	myhelpfile.open("HELP.txt");
-	string HELP_LINE;
-	ostringstream oss;
-	
-	for(int i=0; i<command.size(); i++)
-		command[i] = tolower(command[i]);
-	
-	if(command == "" || command == "command")
-	{
-		int i=0, k=0;
-		getline(myhelpfile, HELP_LINE);
-		oss << endl << setw(54) << setfill(' ') << HELP_LINE << endl;
-		oss << endl << "  ----------------------------------------------------------------------------  ";
-		while(getline(myhelpfile, HELP_LINE) && !myhelpfile.eof())
-		{
-			if(HELP_LINE.empty())
-				oss << endl;
-			else
-			{
-				if(k==0)
-				{
-					oss << "  " << "Command: " << HELP_LINE << endl;
-					k++;
-				}
-				else
-				{
-					oss << endl << "  " << HELP_LINE << endl; 
-					k=0;
-				}
-				if(HELP_LINE.empty()) 
-					oss << "  ----------------------------------------------------------------------------  "<< endl ;
-			}
-			if(i != 0 && HELP_LINE.empty())
-				oss << "  ----------------------------------------------------------------------------  "<< endl ;
-			i++;
-		}
-		oss << endl << "  ----------------------------------------------------------------------------  ";
-	}
+string ToDoMngr::help (string command){
 
-	while(getline(myhelpfile, HELP_LINE))
-	{
-		if(command == HELP_LINE)
-		{	
-			oss << endl << setw(54) << setfill(' ') << "<--- TASKCAL Help Viewer --->"  << endl;
-			oss << endl << "  ----------------------------------------------------------------------------  ";
-			oss << endl << "  " << "Command: " << HELP_LINE << endl;
-			while(getline(myhelpfile, HELP_LINE) && !HELP_LINE.empty())
-				oss << endl << "  " << HELP_LINE << endl;
-			oss << endl << "  ----------------------------------------------------------------------------  ";
-			myhelpfile.close();
-			break;
-		}
-	}	
-	return oss.str();
+        ifstream myhelpfile;
+        myhelpfile.open("HELP.txt");
+        string HELP_LINE;
+                ostringstream str;
+
+        if(command.empty ()){
+                while(getline(myhelpfile, HELP_LINE))
+                {
+                        str<<HELP_LINE<<endl;
+                }
+        }
+
+                return str.str ();
 }
 
 string ToDoMngr::reminder(){
@@ -1070,11 +1057,8 @@ list<Task> ToDoMngr::add(Task task, bool forceAdd)
  if(forceAdd == true || task.timeTask == true)
  { 
   // forceAdd is true or is timetask 
-  Task *ptr = &Task;
-  list<Task> *_newList;
-  _addList.push_back(ptr);
-  _dataStorage.save(_newList); 
-  
+  _addList.push_back(task);
+  _dataStorage.save(_addList); 
   
   // and return empty list
   _addList.clear();
@@ -1111,10 +1095,8 @@ list<Task> ToDoMngr::add(Task task, bool forceAdd)
   }
   else
   {
-  Task *ptr = &Task;
-  list<Task> *_newList;
-  _addList.push_back(ptr);
-  _dataStorage.save(_newList); 
+  _addList.push_back(task);
+  _dataStorage.save(_addList); 
   
   // and return empty list
   _addList.clear();
