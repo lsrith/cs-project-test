@@ -1,24 +1,67 @@
-|?| TASKCAL Help Viewer 
+<--- TASKCAL Help Viewer ---> 
 
-About Help Tool
-In-product Help is available through the Help menu.To access the help
-viewer the user can either type a specific command to view its usage or if
-wanted the entire help sheet, the user can enter 0.
+add
+Description: To add a file, just add it!
 
-Task Manager --->
+edit
+Description: To add a file, just add it!
 
-->Adding,Deleting and Editing a Task.
+delete
+Description: To add a file, just add it!
 
-->Viewing and Searching a Task.
+table
+Description: To add a file, just add it!
 
-->Setting up Venue and Time.
+view
+Description: To add a file, just add it!
 
-->Creating your own template.
+reminder
+Description: To add a file, just add it!
 
-->Save and Undo
+next
+Description: To add a file, just add it!
 
-->Full Command List
+previous
+Description: To add a file, just add it!		
 
+first
+Description: To add a file, just add it!
 
+last
+Description: To add a file, just add it!
 
- 
+undo
+Description: To add a file, just add it!
+
+redo
+Description: To add a file, just add it!
+
+help
+Description: To add a file, just add it!
+
+sort
+Description: To add a file, just add it!
+
+search
+Description: To add a file, just add it!
+
+clear
+Description: To add a file, just add it!
+
+reset
+Description: To add a file, just add it!
+
+exit
+Description: To add a file, just add it!
+
+discard
+Description: To add a file, just add it!
+
+replace
+Description: To add a file, just add it!
+
+insert
+Description: To add a file, just add it!
+
+void
+Description: To add a file, just add it!
