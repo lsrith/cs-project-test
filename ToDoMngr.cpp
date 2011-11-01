@@ -958,21 +958,63 @@ return view(_activeTaskList);
 
 }
 
-string ToDoMngr::help (string command){
+string ToDoMngr::help (string command)
+{
+	ifstream myhelpfile;
+	myhelpfile.open("help.txt");
+	string HELP_LINE;
+	ostringstream oss;
+	
+	for(int i=0; i<command.size(); i++)
+		command[i] = tolower(command[i]);
+	
+	if(command == "" || command == "command")
+	{
+		int i=0, k=0;
+		getline(myhelpfile, HELP_LINE);
+		oss << endl << setw(54) << setfill(' ') << HELP_LINE << endl;
+		oss << endl << "  ----------------------------------------------------------------------------  ";
+		while(getline(myhelpfile, HELP_LINE) && !myhelpfile.eof())
+		{
+			if(HELP_LINE.empty())
+				oss << endl;
+			else
+			{
+				if(k==0)
+				{
+					oss << "  " << "Command: " << HELP_LINE << endl;
+					k++;
+				}
+				else
+				{
+					oss << endl << "  " << HELP_LINE << endl; 
+					k=0;
+				}
+				if(HELP_LINE.empty()) 
+					oss << "  ----------------------------------------------------------------------------  "<< endl ;
+			}
+			if(i != 0 && HELP_LINE.empty())
+				oss << "  ----------------------------------------------------------------------------  "<< endl ;
+			i++;
+		}
+		oss << endl << "  ----------------------------------------------------------------------------  ";
+	}
 
-        ifstream myhelpfile;
-        myhelpfile.open("HELP.txt");
-        string HELP_LINE;
-                ostringstream str;
-
-        if(command.empty ()){
-                while(getline(myhelpfile, HELP_LINE))
-                {
-                        str<<HELP_LINE<<endl;
-                }
-        }
-
-                return str.str ();
+	while(getline(myhelpfile, HELP_LINE))
+	{
+		if(command == HELP_LINE)
+		{	
+			oss << endl << setw(54) << setfill(' ') << "<--- TASKCAL Help Viewer --->"  << endl;
+			oss << endl << "  ----------------------------------------------------------------------------  ";
+			oss << endl << "  " << "Command: " << HELP_LINE << endl;
+			while(getline(myhelpfile, HELP_LINE) && !HELP_LINE.empty())
+				oss << endl << "  " << HELP_LINE << endl;
+			oss << endl << "  ----------------------------------------------------------------------------  ";
+			myhelpfile.close();
+			break;
+		}
+	}	
+	return oss.str();
 }
 
 string ToDoMngr::reminder(){
