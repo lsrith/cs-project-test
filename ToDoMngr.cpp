@@ -1300,11 +1300,119 @@ list<Task> ToDoMngr::add(string tableName, Task task, bool forceAdd)
  }
 }
 
-void ToDoMngr::undo () {
+void ToDoMngr::undo () 
+{
+ if(undoStack.empty() == false)
+ {
+  UserTask undoTask = undoStack.top();
+  switch(undoTask->_cmd)
+  {
+  case 1:
+   //previous cmd is add a single task
+   //get the index of the task
+   taskIndex = taskptr->get_index(); 
+   undoTask->indexList.push_back(taskIndex);
+   //delete from dataStorage
+   _dataStorage.erase(undoTask->indexList);
+   break;
+   
+  case 2:
+   //previous cmd erase a task from the dataStorage and active TaskList
+   //add to _activeTaskList
+   list<Task>:: iterator li = _activeTaskList.begin()
+   for(int i=1; i<taskId; i++)
+   { 
+    li++;
+   } 
+   _activeTaskList.push_back(li, undoTask->_currentTaskList.begin());
+   //save to dataStorage
+   _dataStorage.save(undoTask->indexList);
+   break;
+   
+  case 3:
+   //previous cmd is to erase the tasks in the period from the dataStorage
+   //add back the tasks in the period back to dataStorage
+   _dataStorage.save(undoTask->indexList);
+   break; 
+   
+  case 4:
+   //previous cmd is to add a timetable name into dataStorage
+   //erase the timetable name from the dataStorage
+   _dataStorage.erase(undoTask->_tableName);
+   break;
+   
+  case 5:
+   //previous cmd is add a newtable and add the tasks into dataStorage
+   //delete the timetablename and tasks from the dataStorage
+   //with no table name
+   if(undoTask->_tableName == NULL)
+   {
+   //delete from dataStorage
+   undoTask->taskIndex = taskptr->get_index(); 
+   curentTask->indexList.push_back(taskIndex);
+   _dataStorage.erase(undoTask->indexList);
+   }
+   //with table name
+   _dataStorage.erase(undoTask->_tableName);
+   break;
+   
+   case 6:
+   //previous comment is delete the timetable by name
+   //delete timetable
+   _dataStorage.erase(undoTask->_tableName);
+   break;
+   
+   case 7:
+   break;
+  }
+ }
+ else
+ {
+  cout<<"nothing to undo"<<endl;
+ }   
 }
 
-void ToDoMngr::redo () {
+void ToDoMngr::redo () 
+
+void redo()
+{
+ if(redoStack.empty() == false)
+ {
+  userTask redoTask = redoStack.top();                     
+  list<Task> dummyList;
+  Task dummyTask;
+  bool dummyBool;
+  
+  
+  switch(redoTask->_cmd)
+  case 1:
+       dummyList = add(redoTask->_currentTaskList, redoTask->forceAdd);
+       break;
+  case 2:
+       dummyTask = erase(redoTask->_taskId);
+       break;
+  case 3:
+       erase(redoTask->_period);
+       break;
+  case 4:
+       dummyBool = newTable(redoTask->_tableName, redoTask->_period)
+       break;
+  case 5:
+       dummyList = add(redoTask->_tableName, redoTask->_currentTaskList.begin(), redoTask->forceAdd)
+       break;
+  case 6:
+       erase(redoTask->tableName);
+       break;
+ }
+ else
+ {
+  cout<<"nothing to redo"<<endl;
+ }
+ redoStack.pop();
+ undoStack.push_back(RedoTask);
 }
+
+
 
 //Rith
 string ToDoMngr::search (search_t type, string phrase) {
