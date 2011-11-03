@@ -10,16 +10,31 @@ inline VldCmdCtrl::command getFirstCmd (string*, VldCmdCtrl*);
 inline void eraseFirstWord (string*);
 
 int main () {
+	Logging log;
+	log.log ("main");
+	log.start ("main");
 	const string WELCOME = "\tTASKCAL\n\n";
 	cout << WELCOME << endl;
 
 	string output, input, newInput;
+	log.call ("ToDoMngr");
 	ToDoMngr toDoMngr;
+	log.end ();
 	ToDoMngr* toDo = &toDoMngr;
+
+	log.call ("VldCmdCtrl");
+	try {
+		VldCmdCtrl testLoading;
+	} catch (string xcpt) {
+		cout << xcpt << endl;
+		return 0;
+	}
+	log.end ();
 
 	VldCmdCtrl cmdCtrl;
 	bool prompt;
 	VldCmdCtrl::command cmd = VldCmdCtrl::CUSER;
+
 	Merge merge (cmdCtrl.get_vldCmdList ());
 	ExecuteCmd* exeCmd = NULL;
 	AccCtrl userAcc (toDo);
@@ -31,6 +46,7 @@ int main () {
 
 	input = VldCmdCtrl::convertToString (VldCmdCtrl::CUSER);
 
+	log.loop ("main");
 	do {
 		output.erase (0, string::npos);
 		cout << ">> ";
@@ -41,6 +57,7 @@ int main () {
 		input = merge.result ();
 		prompt = false;
 
+		log.loop ("sub");
 		while (!input.empty () && !prompt) {
 			cmd = getFirstCmd (&input, &cmdCtrl);
 			
@@ -115,6 +132,7 @@ int main () {
 				exeCmd = NULL;
 				break;
 			}
+
 			if (exeCmd != NULL) {
 				exeCmd->updateInput (input);
 				if (!exeCmd->execute ()) {
@@ -125,9 +143,12 @@ int main () {
 				input = exeCmd->get_input ();
 			}
 		}
+		log.end ();
 
 		cout << output << endl;
 	} while (cmd != VldCmdCtrl::CEXIT);
+	log.end ();
+	log.end ();
 	return 0;
 }
 

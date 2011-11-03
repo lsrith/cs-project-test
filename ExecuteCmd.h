@@ -84,6 +84,7 @@ public:
 	bool execute ();
 
 private:
+	Logging log;
 	static string MSG_DELETED;
 };
 

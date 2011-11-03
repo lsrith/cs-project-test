@@ -510,6 +510,7 @@ Delete::Delete (vector<cmd_pair> validCmd, ToDoMngr* toDoMngr) {
 	_validCmd = validCmd;
 	_toDoMngr = toDoMngr;
 	initPointers ();
+	log.log ("Delete");
 }
 
 Delete::~Delete () {
@@ -517,18 +518,30 @@ Delete::~Delete () {
 }
 
 bool Delete::execute () {
+	log.clear ();
+	log.start ("execute");
 	Task task;
 	TimePeriod period;
 	int taskId;
 
+	log.call ("splitInput");
 	splitInput (_input);
+	log.end ();
 
+	if (!_sequence->empty () && _sequence->front () == CMD && _cmdInput->front () == CDELETE) {
+		pop ();
+	} else {
+		return true;
+	}
 
+	log.cond ("sequence");
 	if (_sequence->empty () == false) {
 		switch (_sequence->front ()) {
 		case DATA:
 			taskId = convertToInt (_dataInput->front ());
+			log.call ("_toDoMngr->erase (taskId)");
 			task = _toDoMngr->erase (taskId);
+			log.end ();
 			if (task.get_index () != 0) {
 				_result = ToDoMngr::view (task) + MSG_DELETED;
 				pop ();
@@ -539,12 +552,17 @@ bool Delete::execute () {
 			case CFROM:
 			case CTO:
 				period = get_period ();
-				if (_flagError == NONE)
+				if (_flagError == NONE) {
+					log.call ("_toDoMngr->erase (period)");
 					_toDoMngr->erase (period);
+					log.end ();
+				}
 				break;
 			case CTABLE:
 				pop ();
+				log.call ("_toDoMngr->erase (table)");
 				_toDoMngr->erase(mergeSimStringInput ());
+				log.end ();
 				break;
 			default:
 				break;
@@ -553,9 +571,10 @@ bool Delete::execute () {
 			break;
 		}
 	}
-
+	log.end ();
 	_input = getLeftOverInput ();
 
+	log.end ();
 	if (_flagError == NONE)
 		return true;
 	else
