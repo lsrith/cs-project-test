@@ -43,6 +43,7 @@ protected:
 	string mergeStringInput ();
 	string mergeSimStringInput ();
 
+	void initPointers ();
 	void push (command);
 	void push (string);
 	void clear ();

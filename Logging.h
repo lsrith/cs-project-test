@@ -6,13 +6,14 @@ using namespace std;
 class Logging {
 public:
 	Logging ();
-	void log (string);		//specify output file name
+	void log (string);			//specify output file name
 	void start (string);		//start function
 	void end ();				//end last start
 	void loop (string);			//start iterative, loop name
 	void cond (string);			//start switch or if, name
 	void cond (string, int);	//start switch, name, case
 	void call (string);			//start calling function name
+	void clear ();				//clear the log file
 
 private:
 	enum LOG {START = 0, LOOP, COND, CALL};

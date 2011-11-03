@@ -131,6 +131,11 @@ void Logging::end () {
 	__tab--;
 }
 
+void Logging::clear () {
+	ofstream outFile (_file);
+	outFile.close ();
+}
+
 void Logging::_addLine (string str) {
 	if (_loop) {
 		_replaceLine (str);
