@@ -312,6 +312,7 @@ string ToDoMngr:: view(list<Task> tasklist){
 
 	std::ostringstream oss,index_convert;
 	list<Task> taskl=tasklist;
+	taskl.sort(Task::compareByStartTime);
 
 	if(taskl.size()==1||taskl.size()==2||taskl.size()==3||taskl.size()==4||taskl.size()==5||taskl.size()==6||taskl.size()==7||taskl.size()==8||taskl.size()==9)
 		index_convert<<10;
