@@ -69,6 +69,7 @@ bool Add::execute () {
 		force = true;
 	}
 	Task task = get_task ();
+	cout << task.get_time ().string_date () << endl;
 	if (_flagError == NONE) {
 		list<Task> taskList = _toDoMngr->add (task, force);
 		if (!force && !taskList.empty ()) {
@@ -509,7 +510,118 @@ bool Delete::execute () {
 		return false;
 }
 
-//--------------------------------------------------------------
+//---------------------------------------------------------------
+
+Merge::Merge (vector<cmd_pair> validCmd) {
+	_validCmd = validCmd;
+	_sequence = NULL;
+	_dataInput = NULL;
+	_cmdInput = NULL;
+	_splitedInput = NULL;
+}
+
+Merge::~Merge () {
+	clear ();
+}
+
+void Merge::updateInput (string& input, string& newInput) {
+	_input = input;
+	_newInput = newInput;
+}
+
+bool Merge::execute () {
+	string part1, part2;
+	unsigned int pos;
+	pos = _input.find (BREAK, 0);
+
+	if (pos == string::npos) {
+		part1 = _input;
+	} else if (pos == 0) {
+		part2 = _input.substr (BREAK.size () + 1, string::npos);
+	} else {
+		part1 = _input.substr (0, pos - 1);
+
+		if (pos + 1 + BREAK.size () < _input.size ()) {
+			part2 = _input.substr (pos + 1 + BREAK.size (), string::npos);
+		}
+	}
+
+	splitInput (_newInput);
+
+	if (!_sequence->empty () && _sequence->front () == CMD) {
+		switch (_cmdInput->front ()) {
+		case CDISCARD:
+			pop ();
+			if (!_sequence->empty () && _sequence->front () == CMD) {
+				if (_cmdInput->front () == CLEFT) {
+					pos = part1.find_last_of (' ');
+					part1 = part1.substr (0, pos);
+				} else if (_cmdInput->front () == CRIGHT) {
+					pos = part2.find_first_of (' ', 0);
+					if (pos + 1 < part2.size ()) {
+						part2 = part2.substr (pos + 1, string::npos);
+					}
+				} else;
+			}
+			_input.erase ();
+			_result = appendStrings (part1, part2, _input);
+
+			break;
+		case CREPLACE:
+			pop ();
+			if (!_sequence->empty () && _sequence->front () == CMD) {
+				if (_cmdInput->front () == CLEFT) {
+					pop ();
+					pos = part1.find_last_of (' ');
+					part1 = part1.substr (0, pos);
+				} else if (_cmdInput->front () == CRIGHT) {
+					pop ();
+					pos = part2.find_first_of (' ', 0);
+					if (pos + 1 < part2.size ()) {
+						part2 = part2.substr (pos + 1, string::npos);
+					}
+				} else;
+			}
+			_input = getLeftOverInput ();
+			_result = appendStrings (part1, _input, part2);
+			break;
+		case CINSERT:
+			pop ();
+		default:
+			_input = getLeftOverInput ();
+			_result = appendStrings (part1, _input, part2);
+		}
+	} else {
+		_input = getLeftOverInput ();
+		_result = appendStrings (part1, _input, part2);
+	}
+
+	return true;
+}
+
+string Merge::appendStrings (string& str1, string& str2, string& str3) {
+	string str;
+
+	if (str1.empty () && str2.empty ()) {
+		str = str3;
+	} else if (str1.empty () && str3.empty ()) {
+		str = str2;
+	} else if (str2.empty () && str3.empty ()) {
+		str = str1;
+	} else if (str1.empty ()) {
+		str = str2 + ' ' + str3;
+	} else if (str2.empty ()) {
+		str = str1 + ' ' + str3;
+	} else if (str3.empty ()) {
+		str = str1 + ' ' + str2;
+	} else {
+		str = str1 + ' ' + str2 + ' ' + str3;
+	}
+
+	return str;
+}
+
+//---------------------------------------------------------------
 
 AccCtrl::AccCtrl (ToDoMngr* toDoMngr) {
 	assert (toDoMngr != NULL);

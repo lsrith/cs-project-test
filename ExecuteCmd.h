@@ -86,6 +86,18 @@ private:
 	static string MSG_DELETED;
 };
 
+class Merge: public CmdTrans, public ExecuteCmd {
+public:
+	Merge (vector<cmd_pair>);
+	~Merge ();
+	void updateInput (string&, string&);
+	bool execute ();
+
+private:
+	string _newInput;
+	string appendStrings (string&, string&, string&);
+};
+
 class AccCtrl: public ExecuteCmd {
 public:
 	AccCtrl (ToDoMngr*);

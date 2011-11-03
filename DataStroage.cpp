@@ -10,6 +10,10 @@ DataStorage::DataStorage ()
 {
 }
 
+DataStorage::~DataStorage () {
+	exit ();
+}
+
 void DataStorage::updateStorageName (string storageName) {
 	_largestIndex = 1;
 	TaskNode* node = new TaskNode;

@@ -28,6 +28,7 @@ private:
 
 public:	
 	DataStorage ();
+	~DataStorage ();
 
 	void updateStorageName (string storageName);
 

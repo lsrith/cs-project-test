@@ -132,6 +132,8 @@ VldCmdCtrl::command VldCmdCtrl::convertToCommand (int indx) {
 		case 43:	cmd = CDISCARD;		break;
 		case 44:	cmd = CREPLACE;		break;
 		case 45:	cmd = CINSERT;		break;
+		case 46:	cmd = CLEFT;		break;
+		case 47:	cmd = CRIGHT;		break;
 		default:	cmd = CVOID;		break;
 	}
 
@@ -206,6 +208,8 @@ string VldCmdCtrl::convertToString (command cmd) {
 	case (CDISCARD):	str = "discard";	break;
 	case (CREPLACE):	str = "replace";	break;
 	case (CINSERT):		str = "insert";		break;
+	case (CLEFT):		str = "left";		break;
+	case (CRIGHT):		str = "right";		break;
 	default:			str = "void";		break;
 	}
 	return str;

@@ -62,4 +62,8 @@
 43 discard
 44 replace
 45 insert
-46 .
+46 -l
+46 left
+47 -r
+47 right
+48 .

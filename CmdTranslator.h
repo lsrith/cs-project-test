@@ -24,7 +24,6 @@ public:
 	Time::clk_t get_clock ();
 
 	static string BREAK;
-	static string MORE;
 
 protected:
 	queue<command>* _cmdInput;

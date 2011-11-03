@@ -3,7 +3,6 @@
 using namespace std;
 
 string CmdTrans::BREAK = "[break]";
-string CmdTrans::MORE = "[more]";
 
 CmdTrans::CmdTrans () {
 	try {
@@ -23,6 +22,7 @@ CmdTrans::~CmdTrans () {
 }
 
 void CmdTrans::splitInput (string& _input) {
+	clear ();
 	_sequence = new (nothrow) queue<input_t>;
 	_dataInput = new (nothrow) queue<string>;
 	_cmdInput = new (nothrow) queue<command>;
@@ -63,7 +63,7 @@ void CmdTrans::splitInput (string& _input) {
 
 string CmdTrans::getLeftOverInput () {
 	string input;
-	int size = _sequence->size ();
+	unsigned int size = _sequence->size ();
 	if (_flagError == NONE) {
 		while (_splitedInput->size () > size) {
 			_splitedInput->pop_front ();
@@ -79,10 +79,7 @@ string CmdTrans::getLeftOverInput () {
 			_splitedInput->pop_front ();
 		}
 
-		if (size > 0)
-			input += BREAK + " ";
-		else
-			input += MORE + " ";
+		input += BREAK + " ";
 
 		while (!_splitedInput->empty ()) {
 			input += _splitedInput->front () + " ";

@@ -3,6 +3,7 @@
 #include "AccCtrl.h"
 #include "Logging.h"
 #include <iostream>
+#include <direct.h>
 using namespace std;
 
 inline VldCmdCtrl::command getFirstCmd (string*, VldCmdCtrl*);
@@ -19,7 +20,7 @@ int main () {
 	VldCmdCtrl cmdCtrl;
 	bool prompt;
 	VldCmdCtrl::command cmd = VldCmdCtrl::CUSER;
-//	Merge merge (cmdCtrl.get_vldCmdList ());
+	Merge merge (cmdCtrl.get_vldCmdList ());
 	ExecuteCmd* exeCmd = NULL;
 	AccCtrl userAcc (toDo);
 	Add add (cmdCtrl.get_vldCmdList (), toDo);
@@ -116,11 +117,12 @@ int main () {
 			}
 			if (exeCmd != NULL) {
 				exeCmd->updateInput (input);
-				if (exeCmd->execute ())
+				if (exeCmd->execute ()) {
 					output += exeCmd->result ();
-				else
+				} else {
+					cout << input << endl;
 					prompt = true;
-
+				}
 				input = exeCmd->get_input ();
 			}
 		}
@@ -129,9 +131,9 @@ int main () {
 		cout << ">> ";
 		getline (cin, newInput);
 
-//		merge.update (input, newInput);
-//		input = merge.execute ();
-		input = newInput;
+		merge.updateInput (input, newInput);
+		merge.execute ();
+		input = merge.result ();
 	} while (cmd != VldCmdCtrl::CEXIT);
 	return 0;
 }
