@@ -39,10 +39,7 @@ Add::Add (vector<cmd_pair> validCmd, ToDoMngr* toDoMngr) {
 	assert (toDoMngr != NULL);
 	_validCmd = validCmd;
 	_toDoMngr = toDoMngr;
-	_sequence = NULL;
-	_dataInput = NULL;
-	_cmdInput = NULL;
-	_splitedInput = NULL;
+	initPointers ();
 }
 
 Add::~Add () {
@@ -70,16 +67,20 @@ bool Add::execute () {
 		pop ();
 		force = true;
 	}
+
 	Task task = get_task ();
 
-	if (task.get_time ().get_date () == Time::DFLT_DATE || task.get_period ().get_start_time ().get_date () == Time::DFLT_DATE)
+	if (task.get_time ().get_date () == Time::DFLT_DATE && task.get_period ().get_start_time ().get_date () == Time::DFLT_DATE) {
 		_flagError = DATA;
-
-	if (_flagError == NONE) {
+		_input = getLeftOverInput ();
+		_result = "\nTime or Period of the task is required!\n";
+		done = false;
+	} else if (_flagError == NONE) {
 		list<Task> taskList = _toDoMngr->add (task, force);
+		
 		if (!force && !taskList.empty ()) {
 			_result = ToDoMngr::view (task) + MSG_CLASH + ToDoMngr::view (taskList);
-			_result += "\nEnter -f to continue adding.";
+			_result += "\nEnter -f to continue adding.\n";
 			insertBreakPoint ();
 			done = false;
 		} else if (force && !taskList.empty ()) {
@@ -90,8 +91,8 @@ bool Add::execute () {
 			done = true;
 		}
 	} else {
-		done = false;
 		_input = getLeftOverInput ();
+		done = false;
 	}
 
 	return done;
@@ -120,10 +121,7 @@ Edit::Edit (vector<cmd_pair> validCmd, ToDoMngr* toDoMngr) {
 	assert (toDoMngr != NULL);
 	_validCmd = validCmd;
 	_toDoMngr = toDoMngr;
-	_sequence = NULL;
-	_dataInput = NULL;
-	_cmdInput = NULL;
-	_splitedInput = NULL;
+	initPointers ();
 }
 
 Edit::~Edit () {
@@ -210,10 +208,7 @@ View::View (vector<cmd_pair> validCmd, ToDoMngr* toDoMngr) {
 	_viewType = DAILY;
 	_traverse = true;
 	_activeListAccessible = false;
-	_sequence = NULL;
-	_dataInput = NULL;
-	_cmdInput = NULL;
-	_splitedInput = NULL;
+	initPointers ();
 }
 
 View::~View () {
@@ -514,10 +509,7 @@ Delete::Delete (vector<cmd_pair> validCmd, ToDoMngr* toDoMngr) {
 	assert (toDoMngr != NULL);
 	_validCmd = validCmd;
 	_toDoMngr = toDoMngr;
-	_sequence = NULL;
-	_dataInput = NULL;
-	_cmdInput = NULL;
-	_splitedInput = NULL;
+	initPointers ();
 }
 
 Delete::~Delete () {
@@ -574,10 +566,8 @@ bool Delete::execute () {
 
 Merge::Merge (vector<cmd_pair> validCmd) {
 	_validCmd = validCmd;
-	_sequence = NULL;
-	_dataInput = NULL;
-	_cmdInput = NULL;
-	_splitedInput = NULL;
+	initPointers ();
+	log.log ("Merge");
 }
 
 Merge::~Merge () {
@@ -585,14 +575,19 @@ Merge::~Merge () {
 }
 
 void Merge::updateInput (string& input, string& newInput) {
+	log.clear ();
+	log.start ("updateInput");
 	_input = input;
 	_newInput = newInput;
+	log.end ();
 }
 
 bool Merge::execute () {
+	log.start ("execute");
 	seperateInput ();
 	splitInput (_newInput);
 
+	log.cond ("sequence");
 	if (!_sequence->empty () && _sequence->front () == CMD) {
 		switch (_cmdInput->front ()) {
 		case CVOID:
@@ -621,13 +616,15 @@ bool Merge::execute () {
 		_input = getLeftOverInput ();
 		_result = appendStrings (_part1, _input, _part2);
 	}
-
+	log.end ();
+	log.end ();
 	return true;
 }
 
 void Merge::discard () {
+	log.start ("discard");
 	unsigned int pos;
-
+	
 	if (!_sequence->empty () && _sequence->front () == CMD) {
 		if (_cmdInput->front () == CLEFT) {
 			pop ();
@@ -641,20 +638,25 @@ void Merge::discard () {
 			}
 		} else;
 	}
+	log.end ();
 }
 
 void Merge::seperateInput () {
+	log.start ("seperateInput");
 	unsigned int pos, next;
 	pos = _input.find (BREAK, 0);
 
-	int num_break = 0;
-	next = pos + BREAK.size ();
-	while (next != string::npos && next > _input.size ()) {
-		next = _input.find (BREAK, next);
-		next += BREAK.size ();
-		num_break++;
+	if (pos != string::npos) {
+		int num_break = 0;
+		next = pos + BREAK.size ();
+		while (next != string::npos && next > _input.size ()) {
+			num_break++;
+			next = _input.find (BREAK, next);
+			if (next != string::npos)
+				next += BREAK.size ();
+		}
+		assert (num_break <= 1);
 	}
-	assert (num_break <= 1);
 
 	_part1.erase ();
 	_part2.erase ();
@@ -670,6 +672,7 @@ void Merge::seperateInput () {
 			_part2 = _input.substr (pos + 1 + BREAK.size (), string::npos);
 		}
 	}
+	log.end ();
 }
 
 string Merge::appendStrings (string& str1, string& str2, string& str3) {
