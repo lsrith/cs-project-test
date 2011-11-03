@@ -70,37 +70,41 @@ bool Add::execute () {
 		force = true;
 	}
 	Task task = get_task ();
-//	cout << task.get_time ().string_date () << endl;
 	if (_flagError == NONE) {
 		list<Task> taskList = _toDoMngr->add (task, force);
 		if (!force && !taskList.empty ()) {
 			_result = ToDoMngr::view (task) + MSG_CLASH + ToDoMngr::view (taskList);
+			_result += "\nEnter -f to continue adding.";
 			insertBreakPoint ();
 			done = false;
 		} else if (force && !taskList.empty ()) {
 			assert (force == taskList.empty ());
 		} else {
+			_input = getLeftOverInput ();
 			_result = ToDoMngr::view (task) + MSG_ADDED;
 			done = true;
 		}
 	} else {
 		done = false;
+		_input = getLeftOverInput ();
 	}
 
-	_input = getLeftOverInput ();
 	return done;
 }
 
 void Add::insertBreakPoint () {
-	list<string>* temp = new list<string>;
-
-	temp->push_back (_splitedInput->front ());
+	_input = _splitedInput->front () + " ";
 	_splitedInput->pop_front ();
-	temp->push_back (BREAK);
-	temp->splice (temp->end (), *_splitedInput);
-	
-	delete _splitedInput;
-	_splitedInput = temp;
+
+	if (_splitedInput->empty ())
+		_input += BREAK;
+	else
+		_input += BREAK + " ";
+
+	while (!_splitedInput->empty ()) {
+		_input += _splitedInput->front () + " ";
+		_splitedInput->pop_front ();
+	}		
 }
 
 //-----------------------------------------------------------------
