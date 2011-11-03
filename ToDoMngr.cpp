@@ -446,7 +446,7 @@ string ToDoMngr:: view(list<Task> tasklist){
 				{ //if(l->get_period().get_start_time().get_date()!=Time::DFLT_DATE)
 					oss<<"\n";
 					oss<<setw(38)<<setfill(' ')<<"-------------------"<<"\n";
-					oss<<setw(20)<<setfill(' ')<<"|"<<" "<<l->get_period().get_start_time().display_day(l->get_period().get_start_time().get_day())<<" "<<_date<<" ";
+					oss<<setw(20)<<setfill(' ')<<"|"<<" "<<l->get_period().get_start_time().display_day(l->get_period().get_start_time().get_day())<<" "<<setw(2)<<setfill(' ')<<_date<<" ";
 
 					if(temp_month==month){
 
@@ -691,7 +691,7 @@ string ToDoMngr:: view(list<Task> tasklist){
 				{
 					oss<<"\n";
 					oss<<setw(38)<<setfill(' ')<<"-------------------"<<"\n";
-					oss<<setw(20)<<setfill(' ')<<"|"<<" "<<l->get_time().display_day(l->get_time().get_day())<<" "<<_date<<" ";
+					oss<<setw(20)<<setfill(' ')<<"|"<<" "<<l->get_time().display_day(l->get_time().get_day())<<" "<<setw(2)<<setfill(' ')<<_date<<" ";
 					if(temp_month==month){
 
 						oss<<temp_month<<" ";
