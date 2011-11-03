@@ -79,7 +79,10 @@ string CmdTrans::getLeftOverInput () {
 			_splitedInput->pop_front ();
 		}
 
-		input += BREAK + " ";
+		if (_splitedInput->empty ())
+			input += BREAK;
+		else
+			input += BREAK + " ";
 
 		while (!_splitedInput->empty ()) {
 			input += _splitedInput->front () + " ";

@@ -32,7 +32,6 @@ int main () {
 	input = VldCmdCtrl::convertToString (VldCmdCtrl::CUSER);
 
 	do {
-		cout << output << endl;
 		output.erase (0, string::npos);
 		cout << ">> ";
 		getline (cin, newInput);
@@ -118,15 +117,16 @@ int main () {
 			}
 			if (exeCmd != NULL) {
 				exeCmd->updateInput (input);
-				if (exeCmd->execute ()) {
-					output += exeCmd->result ();
-				} else {
-					cout << input << endl;
+				if (!exeCmd->execute ()) {
+					output += "\n>> " + exeCmd->get_input ();
 					prompt = true;
 				}
+				output += "\n" + exeCmd->result ();
 				input = exeCmd->get_input ();
 			}
 		}
+
+		cout << output << endl;
 	} while (cmd != VldCmdCtrl::CEXIT);
 	return 0;
 }
