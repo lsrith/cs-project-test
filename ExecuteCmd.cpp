@@ -5,6 +5,7 @@
 #include <list>
 #include <cassert>
 #include <iomanip>
+#include <iostream>
 using namespace std;
 
 ExecuteCmd::ExecuteCmd () {
@@ -70,6 +71,10 @@ bool Add::execute () {
 		force = true;
 	}
 	Task task = get_task ();
+
+	if (task.get_time ().get_date () == Time::DFLT_DATE || task.get_period ().get_start_time ().get_date () == Time::DFLT_DATE)
+		_flagError = DATA;
+
 	if (_flagError == NONE) {
 		list<Task> taskList = _toDoMngr->add (task, force);
 		if (!force && !taskList.empty ()) {
@@ -585,73 +590,86 @@ void Merge::updateInput (string& input, string& newInput) {
 }
 
 bool Merge::execute () {
-	string part1, part2;
-	unsigned int pos;
-	pos = _input.find (BREAK, 0);
-
-	if (pos == string::npos) {
-		part1 = _input;
-	} else if (pos == 0) {
-		part2 = _input.substr (BREAK.size () + 1, string::npos);
-	} else {
-		part1 = _input.substr (0, pos - 1);
-
-		if (pos + 1 + BREAK.size () < _input.size ()) {
-			part2 = _input.substr (pos + 1 + BREAK.size (), string::npos);
-		}
-	}
-
+	seperateInput ();
 	splitInput (_newInput);
 
 	if (!_sequence->empty () && _sequence->front () == CMD) {
 		switch (_cmdInput->front ()) {
+		case CVOID:
+			_input.erase ();
+			_result.erase ();
+			break;
 		case CDISCARD:
 			pop ();
-			if (!_sequence->empty () && _sequence->front () == CMD) {
-				if (_cmdInput->front () == CLEFT) {
-					pos = part1.find_last_of (' ');
-					part1 = part1.substr (0, pos);
-				} else if (_cmdInput->front () == CRIGHT) {
-					pos = part2.find_first_of (' ', 0);
-					if (pos + 1 < part2.size ()) {
-						part2 = part2.substr (pos + 1, string::npos);
-					}
-				} else;
-			}
+			discard ();
 			_input.erase ();
-			_result = appendStrings (part1, part2, _input);
-
+			_result = appendStrings (_part1, _part2, _input);
 			break;
 		case CREPLACE:
 			pop ();
-			if (!_sequence->empty () && _sequence->front () == CMD) {
-				if (_cmdInput->front () == CLEFT) {
-					pop ();
-					pos = part1.find_last_of (' ');
-					part1 = part1.substr (0, pos);
-				} else if (_cmdInput->front () == CRIGHT) {
-					pop ();
-					pos = part2.find_first_of (' ', 0);
-					if (pos + 1 < part2.size ()) {
-						part2 = part2.substr (pos + 1, string::npos);
-					}
-				} else;
-			}
+			discard ();
 			_input = getLeftOverInput ();
-			_result = appendStrings (part1, _input, part2);
+			_result = appendStrings (_part1, _input, _part2);
 			break;
 		case CINSERT:
 			pop ();
 		default:
 			_input = getLeftOverInput ();
-			_result = appendStrings (part1, _input, part2);
+			_result = appendStrings (_part1, _input, _part2);
 		}
 	} else {
 		_input = getLeftOverInput ();
-		_result = appendStrings (part1, _input, part2);
+		_result = appendStrings (_part1, _input, _part2);
 	}
 
 	return true;
+}
+
+void Merge::discard () {
+	unsigned int pos;
+
+	if (!_sequence->empty () && _sequence->front () == CMD) {
+		if (_cmdInput->front () == CLEFT) {
+			pop ();
+			pos = _part1.find_last_of (' ');
+			_part1 = _part1.substr (0, pos);
+		} else if (_cmdInput->front () == CRIGHT) {
+			pop ();
+			pos = _part2.find_first_of (' ', 0);
+			if (pos + 1 < _part2.size ()) {
+				_part2 = _part2.substr (pos + 1, string::npos);
+			}
+		} else;
+	}
+}
+
+void Merge::seperateInput () {
+	unsigned int pos, next;
+	pos = _input.find (BREAK, 0);
+
+	int num_break = 0;
+	next = pos + BREAK.size ();
+	while (next != string::npos && next > _input.size ()) {
+		next = _input.find (BREAK, next);
+		next += BREAK.size ();
+		num_break++;
+	}
+	assert (num_break <= 1);
+
+	_part1.erase ();
+	_part2.erase ();
+
+	if (pos == string::npos) {
+		_part1 = _input;
+	} else if (pos == 0) {
+		_part2 = _input.substr (BREAK.size () + 1, string::npos);
+	} else {
+		_part1 = _input.substr (0, pos - 1);
+
+		if (pos + 1 + BREAK.size () < _input.size ()) {
+			_part2 = _input.substr (pos + 1 + BREAK.size (), string::npos);
+		}
+	}
 }
 
 string Merge::appendStrings (string& str1, string& str2, string& str3) {
@@ -674,6 +692,27 @@ string Merge::appendStrings (string& str1, string& str2, string& str3) {
 	}
 
 	return str;
+}
+
+//---------------------------------------------------------------
+
+Table::Table (vector<cmd_pair> validCmd, ToDoMngr* toDoMngr) {
+	assert (toDoMngr != NULL);
+	_validCmd = validCmd;
+	_toDoMngr = toDoMngr;
+	_sequence = NULL;
+	_dataInput = NULL;
+	_cmdInput = NULL;
+	_splitedInput = NULL;
+}
+
+Table::~Table () {
+	clear ();
+}
+
+bool Table::execute () {
+	bool done = true;
+	return done;
 }
 
 //---------------------------------------------------------------
