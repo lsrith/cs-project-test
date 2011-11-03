@@ -40,12 +40,12 @@ string ToDoMngr::view(Task taskId){
 
 		full_date=taskId.get_period().get_start_time().get_date();
 		_date=full_date/1000000;
-		month=taskId.get_time().display_month((full_date % 1000000) / 10000);
+		month=taskId.get_period().get_start_time().display_month((full_date % 1000000) / 10000);
 		year=full_date%10000;
 
 		oss<<"\n";
 		if(taskId.get_period().get_start_time().get_date()!=Time::DFLT_DATE){
-			oss<<setw(24)<<setfill(' ')<<month<<" "<<year<<"  "<<_date<<" "<<taskId.get_time().display_day(taskId.get_period().get_start_time().get_day())<<"\n";
+			oss<<setw(24)<<setfill(' ')<<month<<" "<<year<<"  "<<_date<<" "<<taskId.get_period().get_start_time().display_day(taskId.get_period().get_start_time().get_day())<<"\n";
 
 			oss<<"\n";
 		}
@@ -341,7 +341,7 @@ string ToDoMngr:: view(list<Task> tasklist){
 				_date=full_date/1000000;
 
 
-				month=l->get_time().display_month((full_date % 1000000) / 10000);
+				month=l->get_period().get_start_time().display_month((full_date % 1000000) / 10000);
 				year=full_date%10000;
 
 
@@ -398,7 +398,7 @@ string ToDoMngr:: view(list<Task> tasklist){
 					oss<<setw(29)<<setfill(' ')<<right<<"End :"<<" ";
 
 					if(l->get_period().get_end_time().get_date()!=Time::DFLT_DATE){
-					oss<<l->get_time().display_day(l->get_period().get_end_time().get_day());
+						oss<<l->get_period().get_end_time().display_day(l->get_period().get_end_time().get_day());
 					oss<<" "<<((l->get_period().get_end_time().get_date())/1000000)<<" ";
 					oss<<l->get_period().get_end_time().display_month((((l->get_period().get_end_time().get_date())% 1000000) / 10000))<<" ";
 					oss<<((l->get_period().get_end_time().get_date())%10000)<<" ";
@@ -445,7 +445,7 @@ string ToDoMngr:: view(list<Task> tasklist){
 				{ //if(l->get_period().get_start_time().get_date()!=Time::DFLT_DATE)
 					oss<<"\n";
 					oss<<setw(38)<<setfill(' ')<<"-------------------"<<"\n";
-					oss<<setw(20)<<setfill(' ')<<"|"<<" "<<l->get_time().display_day(l->get_period().get_start_time().get_day())<<" "<<_date<<" ";
+					oss<<setw(20)<<setfill(' ')<<"|"<<" "<<l->get_period().get_start_time().display_day(l->get_period().get_start_time().get_day())<<" "<<_date<<" ";
 
 					if(temp_month==month){
 
@@ -561,7 +561,7 @@ string ToDoMngr:: view(list<Task> tasklist){
 					oss<<setw(29)<<setfill(' ')<<right<<"End :"<<" ";
 
 					if(l->get_period().get_end_time().get_date()!=Time::DFLT_DATE){
-					oss<<l->get_time().display_day(l->get_period().get_end_time().get_day());
+						oss<<l->get_period().get_end_time().display_day(l->get_period().get_end_time().get_day());
 					oss<<" "<<((l->get_period().get_end_time().get_date())/1000000)<<" ";
 					oss<<l->get_period().get_end_time().display_month((((l->get_period().get_end_time().get_date())% 1000000) / 10000))<<" ";
 					oss<<((l->get_period().get_end_time().get_date())%10000)<<" ";
@@ -837,7 +837,7 @@ string ToDoMngr::view (int taskId){
 
 			full_date=_taskpointer->get_period().get_start_time().get_date();
 			_date=full_date/1000000;
-			month=_taskpointer->get_time().display_month((full_date % 1000000) / 10000);
+			month=_taskpointer->get_period().get_start_time().display_month((full_date % 1000000) / 10000);
 			year=full_date%10000;
 
 			oss<<"\n";
@@ -1149,7 +1149,27 @@ string ToDoMngr::viewTableNames () {
 
 string ToDoMngr::alert () {
 	
-	return "alert";
+
+	list<Task>::iterator time_control;
+	std::ostringstream alerter;
+    
+	Time _time;
+	
+	
+	  for(time_control =_activeTaskList.begin (); time_control!=_activeTaskList.end (); time_control++)
+	  {   _time.current_time();
+		  if(time_control->alert==_time){
+			  alerter<<"ALERT"<<"\a"<<"\n";
+			  alerter<<"You have the following task/tasks now"<<"\n";
+		      
+			 return view(DAILY,time_control->alert);
+
+		  }
+
+
+
+		  }
+	//return "alert";
 }
 
 bool ToDoMngr::ifExistedTable (string tableName) {
