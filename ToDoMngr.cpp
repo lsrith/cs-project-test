@@ -690,7 +690,7 @@ string ToDoMngr:: view(list<Task> tasklist){
 				{
 					oss<<"\n";
 					oss<<setw(38)<<setfill(' ')<<"-------------------"<<"\n";
-					oss<<setw(20)<<setfill(' ')<<"|"<<" "<<l->get_time().display_day(l->get_period().get_start_time().get_day())<<" "<<_date<<" ";
+					oss<<setw(20)<<setfill(' ')<<"|"<<" "<<l->get_time().display_day(l->get_time().get_day())<<" "<<_date<<" ";
 					if(temp_month==month){
 
 						oss<<temp_month<<" ";
@@ -800,6 +800,7 @@ string ToDoMngr:: view(list<Task> tasklist){
 	return oss.str();
 
 }
+
 
 string ToDoMngr::view (int taskId){
 	Time obj;
@@ -1088,6 +1089,23 @@ string ToDoMngr::view (TimePeriod period){
 
 	return view(_activeTaskList);
 
+}
+
+string ToDoMngr::help (string command){
+
+	ifstream myhelpfile;
+	myhelpfile.open("HELP.txt");
+	string HELP_LINE;
+	ostringstream str;
+
+	if(command.empty ()){
+		while(getline(myhelpfile, HELP_LINE))
+		{
+			str<<HELP_LINE<<endl;
+		}
+	}
+
+	return str.str ();
 }
 
 string ToDoMngr::reminder(){
