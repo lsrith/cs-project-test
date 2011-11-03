@@ -1,9 +1,10 @@
 #include "ExecuteCmd.h"
 #include <sstream>
+#include <fstream>
 #include <vector>
 #include <list>
 #include <cassert>
-#include <iostream>
+#include <iomanip>
 using namespace std;
 
 ExecuteCmd::ExecuteCmd () {
@@ -69,7 +70,7 @@ bool Add::execute () {
 		force = true;
 	}
 	Task task = get_task ();
-	cout << task.get_time ().string_date () << endl;
+//	cout << task.get_time ().string_date () << endl;
 	if (_flagError == NONE) {
 		list<Task> taskList = _toDoMngr->add (task, force);
 		if (!force && !taskList.empty ()) {
@@ -215,8 +216,38 @@ bool View::execute () {
 	
 	splitInput (_input);
 
-	if (!_sequence->empty () && _sequence->front () == CMD && _cmdInput->front () == CVIEW) {
-		pop ();
+	if (!_sequence->empty () && _sequence->front () == CMD) {
+		switch (_cmdInput->front ()) {
+		case CVIEW:
+			pop ();
+			break;
+		case CNEXT:
+			next ();
+			pop ();
+			_input = getLeftOverInput ();
+			return true;
+			break;
+		case CPREVIOUS:
+			prev ();
+			pop ();
+			_input = getLeftOverInput ();
+			return true;
+			break;
+		case CLAST:
+			last ();
+			pop ();
+			_input = getLeftOverInput ();
+			return true;
+			break;
+		case CFIRST:
+			first ();
+			pop ();
+			_input = getLeftOverInput ();
+			return true;
+			break;
+		default:
+			break;
+		}
 	} else {
 		done = true;
 	}
@@ -262,6 +293,30 @@ bool View::execute () {
 		break;
 	case CMD:
 		switch (_cmdInput->front ()) {
+		case CNEXT:
+			next ();
+			pop ();
+			_input = getLeftOverInput ();
+			return true;
+			break;
+		case CPREVIOUS:
+			prev ();
+			pop ();
+			_input = getLeftOverInput ();
+			return true;
+			break;
+		case CLAST:
+			last ();
+			pop ();
+			_input = getLeftOverInput ();
+			return true;
+			break;
+		case CFIRST:
+			first ();
+			pop ();
+			_input = getLeftOverInput ();
+			return true;
+			break;
 		case CFROM:
 			_period = get_period ();
 			
@@ -304,9 +359,9 @@ bool View::execute () {
 	return done;
 }
 
-string View::next () {
+void View::next () {
 	if (!_traverse)
-		return _result;
+		return;
 
 	_first = false;
 
@@ -354,13 +409,11 @@ string View::next () {
 
 	if (_last)
 		_result = MSG_NO_NEXT;
-
-	return _result;
 }
 
-string View::prev () {
+void View::prev () {
 	if (!_traverse)
-		return _result;
+		return;
 
 	_last = false;
 
@@ -407,13 +460,11 @@ string View::prev () {
 
 	if (_first)
 		_result = MSG_NO_PREV;
-
-	return _result;
 }
 
-string View::first () {
+void View::first () {
 	if (!_traverse)
-		return _result;
+		return;
 
 	string temp;
 	
@@ -422,12 +473,12 @@ string View::first () {
 		if (!_first)
 			temp = _result;
 	}
-	return _result = temp;
+	_result = temp;
 }
 
-string View::last () {
+void View::last () {
 	if (!_traverse)
-		return _result;
+		return;
 	
 	string str;
 	string temp;
@@ -437,7 +488,7 @@ string View::last () {
 		if (!_last)
 			temp = _result;
 	}
-	return _result = temp;
+	_result = temp;
 }
 
 void View::deactivateTraverse () {
@@ -619,6 +670,82 @@ string Merge::appendStrings (string& str1, string& str2, string& str3) {
 	}
 
 	return str;
+}
+
+//---------------------------------------------------------------
+
+bool Help::execute () {
+	ifstream myhelpfile;
+	myhelpfile.open("HELP.txt");
+	string HELP_LINE;
+	ostringstream oss;
+
+	eraseFirstWord ();
+//from here, you can change command variable to _input so that you dont need this line
+	string command = _input;
+
+	for(int i=0; i<command.size(); i++)
+		command[i] = tolower(command[i]);
+	
+	if(command == "" || command == "command")
+	{
+		int i=0, k=0;
+		getline(myhelpfile, HELP_LINE);
+		oss << endl << setw(54) << setfill(' ') << HELP_LINE << endl;
+		oss << endl << "  ----------------------------------------------------------------------------  ";
+		while(getline(myhelpfile, HELP_LINE) && !myhelpfile.eof())
+		{
+			if(HELP_LINE.empty())
+				oss << endl;
+			else
+			{
+				if(k==0)
+				{
+					oss << "  " << "Command: " << HELP_LINE << endl;
+					k++;
+				}
+				else
+				{
+					oss << endl << "  " << HELP_LINE << endl; 
+					k=0;
+				}
+				if(HELP_LINE.empty()) 
+					oss << "  ----------------------------------------------------------------------------  "<< endl ;
+			}
+			if(i != 0 && HELP_LINE.empty())
+				oss << "  ----------------------------------------------------------------------------  "<< endl ;
+			i++;
+		}
+		oss << endl << "  ----------------------------------------------------------------------------  ";
+	}
+
+	while(getline(myhelpfile, HELP_LINE))
+	{
+		if(command == HELP_LINE)
+		{	
+			oss << endl << setw(54) << setfill(' ') << "<--- TASKCAL Help Viewer --->"  << endl;
+			oss << endl << "  ----------------------------------------------------------------------------  ";
+			oss << endl << "  " << "Command: " << HELP_LINE << endl;
+			while(getline(myhelpfile, HELP_LINE) && !HELP_LINE.empty())
+				oss << endl << "  " << HELP_LINE << endl;
+			oss << endl << "  ----------------------------------------------------------------------------  ";
+			myhelpfile.close();
+			break;
+		}
+	}
+	
+	//this is to make sure that you dont return any leftOverInput
+	_input.erase ();
+
+	return true;
+}
+
+void Help::eraseFirstWord () {
+	unsigned int pos = _input.find_first_of (' ', 0);
+	if (pos == string::npos)
+		_input.erase (0, pos);
+	else
+		_input.erase (0, pos + 1);
 }
 
 //---------------------------------------------------------------

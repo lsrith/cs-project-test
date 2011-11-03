@@ -27,40 +27,34 @@ int main () {
 	Edit edit (cmdCtrl.get_vldCmdList (), toDo);
 	View view (cmdCtrl.get_vldCmdList (), toDo);
 	Delete erase (cmdCtrl.get_vldCmdList (), toDo);
+	Help help;
 
 	input = VldCmdCtrl::convertToString (VldCmdCtrl::CUSER);
 
 	do {
+		cout << output << endl;
+		output.erase (0, string::npos);
+		cout << ">> ";
+		getline (cin, newInput);
+
+		merge.updateInput (input, newInput);
+		merge.execute ();
+		input = merge.result ();
 		prompt = false;
+
 		while (!input.empty () && !prompt) {
 			cmd = getFirstCmd (&input, &cmdCtrl);
 			
-			prompt = true;
 			switch (cmd) {
+			case VldCmdCtrl::CVIEW:
 			case VldCmdCtrl::CNEXT:
-				output += view.next ();
-				eraseFirstWord (&input);
-				break;
 			case VldCmdCtrl::CPREVIOUS:
-				output += view.prev ();
-				eraseFirstWord (&input);
-				break;
 			case VldCmdCtrl::CFIRST:
-				output += view.first ();
-				eraseFirstWord (&input);
-				break;
 			case VldCmdCtrl::CLAST:
-				output += view.last ();
-				eraseFirstWord (&input);
 				break;
 			default:
 				view.deactivateTraverse ();
-				prompt = false;
 				break;
-			}
-			if (prompt) {
-				prompt = false;
-				continue;
 			}
 
 			prompt = true;
@@ -102,7 +96,14 @@ int main () {
 				exeCmd = &erase;	
 				break;
 			case VldCmdCtrl::CVIEW:
+			case VldCmdCtrl::CNEXT:
+			case VldCmdCtrl::CPREVIOUS:
+			case VldCmdCtrl::CFIRST:
+			case VldCmdCtrl::CLAST:
 				exeCmd = &view;
+				break;
+			case VldCmdCtrl::CHELP:
+				exeCmd = &help;
 				break;
 			case VldCmdCtrl::CUSER:
 				exeCmd = &userAcc;
@@ -126,14 +127,6 @@ int main () {
 				input = exeCmd->get_input ();
 			}
 		}
-		cout << output << endl;
-		output.erase (0, string::npos);
-		cout << ">> ";
-		getline (cin, newInput);
-
-		merge.updateInput (input, newInput);
-		merge.execute ();
-		input = merge.result ();
 	} while (cmd != VldCmdCtrl::CEXIT);
 	return 0;
 }

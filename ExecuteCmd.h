@@ -56,10 +56,10 @@ public:
 	~View ();
 	bool execute ();
 	void deactivateTraverse ();
-	string next ();
-	string prev ();
-	string last ();
-	string first ();
+	void next ();
+	void prev ();
+	void last ();
+	void first ();
 
 private:
 	static string MSG_NO_NEXT;
@@ -96,6 +96,14 @@ public:
 private:
 	string _newInput;
 	string appendStrings (string&, string&, string&);
+};
+
+class Help:public ExecuteCmd {
+public:
+	bool execute ();
+
+private:
+	void eraseFirstWord ();
 };
 
 class AccCtrl: public ExecuteCmd {
