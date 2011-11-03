@@ -64,6 +64,7 @@ int main () {
 			cout << "exp:: " << expOutput << endl;
 			cout << "try:: " << testOutput << endl;
 		}
+		cout << endl;
 	
 		input = "hello how are you? I am fine. " + CmdTrans::BREAK;
 		newInput = "discard -l I am fine as well";

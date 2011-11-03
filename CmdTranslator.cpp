@@ -11,10 +11,7 @@ CmdTrans::CmdTrans () {
 		throw (message);
 	}
 
-	_sequence = NULL;
-	_dataInput = NULL;
-	_cmdInput = NULL;
-	_splitedInput = NULL;
+	initPointers ();
 }
 
 CmdTrans::~CmdTrans () {
@@ -79,10 +76,7 @@ string CmdTrans::getLeftOverInput () {
 			_splitedInput->pop_front ();
 		}
 
-		if (_splitedInput->empty ())
-			input += BREAK;
-		else
-			input += BREAK + " ";
+		input += BREAK + " ";
 
 		while (!_splitedInput->empty ()) {
 			input += _splitedInput->front () + " ";
@@ -755,6 +749,13 @@ VldCmdCtrl::command CmdTrans::translateCmd (string str) {
 	}
 
 	return cmd;
+}
+
+void CmdTrans::initPointers () {
+	_sequence = NULL;
+	_dataInput = NULL;
+	_cmdInput = NULL;
+	_splitedInput = NULL;
 }
 
 void CmdTrans::push (command cmd) {
