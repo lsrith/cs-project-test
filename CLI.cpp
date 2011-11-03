@@ -118,7 +118,7 @@ int main () {
 			if (exeCmd != NULL) {
 				exeCmd->updateInput (input);
 				if (!exeCmd->execute ()) {
-					output += "\n>> " + exeCmd->get_input ();
+					output += "\n<< " + exeCmd->get_input ();
 					prompt = true;
 				}
 				output += "\n" + exeCmd->result ();
