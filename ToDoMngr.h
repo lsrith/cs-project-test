@@ -63,9 +63,6 @@ public:
 	string alert ();
 	// return a string to pop up whenever a task is set to be alert at any specified time
         
-	static string help (string command);
-	// view help based on specific command, view full help if command == NULL;
-	// for V0.1, suppose that the command is only NULL or command;
 	//***Switch User*** function prototype to be completed
 
 	static list<string> tableNames ();

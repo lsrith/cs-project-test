@@ -801,7 +801,6 @@ string ToDoMngr:: view(list<Task> tasklist){
 
 }
 
-
 string ToDoMngr::view (int taskId){
 	Time obj;
 	ToDoMngr todo;
@@ -1089,23 +1088,6 @@ string ToDoMngr::view (TimePeriod period){
 
 	return view(_activeTaskList);
 
-}
-
-string ToDoMngr::help (string command){
-
-	ifstream myhelpfile;
-	myhelpfile.open("HELP.txt");
-	string HELP_LINE;
-	ostringstream str;
-
-	if(command.empty ()){
-		while(getline(myhelpfile, HELP_LINE))
-		{
-			str<<HELP_LINE<<endl;
-		}
-	}
-
-	return str.str ();
 }
 
 string ToDoMngr::reminder(){
