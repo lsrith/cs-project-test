@@ -3,6 +3,7 @@
 #include "VldCmdCtrl.h"
 #include "CmdTranslator.h"
 #include "ToDoMngr.h"
+#include "Logging.h"
 using namespace std;
 
 template <typename data_t>
@@ -101,6 +102,7 @@ public:
 	bool execute ();
 
 private:
+	Logging log;
 	string _newInput;
 	string _part1;
 	string _part2;
