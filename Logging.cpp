@@ -62,7 +62,7 @@ void Logging::cond (string name, int cond) {
 }
 
 void Logging::end () {
-	if (_inactive || !_start) return;
+	if (_inactive) return;
 	if (_history.empty ()) return;
 	
 	__tab--;
@@ -71,6 +71,7 @@ void Logging::end () {
 		_history.pop ();
 		_removeLine ();
 	} else if (_loop == true && _history.top () == LOOP) {
+		__tab++;
 		_history.pop ();
 		_loop = false;
 		__iter.pop ();

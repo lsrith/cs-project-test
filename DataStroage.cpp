@@ -4,6 +4,7 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <iostream>
 using namespace std;
 
 DataStorage::DataStorage ()
@@ -376,7 +377,7 @@ void DataStorage::loadFromFile () {
 	list<TaskNode*>::iterator taskIter;
 	if (taskFile.is_open ()) {
 		while (getline (taskFile, str)) {
-			TaskNode* node = new TaskNode;
+			TaskNode *node = new TaskNode;
 			stringstream strStream;
 			strStream << str;
 			strStream >> node->_active >> str;
@@ -400,7 +401,7 @@ void DataStorage::loadFromFile () {
 					}
 				}
 			} else if (node->_task._index < _largestIndex) {
-				TaskNode** ptr;
+				TaskNode* *ptr;
 				ptr = find_pos (&_indxTasks, node->_task._index);
 				**ptr = *node;
 				delete node;
@@ -501,7 +502,7 @@ template <typename data_t>
 data_t* find_pos (list<data_t>* dataList, int pos) {
 	list<data_t>::iterator iter;
 	int i;
-	for (i = 0, iter = dataList->begin (); i < pos || iter != dataList->end (); iter++, i++);
+	for (i = 0, iter = dataList->begin (); i < pos && iter != dataList->end (); iter++, i++);
 
 	if (iter == dataList->end ())
 		return NULL;

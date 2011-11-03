@@ -66,7 +66,7 @@ public:
 private:
 	string _taskFile;
 	string _tableFile;
-	int _largestIndex;
+	unsigned int _largestIndex;
 	list<TaskNode*> _indxTasks;
 	list<TableNode*> _tables;
 	
