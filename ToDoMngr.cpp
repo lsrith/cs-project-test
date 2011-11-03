@@ -609,7 +609,7 @@ string ToDoMngr:: view(list<Task> tasklist){
 					oss<<setw(index_convert.str().length())<<setfill(' ')<<index<<"."<<" ";
 					oss<<"Start :"<<" ";
 
-					if(l->get_time()!=_tm)
+					if(l->get_time().get_clock()!=Time::DFLT_CLOCK)
 						oss<<l->get_time().string_clock();
 					else
 						oss<<"        ";
@@ -725,7 +725,7 @@ string ToDoMngr:: view(list<Task> tasklist){
 					oss<<setw(index_convert.str().length())<<setfill(' ')<<index<<"."<<" ";
 					oss<<"Start :"<<" ";
 
-					if(l->get_time()!=_tm)
+					if(l->get_time().get_clock()!=Time::DFLT_CLOCK)
 						oss<<l->get_time().string_clock();
 					else
 						oss<<"        ";
@@ -1486,6 +1486,7 @@ void ToDoMngr::setTaskElem (ToDoMngr::TaskElement* taskElem, Task* task) {
 }
 
 bool ToDoMngr::activateTable (string tableName) {
+
 	return false;
 }
 
