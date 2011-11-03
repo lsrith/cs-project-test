@@ -1091,22 +1091,6 @@ string ToDoMngr::view (TimePeriod period){
 
 }
 
-string ToDoMngr::help (string command){
-
-	ifstream myhelpfile;
-	myhelpfile.open("HELP.txt");
-	string HELP_LINE;
-	ostringstream str;
-
-	if(command.empty ()){
-		while(getline(myhelpfile, HELP_LINE))
-		{
-			str<<HELP_LINE<<endl;
-		}
-	}
-
-	return str.str ();
-}
 
 string ToDoMngr::reminder(){
 
