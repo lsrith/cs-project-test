@@ -134,7 +134,8 @@ VldCmdCtrl::command VldCmdCtrl::convertToCommand (int indx) {
 		case 45:	cmd = CINSERT;		break;
 		case 46:	cmd = CLEFT;		break;
 		case 47:	cmd = CRIGHT;		break;
-		default:	cmd = CVOID;		break;
+		case 48:	cmd = CVOID;		break;
+		default:	cmd = CNULL;		break;
 	}
 
 	return cmd;
@@ -149,7 +150,7 @@ VldCmdCtrl::command VldCmdCtrl::convertToCommand (string str) {
 bool VldCmdCtrl::search_vldCmd (string str, command& cmd) {
 	int size = _validCmd.size ();
 	bool found = false;
-	cmd = CVOID;
+	cmd = CNULL;
 	for (int i = 0; !found && i < size; i++) {
 		if (str == _validCmd[i].str_cmd) {
 			found = true;
@@ -210,7 +211,8 @@ string VldCmdCtrl::convertToString (command cmd) {
 	case (CINSERT):		str = "insert";		break;
 	case (CLEFT):		str = "left";		break;
 	case (CRIGHT):		str = "right";		break;
-	default:			str = "void";		break;
+	case (CVOID):		str = "void";		break;
+	default:								break;
 	}
 	return str;
 }
