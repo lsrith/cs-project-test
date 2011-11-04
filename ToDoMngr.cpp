@@ -312,6 +312,7 @@ string ToDoMngr:: view(list<Task> tasklist){
 
 	std::ostringstream oss,index_convert;
 	list<Task> taskl=tasklist;
+	taskl.sort(Task::compareByStartTime);
 
 	if(taskl.size()==1||taskl.size()==2||taskl.size()==3||taskl.size()==4||taskl.size()==5||taskl.size()==6||taskl.size()==7||taskl.size()==8||taskl.size()==9)
 		index_convert<<10;
@@ -445,7 +446,7 @@ string ToDoMngr:: view(list<Task> tasklist){
 				{ //if(l->get_period().get_start_time().get_date()!=Time::DFLT_DATE)
 					oss<<"\n";
 					oss<<setw(38)<<setfill(' ')<<"-------------------"<<"\n";
-					oss<<setw(20)<<setfill(' ')<<"|"<<" "<<l->get_period().get_start_time().display_day(l->get_period().get_start_time().get_day())<<" "<<_date<<" ";
+					oss<<setw(20)<<setfill(' ')<<"|"<<" "<<l->get_period().get_start_time().display_day(l->get_period().get_start_time().get_day())<<" "<<setw(2)<<setfill(' ')<<_date<<" ";
 
 					if(temp_month==month){
 
@@ -609,7 +610,7 @@ string ToDoMngr:: view(list<Task> tasklist){
 					oss<<setw(index_convert.str().length())<<setfill(' ')<<index<<"."<<" ";
 					oss<<"Start :"<<" ";
 
-					if(l->get_time()!=_tm)
+					if(l->get_time().get_clock()!=Time::DFLT_CLOCK)
 						oss<<l->get_time().string_clock();
 					else
 						oss<<"        ";
@@ -690,7 +691,7 @@ string ToDoMngr:: view(list<Task> tasklist){
 				{
 					oss<<"\n";
 					oss<<setw(38)<<setfill(' ')<<"-------------------"<<"\n";
-					oss<<setw(20)<<setfill(' ')<<"|"<<" "<<l->get_time().display_day(l->get_time().get_day())<<" "<<_date<<" ";
+					oss<<setw(20)<<setfill(' ')<<"|"<<" "<<l->get_time().display_day(l->get_time().get_day())<<" "<<setw(2)<<setfill(' ')<<_date<<" ";
 					if(temp_month==month){
 
 						oss<<temp_month<<" ";
@@ -725,7 +726,7 @@ string ToDoMngr:: view(list<Task> tasklist){
 					oss<<setw(index_convert.str().length())<<setfill(' ')<<index<<"."<<" ";
 					oss<<"Start :"<<" ";
 
-					if(l->get_time()!=_tm)
+					if(l->get_time().get_clock()!=Time::DFLT_CLOCK)
 						oss<<l->get_time().string_clock();
 					else
 						oss<<"        ";
@@ -1486,6 +1487,7 @@ void ToDoMngr::setTaskElem (ToDoMngr::TaskElement* taskElem, Task* task) {
 }
 
 bool ToDoMngr::activateTable (string tableName) {
+
 	return false;
 }
 
