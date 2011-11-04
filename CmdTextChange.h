@@ -41,6 +41,8 @@ private:
 	void setCurrWord (Color);
 	void setPrevWords (Color);
 	Color prevWord ();
+	void clear ();
+	void buffer ();
 };
 
 #endif

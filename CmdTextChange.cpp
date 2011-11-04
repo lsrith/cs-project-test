@@ -14,6 +14,7 @@ CmdTextChange::CmdTextChange () {
 
 	initPointers ();
 	_insertActive = true;
+	_cursor = 0;
 	hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 }
 
@@ -29,6 +30,7 @@ string CmdTextChange::read (string __str) {
 	splitString (__str);
 	short int ch;
 	do {
+		buffer ();
 		ch = _getch ();
 		
 		if (ch == '\r') {
@@ -50,8 +52,10 @@ string CmdTextChange::read (string __str) {
 		} else;
 	} while (ch != '\n');
 	
-	SetConsoleTextAttribute(hConsole, GRAY);	
-	return mergeChar (&_chList);
+	SetConsoleTextAttribute(hConsole, GRAY);
+	string str = mergeChar (&_chList);
+	_cursor = str.size ();
+	return str;
 }
 
 //to be modified
@@ -321,8 +325,7 @@ void CmdTextChange::insChar (short int ch) {
 
 void CmdTextChange::splitString (string& str) {
 	SetConsoleTextAttribute(hConsole, WHITE);
-
-	_cursor = 0;
+	clear ();
 	unsigned int i, size = str.size ();
 	chNode node;
 	for (i = 0; i < size; i++) {
@@ -350,6 +353,10 @@ void CmdTextChange::splitString (string& str) {
 string CmdTextChange::mergeChar (list<chNode>* __chList) {
 	string str;
 	unsigned int i, size = __chList->size ();
+
+	if (size == 0)
+		return str;
+
 	list<chNode>::iterator iter = __chList->begin ();
 	for (i = 0; i < size - 1; i++) {
 		str += (char) iter->_ch;
@@ -367,4 +374,17 @@ list<CmdTextChange::chNode>::iterator CmdTextChange::getNode (unsigned int pos) 
 	list<chNode>::iterator iter = _chList.begin ();
 	for (unsigned int i = 0; i < pos; i++, iter++);
 	return iter;
+}
+
+void CmdTextChange::clear () {
+	_cursor = 0;
+	_insertActive = true;
+	_chList.clear ();
+}
+
+void CmdTextChange::buffer () {
+	unsigned long int currTick, prevTick = GetTickCount ();
+	do {
+		currTick = GetTickCount ();
+	} while (currTick - prevTick < 150);
 }

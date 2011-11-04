@@ -2,6 +2,7 @@
 #include "ExecuteCmd.h"
 #include "AccCtrl.h"
 #include "Logging.h"
+#include "CmdTextChange.h"
 #include <iostream>
 #include <direct.h>
 using namespace std;
@@ -35,6 +36,7 @@ int main () {
 	bool prompt;
 	VldCmdCtrl::command cmd = VldCmdCtrl::CUSER;
 
+	CmdTextChange console;
 	Merge merge (cmdCtrl.get_vldCmdList ());
 	ExecuteCmd* exeCmd = NULL;
 	AccCtrl userAcc (toDo);
@@ -50,7 +52,7 @@ int main () {
 	do {
 		output.erase (0, string::npos);
 		cout << ">> ";
-		getline (cin, newInput);
+		newInput = console.read ();
 
 		merge.updateInput (input, newInput);
 		merge.execute ();
