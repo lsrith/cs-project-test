@@ -222,27 +222,49 @@ void DataStorage::save (TableNode* table, list<Task>* taskList) {
 	appendToFile (&newTasks);
 }
 
+void DataStorage::save (string tableName, list<Task> tasks) {
+	if (_tables.empty ())
+		return;
+
+	TimePeriod period;
+	list<TableNode*>::iterator tableIter;
+	for (tableIter = _tables.begin (); tableIter != _tables.end (); tableIter++) {
+		if ((*tableIter)->_name == tableName) {
+			period = (*tableIter)->_period;
+			break;
+		}
+	}
+
+	if (tableIter == _tables.end ())
+		return;
+	else
+		save (tableName, period, tasks);
+}
+
 void DataStorage::save (string tableName, TimePeriod period, list<Task> tasks) {
 	bool existingTable = false;
 	TableNode* table;
 	list<TableNode*>::iterator tableIter;
-	for (tableIter = _tables.begin (); tableIter != _tables.end (); tableIter++) {
-		if ((*tableIter)->_name == tableName) {
-			if ((*tableIter)->_active &&
-				(*tableIter)->_period.get_start_time () == period.get_start_time () &&
-				(*tableIter)->_period.get_end_time () == period.get_end_time ()) {
-				save (*tableIter, &tasks);
-			} else {
-				setInactive (&((*tableIter)->_tasks));
-				(*tableIter)->_period = period;
-				(*tableIter)->_active = true;
-				(*tableIter)->_tasks.clear ();
-				save (*tableIter, &tasks);
-			}
+	
+	if (!_tables.empty ()) {
+		for (tableIter = _tables.begin (); tableIter != _tables.end (); tableIter++) {
+			if ((*tableIter)->_name == tableName) {
+				if ((*tableIter)->_active &&
+					(*tableIter)->_period.get_start_time () == period.get_start_time () &&
+					(*tableIter)->_period.get_end_time () == period.get_end_time ()) {
+					save (*tableIter, &tasks);
+				} else {
+					setInactive (&((*tableIter)->_tasks));
+					(*tableIter)->_period = period;
+					(*tableIter)->_active = true;
+					(*tableIter)->_tasks.clear ();
+					save (*tableIter, &tasks);
+				}
 
-			existingTable = true;
-			table = *tableIter;
-			break;
+				existingTable = true;
+				table = *tableIter;
+				break;
+			}
 		}
 	}
 

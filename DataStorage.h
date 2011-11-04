@@ -48,6 +48,7 @@ public:
 	void clear ();
 	void exit ();
 
+	void save (string tableName, list<Task> tasks);
 	void save (string tableName, TimePeriod period, list<Task> tasks);
 	// save the timetable with the name and period so that you can load back all tasks
 	// if the tableName is the existing one, check the period

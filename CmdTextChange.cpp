@@ -388,3 +388,17 @@ void CmdTextChange::buffer () {
 		currTick = GetTickCount ();
 	} while (currTick - prevTick < 150);
 }
+
+CmdTextChange::Color CmdTextChange::getCmdColor (command cmd) {
+	Color color;
+	switch (cmd) {
+	case CCOSTOM:
+	case CFORCE:
+	case CEXACT:
+	case CSIMILAR:
+	case CEACH:
+	case CCOMMAND:
+		color = 
+	}
+	return 0;
+}

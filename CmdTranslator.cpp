@@ -255,6 +255,11 @@ TimePeriod CmdTrans::get_period () {
 		_flagError = CMD;
 	}
 
+	if (_sequence->empty ()) {
+		_flagError = CMD;
+		return period;
+	}
+
 	if (_flagError == NONE) {
 		if (_sequence->front () == CMD && _cmdInput->front () == CTO) {
 			pop ();
