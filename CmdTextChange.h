@@ -8,7 +8,7 @@ using namespace std;
 class CmdTextChange: public CmdTrans {
 private:
 	enum SpCmd {SPCMD = 224, RIGHT = 'M', LEFT = 'K', DEL = 'S', INS = 'R'};
-	enum Color {GRAY = 7, GREY, BLUE, GREEN, SKY, RED, PINK, YELLOW, WHITE};
+	enum Color {BLACK = 0, GRAY = 7, GREY, BLUE, GREEN, SKY, RED, PINK, YELLOW, WHITE};
 
 	struct chNode {
 		short int _ch;
@@ -36,11 +36,11 @@ private:
 	string mergeChar (list<chNode>*);
 	list<chNode>::iterator getNode (unsigned int);
 	string getCurrWord ();
-	string getPrevWord ();
-	bool ifDataError (string);
+	void getPrevWords (command&, string&);
+	bool ifDataError (command, string);
 	void setCurrWord (Color);
-	void setPrevWord (Color);
-	input_t prevWord ();
+	void setPrevWords (Color);
+	Color prevWord ();
 };
 
 #endif

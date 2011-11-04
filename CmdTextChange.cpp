@@ -54,25 +54,43 @@ string CmdTextChange::read (string __str) {
 	return mergeChar (&_chList);
 }
 
+//to be modified
 void CmdTextChange::checkWord () {
 	string str;
 	str = getCurrWord ();
 	command cmd = convertToCommand (str);
 	if (cmd == CNULL) {
-		if (prevWord () == NONE)
+		if (prevWord () == BLACK || prevWord () == RED)
 			setCurrWord (RED);
+		else
+			setCurrWord (WHITE);
 	} else {
-		if (prevWord () == CMD) {
-			setPrevWord (RED);
-			setCurrWord (RED);
-		} else if (prevWord () == DATA) {
-			str = getPrevWord ();
-			if (ifDataError (str))
-				setPrevWord (RED);
-			setCurrWord (BLUE);
-		} else {
-			setCurrWord (BLUE);
+		setCurrWord (SKY);
+		if (prevWord () == WHITE) {
+			getPrevWords (cmd, str);
+			if (ifDataError (cmd, str))
+				setPrevWords (RED);
 		}
+	}
+}
+
+bool CmdTextChange::ifDataError (command cmd, string str) {
+	splitInput (str);
+	switch (cmd) {
+	case CFROM:
+	case CTO:
+	case CTIME:
+	case CDATE:
+	case CALERT:
+		get_time ();
+		if (_flagError != NONE)
+			return true;
+		else
+			return false;
+		break;
+	default:
+		return false;
+		break;
 	}
 }
 
@@ -81,7 +99,7 @@ string CmdTextChange::getCurrWord () {
 	list<chNode>::iterator iter = getNode (_cursor - 1);
 
 	while (iter->_ch != ' ') {
-		temp = iter->_ch;
+		temp = (char) iter->_ch;
 		str.insert (0, temp);
 
 		if (iter == _chList.begin ())
@@ -91,6 +109,42 @@ string CmdTextChange::getCurrWord () {
 	}
 
 	return str;
+}
+
+void CmdTextChange::getPrevWords (command& cmd, string& str) {
+	cmd = CNULL;
+	str.erase ();
+	string temp, __temp;
+	list<chNode>::iterator iter = getNode (_cursor - 1);
+	Color currColor = iter->_cl;
+	while (iter->_cl == currColor) {
+			iter--;
+	}
+
+	currColor = iter->_cl;
+	if (currColor != WHITE)
+		return;
+
+	iter--;
+	while (iter->_cl == currColor) {
+		temp = (char) iter->_ch;
+		str.insert (0, temp);
+		iter--;
+	}
+
+	currColor = iter->_cl;
+	iter--;
+	while (iter->_cl == currColor) {
+		temp = (char) iter->_ch;
+		__temp.insert (0, temp);
+
+		if (iter == _chList.begin ())
+			break;
+		else
+			iter--;
+	}
+
+	cmd = convertToCommand (__temp);
 }
 
 void CmdTextChange::setCurrWord (Color color) {
@@ -116,6 +170,49 @@ void CmdTextChange::setCurrWord (Color color) {
 		putChar (*iter);
 		iter++;
 	}
+}
+
+void CmdTextChange::setPrevWords (Color color) {
+	unsigned short int i, numChar = 0;
+	list<chNode>::iterator iter = getNode (_cursor - 1);
+	Color currColor = iter->_cl;
+	while (iter->_cl == currColor) {
+			iter--;
+			numChar++;
+	}
+
+	currColor = iter->_cl;
+	iter--;
+	while (iter->_cl == currColor) {
+		iter->_cl = color;
+		iter--;
+		numChar++;
+	}
+
+	iter++;
+	for (i = 0; i < numChar; i++)
+		_putch ('\b');
+
+	for (i = 0; i < numChar; i++) {
+		putChar (*iter);
+		iter++;
+	}
+}
+
+CmdTextChange::Color CmdTextChange::prevWord () {
+	list<chNode>::iterator iter = getNode (_cursor - 1);
+	Color currColor = iter->_cl;
+	while (iter->_cl == currColor) {
+		if (iter == _chList.begin ())
+			break;
+		else
+			iter--;
+	}
+
+	if (iter == _chList.begin ())
+		return BLACK;
+	else
+		return iter->_cl;
 }
 
 void CmdTextChange::putChar (chNode node) {
@@ -235,7 +332,7 @@ void CmdTextChange::splitString (string& str) {
 			node._ch = ' ';
 		}
 
-		if (str[i] == ' ') {
+		if (node._ch == ' ') {
 			if (_chList.empty () || _chList.back ()._ch == ' ') {
 				continue;
 			} else {
