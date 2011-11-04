@@ -734,6 +734,40 @@ Table::~Table () {
 
 bool Table::execute () {
 	bool done = true;
+	splitInput (_input);
+	
+	if (!_sequence->empty () && _sequence->front () == CMD && _cmdInput->front () == CTABLE) {
+		pop ();
+	} else {
+		_input = getLeftOverInput ();
+		done = true;
+	}
+
+	if (!_sequence->empty () && _sequence->front () == DATA) {
+		string tableName = mergeStringInput ();
+		if (!_sequence->empty () && _sequence->front () == CMD && _cmdInput->front () == CFROM) {
+			TimePeriod period = get_period ();
+			
+			if (_flagError == NONE) {
+				if (!_toDoMngr->newTable (tableName, period)) {
+					_result = "The table is existed";
+				}
+				done = true;
+			} else {
+				_input = getLeftOverInput ();
+				done = false;
+			}
+		} else {
+			if (!_toDoMngr->activateTable (tableName)) {
+				_result = _toDoMngr->viewTableNames ();
+				done = true;
+			}
+		}
+	} else {
+		_input = getLeftOverInput ();
+		done = false;
+	}
+
 	return done;
 }
 
