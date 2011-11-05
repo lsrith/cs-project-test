@@ -1197,6 +1197,43 @@ bool ToDoMngr::ifExistedTable (string tableName) {
 	return false;
 }
 
+
+bool ToDoMngr::clashed(Task task){
+	list<Task> checkList;
+	checkList = _dataStorage.load(task.get_period());
+
+	if(checkList.empty() == true){
+		return false;;
+	}
+	else{
+		list<Task>::iterator li = checkList.begin();
+		bool clash = false; 
+
+		for(int i=1; i<= checkList.size(); i++){
+			TimePeriod taskPeriod = checkList.begin()->get_period();
+		
+			if(task.get_period() == taskPeriod){
+				_clashList.push_back(*li);
+				clash = true;
+				
+				//check if there is duplication of the clashed task
+				list<Task>::iterator li2 = checkList.begin();
+				for(int i=1; i<checkList.size(); i++)
+				{
+					if(task.compareByVenue(task,*li2) && task.compareByAlert(task, *li2) && task.compareByEndTime(task, *li2) && task.compareByStartTime(task, *li2))
+					{
+					 _clashList.pop_back();
+					}
+				}
+				}
+				return clash;
+			}
+
+			li++;
+		}
+}
+
+
 list<Task> ToDoMngr::add(Task task, bool forceAdd)                                                                      
 {
 
@@ -1259,38 +1296,41 @@ list<Task> ToDoMngr::add(Task task, bool forceAdd)
 	}
 }
 
-bool ToDoMngr::newTable(string name, TimePeriod period)
-{   
-
-
+bool ToDoMngr::newTable(string name, TimePeriod period){  
 	
-	bool clashName=false;
-	vector<string> existedTableName;  
+	//check if the period is valid
 
-	//load existing table name
-	existedTableName = _dataStorage.load_table_name();                                                                    
+	if(period.get_start_time().get_date() == Time::INF_DATE || period.get_start_time().get_date() == Time::DFLT_DATE ||
+		period.get_end_time().get_date() == Time::DFLT_DATE || period.get_end_time().get_date() == Time::DFLT_DATE) {
+	 cout<<"Error in Timetable Period."<<endl;
+	}
 
-	//check for clashes of name with existing table names
-	for(int i=0; i<existedTableName.size(); i++)
-	{
-		if(existedTableName[i] == name)
-		{
-			clashName= true;
+	else{
+		bool clashName=false;
+		vector<string> existedTableName;  
+
+		//load existing table name
+		existedTableName = _dataStorage.load_table_name();                                                                    
+
+		//check for clashes of name with existing table names
+		for(int i=0; i<existedTableName.size(); i++) {
+			if(existedTableName[i] == name)	{
+				clashName= true;
+			}
 		}
-	}
 
-	if(clashName == true) // got clash return false
-	{
-		return false;
-	}
-	else // no clash return true and save to dataStorage with empty taskIdxList
-	{
-		list<Task> taskList;
-		_dataStorage.save(name, period, taskList);   
-		Table_Mode=true;
-		tableName=name;
-		
-		return true;
+		if(clashName == true)	{ 
+			// got clash return false 
+			return false;
+		}
+		else	{ 
+			// no clash return true and save to dataStorage with empty taskIdxList
+			list<Task> taskList;
+			_dataStorage.save(name, period, taskList);   
+			Table_Mode=true;
+			tableName=name;
+			return true;
+		}
 	}
 }
 
@@ -1359,25 +1399,191 @@ Task ToDoMngr::erase(int taskId)
 
 
 
-list<Task> ToDoMngr::add(string tableName, Task task, bool forceAdd)
-{
-	//create a list and push task into list and add to dataStorage when tableName == NULL
-	if(tableName.size() == 0)
-	{
+list<Task> ToDoMngr::add(string tableName, Task task, bool forceAdd){
+	if(tableName.size() == 0){
 		list<Task> blankList;
 		blankList = add(task, forceAdd);
 		return blankList;
 	}
 
-	else
-	{   list<Task> emptylist;
-		list<Task> IdxList;
-		IdxList.push_back(task);
-		_dataStorage.save(tableName, IdxList);
-		return emptylist;
-	}
+	else{   	
+	// get timetable period
+		list<DataStorage::Table> tableList;
+		list<DataStorage::Table>::iterator tableIter = tableList.begin(); 		
+		TimePeriod activePeriod;
+
+		for(int i=0;i<tableList.size();i++){
+			if(tableIter->name == tableName){
+				activePeriod = tableIter->period;
+			}
+		}
+		
+	// check if it is before, during or after the timetable period 
+		enum checkType {before, during, after};
+		checkType type;
+
+		if(task.get_period().get_start_time().operator<(activePeriod.get_start_time())){
+			type = before;
+		}
+		else if(task.get_period().get_start_time().operator>(activePeriod.get_end_time())){
+			type = after;
+		}
+		else {
+			type = during;
+		}
+
+	// check if task is >7 days, return a error message when task is more than 7 dats
+
+		int duration;
+
+		duration = task.get_period().get_end_time() - task.get_period().get_start_time();
+
+		if(duration > 10080){
+			cout<<"This is a weekly Timetable. We can't have tasks  that last more than 7 days. "<<endl;
+		}
+
+	// add the same task to previous week or next week to timetable and check clashes with the calender
+	// repeat for the entire timetable period
+
+		bool got_clash;
+		list<Task> taskList;
+
+		// if task is within the timetable period
+		if(type == during){
+			// duration of timetable period in term of weeks from the task to the start and end of timetable
+			int duration_endtable = (activePeriod.get_end_time() - task.get_period().get_start_time()) / 10080;
+			int duration_starttable = (task.get_period().get_start_time() - activePeriod.get_start_time()) / 100800;	
+			
+			
+			if(tillEnd(duration_endtable, taskList, task, forceAdd, activePeriod) == true){
+				got_clash = true;
+			}
+			if(tillStart(duration_starttable, taskList, task, forceAdd, activePeriod) == true){
+				got_clash = true;
+			}
+		}
+
+		// if task is before the timetable period
+		// push back the task by a week in each iteration until the task is after the starting time of the timetable
+		if(type == before){
+			while((task.get_period().get_start_time() - activePeriod.get_start_time()) < 0 ){
+				Time::date_t newStartDate = task.get_period().get_start_time().get_date() + ((Time::DAY*7));
+				Time::date_t newEndDate = task.get_period().get_end_time().get_date() + ((Time::DAY*7));
+			}
+
+			// add task into timetable
+
+			int duration = (activePeriod.get_end_time() - activePeriod.get_start_time());
+			if(tillEnd(duration, taskList, task, forceAdd, activePeriod) == true){
+				got_clash = true;
+			}
+		}
+
+		if(type == after)
+		{
+			while((task.get_period().get_end_time() - activePeriod.get_end_time()) < 0 ){
+				Time::date_t newStartDate = task.get_period().get_start_time().get_date() - ((Time::DAY*7));
+				Time::date_t newEndDate = task.get_period().get_end_time().get_date() - ((Time::DAY*7));
+			}
+
+			// add task into timetable
+
+			int duration = (activePeriod.get_end_time() - activePeriod.get_start_time());
+			if(tillEnd(duration, taskList, task, forceAdd, activePeriod) == true){
+				got_clash = true;
+			}
+		}
+	
+		// save taskList to dataStorage
+		_dataStorage.save(taskList);
+
+
+		//return the clash if there is clashes
+		if(got_clash == true) {
+		 return _clashList;
+		}
+		else{
+			list<Task> blankList;
+			return blankList;
+		}
+	}	
 }
 
+
+
+bool ToDoMngr::tillEnd(int duration, list<Task> taskList, Task task, bool forceAdd, TimePeriod activePeriod)
+{
+	bool got_clash = false;
+ 	Time::date_t newStartDate;
+	Time::date_t newEndDate;
+
+	for(int i=0; i<duration; i++){
+
+		//add 7 days to the start and end time of the task for every iterations
+
+		//if adding 7 days to the task will not exceed the end date of the period
+		if((task.get_period().get_end_time()+(Time::DAY*7)) < activePeriod.get_end_time()){
+			newStartDate = task.get_period().get_start_time().get_date() + ((Time::DAY*7)*i);
+			newEndDate = task.get_period().get_end_time().get_date() + ((Time::DAY*7)*i);
+		}
+		
+		task.get_period().get_start_time().modify_date(newStartDate);
+		task.get_period().get_end_time().modify_date(newEndDate);
+
+
+
+		if(forceAdd == true || task.timeTask == true){ 
+			// forceAdd is true or is timetask 
+			taskList.push_back(task);
+		}
+
+		else{
+			if(clashed(task) == true){
+				got_clash = true;
+			}
+			else{
+				taskList.push_back(task);
+			}
+		}
+	}
+	return got_clash;
+}
+
+bool ToDoMngr::tillStart(int duration, list<Task> taskList, Task task, bool forceAdd, TimePeriod activePeriod)
+{	
+	bool got_clash = false;
+ 	Time::date_t newStartDate;
+	Time::date_t newEndDate;
+
+	for(int i=0; i<duration; i++){
+
+		//add 7 days to the start and end time of the task for every iterations
+
+		//if minus 7 days to the task will not exceed the start date of the period
+		if((task.get_period().get_start_time()+(Time::DAY*7)) < activePeriod.get_start_time()){
+			newStartDate = task.get_period().get_start_time().get_date() - ((Time::DAY*7)*i);
+			newEndDate = task.get_period().get_end_time().get_date() - ((Time::DAY*7)*i);
+		}
+		
+		task.get_period().get_start_time().modify_date(newStartDate);
+		task.get_period().get_end_time().modify_date(newEndDate);
+
+		if(forceAdd == true || task.timeTask == true){ 
+			// forceAdd is true or is timetask 
+			taskList.push_back(task);
+		}
+
+		else{
+			if(clashed(task) == true){
+				got_clash = true;
+			}
+			else{
+				taskList.push_back(task);
+			}
+		}
+	}
+	return got_clash;
+}
 
 list<Task> ToDoMngr::edit(int taskId, TaskElement* taskElem, Task* task, bool forceEdit)
 {
