@@ -36,7 +36,7 @@ public:
 	void clear ();
 	// delete everything in the dataStorage
 	string search (search_t, string);
-	bool activateTable (string tableName);
+	bool activateTable (string tableN);
 	void deactivateTable ();
 	bool getTableActivationStatus ();
 
@@ -55,7 +55,7 @@ public:
 	// for each task shown, numering them from 1 to the end and save as a vector of address of template
 	// if user enter view 5, we execute view (templateVect[4]); 
 	string view (TimePeriod period);
-	string view (string tableName);
+	string view (string tableN);
 	string viewTableNames ();
 	// view all the names of existing timetable
 	string reminder ();
@@ -71,7 +71,7 @@ public:
 	bool ifExistedTable (string tableNames);
 
 //Ben:
-	list<Task> add (Task task, bool forceAdd);
+	list<Task> add (Task task, bool forceAdd);  
 	// add a task to the dataStorage
 	// if forceAdd is true, just add and return a fresh list
 	// else return the clashed tasks
@@ -103,9 +103,13 @@ public:
 	void undo ();
 	void redo ();
 
+
+
 private:
 	DataStorage _dataStorage;
 	list<Task> _activeTaskList;
 	list<Task> _clashList;
+	bool Table_Mode;
+	string tableName;
 };
 #endif

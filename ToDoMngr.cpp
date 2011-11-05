@@ -293,6 +293,8 @@ string ToDoMngr::view(Task taskId){
 }
 
 string ToDoMngr:: view(list<Task> tasklist){
+	
+	
 	Time obj;
 	int full_date,_date,temp_date,temp_year;
 	temp_date=0;
@@ -314,13 +316,16 @@ string ToDoMngr:: view(list<Task> tasklist){
 	list<Task> taskl=tasklist;
 	taskl.sort(Task::compareByStartTime);
 
-	if(taskl.size()==1||taskl.size()==2||taskl.size()==3||taskl.size()==4||taskl.size()==5||taskl.size()==6||taskl.size()==7||taskl.size()==8||taskl.size()==9)
+	if(taskl.size()>0&&taskl.size()<=9)
 		index_convert<<10;
 	else
 		index_convert<<taskl.size();
 
 	list<Task>::iterator l;
 	int index=1;
+
+	
+
 	if(tasklist.empty())
 		oss<<"\n"<<NOTHING_TO_VIEW<<"\n";
 	else{
@@ -1083,13 +1088,16 @@ string ToDoMngr::view(view_t viewType, Time time){
 
 string ToDoMngr::view (TimePeriod period){
 
+	if(Table_Mode)
+       return view (tableName);
 
+	else{
 	_activeTaskList= _dataStorage.load(period);
 
 	//cout << ToDoMngr::view (_activeTaskList) << endl;
 
 	return view(_activeTaskList);
-
+	}
 }
 
 
@@ -1121,15 +1129,43 @@ string ToDoMngr::reminder(){
 
 /*pos = str.find_first_of (" ", 0)
 str[pos]*/
-string ToDoMngr::view (string tableName){
+string ToDoMngr::view (string tableN){
+	
+	_activeTaskList=_dataStorage.load(tableN);
 
-	_activeTaskList=_dataStorage.load(tableName);
 
-	return view(_activeTaskList);
+	if(_activeTaskList.empty())
+		return view(_activeTaskList);
+	
+	else
+	    return _activeTaskList.front().get_period().get_start_time().string_date()+" to "+_activeTaskList.back().get_period().get_end_time().string_date()+"\n"+view(_activeTaskList);
 }
 
 string ToDoMngr::viewTableNames () {
-	return "viewTab";
+	
+	vector<string> tablenames=_dataStorage.load_table_name();
+	ostringstream table_view,index_count;
+	vector<string>::iterator browse;
+	int index=1;
+	if(tablenames.size()>0&&tablenames.size()<=9)
+		index_count<<10;
+	else
+		index_count<<tablenames.size();
+
+	table_view<<"\nTable Names In The System\n";
+
+	for(browse=tablenames.begin();browse!=tablenames.end();browse++){
+
+		
+		table_view<<setw(index_count.str().length())<<setfill(' ')<<right<<index<<"."<<" ";
+		table_view<<*browse<<"\n";
+		index++;
+	}
+
+
+	return table_view.str();
+
+
 }
 
 string ToDoMngr::alert () {
@@ -1163,6 +1199,13 @@ bool ToDoMngr::ifExistedTable (string tableName) {
 
 list<Task> ToDoMngr::add(Task task, bool forceAdd)                                                                      
 {
+
+	cout<<tableName;
+	if(Table_Mode)
+     return add(tableName,task,forceAdd);
+
+	else{
+	
 	list<Task> _addList;
 	if(forceAdd == true || task.timeTask == true)
 	{ 
@@ -1213,18 +1256,22 @@ list<Task> ToDoMngr::add(Task task, bool forceAdd)
 			return _addList;
 		}
 	}
+	}
 }
 
 bool ToDoMngr::newTable(string name, TimePeriod period)
-{
-	bool clashName;
+{   
+
+
+	
+	bool clashName=false;
 	vector<string> existedTableName;  
 
 	//load existing table name
 	existedTableName = _dataStorage.load_table_name();                                                                    
 
 	//check for clashes of name with existing table names
-	for(int i=1; i<=existedTableName.size(); i++)
+	for(int i=0; i<existedTableName.size(); i++)
 	{
 		if(existedTableName[i] == name)
 		{
@@ -1239,7 +1286,10 @@ bool ToDoMngr::newTable(string name, TimePeriod period)
 	else // no clash return true and save to dataStorage with empty taskIdxList
 	{
 		list<Task> taskList;
-		_dataStorage.save(name, period, taskList);            
+		_dataStorage.save(name, period, taskList);   
+		Table_Mode=true;
+		tableName=name;
+		
 		return true;
 	}
 }
@@ -1320,9 +1370,11 @@ list<Task> ToDoMngr::add(string tableName, Task task, bool forceAdd)
 	}
 
 	else
-	{
+	{   list<Task> emptylist;
 		list<Task> IdxList;
-		_dataStorage.save(tableName,task.get_period(), IdxList);
+		IdxList.push_back(task);
+		_dataStorage.save(tableName, IdxList);
+		return emptylist;
 	}
 }
 
@@ -1432,10 +1484,12 @@ void ToDoMngr::clear () {
 }
 
 ToDoMngr::ToDoMngr () {
+	Table_Mode=false;
 	_dataStorage.updateStorageName ("");
 }
 
 ToDoMngr::ToDoMngr (string storageName) {
+	Table_Mode=false;
 	_dataStorage.updateStorageName (storageName);
 }
 
@@ -1485,15 +1539,34 @@ void ToDoMngr::setTaskElem (ToDoMngr::TaskElement* taskElem, Task* task) {
 	else
 		taskElem->_repeat = false;
 }
+bool ToDoMngr::activateTable (string tableN) {
 
-bool ToDoMngr::activateTable (string tableName) {
+	//cout<<tableName;
+	vector<string> table_names=_dataStorage.load_table_name();
 
-	return false;
+	vector<string>::iterator browse;
+	bool found=false;;
+	for(browse=table_names.begin();browse!=table_names.end();browse++){
+
+		if(tableN==*browse){
+			Table_Mode=true;
+			tableName=tableN;
+            found= true;
+			break;
+		}		
+	}
+	return found;
 }
 
 void ToDoMngr::deactivateTable () {
+	Table_Mode=false;
 }
 
 bool ToDoMngr::getTableActivationStatus () {
-	return false;
+
+	if(Table_Mode==true)
+		return true;
+	else
+	    return false;
 }
+
