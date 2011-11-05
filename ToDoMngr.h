@@ -13,6 +13,7 @@
 using namespace std;
         
 enum view_t {DAILY, WEEKLY, MONTHLY};
+enum cmdType {_addTask, _eraseTask, _erasePeriod, _addTable1, _addTable2, eraseTable, editTask };
 
 class ToDoMngr {
 public:
@@ -25,6 +26,17 @@ public:
 		bool _venue;
 		bool _alert;
 		bool _repeat;
+	};
+
+	struct UserTask { 
+		list<Task> _currentTaskList; 
+		Task *_taskptr;
+		cmdType _cmd;
+		int _taskId;
+		list<int> _indexList;
+		TimePeriod _period;
+		string _tableName;
+		bool _forceAdd;
 	};
 
 	ToDoMngr ();
@@ -99,7 +111,7 @@ public:
 	// return a list of clashed tasks if any
 	void erase (string name);
 	// erase the timetable with the name specified
-
+	
 	void undo ();
 	void redo ();
 
@@ -111,5 +123,15 @@ private:
 	list<Task> _clashList;
 	bool Table_Mode;
 	string tableName;
+
+	stack<UserTask> _redoStack;
+	stack<UserTask> _undoStack;
+
+	bool clashed(Task task);
+	
+	bool tillStart(int, list<Task> taskList, Task task, bool forceAdd, TimePeriod activePeriod);
+	bool tillEnd(int i, list<Task> taskList, Task task, bool forceAdd, TimePeriod activePeriod);
+
+
 };
 #endif
