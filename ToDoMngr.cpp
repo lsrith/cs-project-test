@@ -1345,6 +1345,7 @@ void ToDoMngr::erase(TimePeriod period)
 	for(int i=1; i<=deleteList.size(); i++)
 	{
 		deletedIdx.push_back(di->get_index());
+      di++
 	}
 
 	//delete from dataStorage the tasks with the id in the list
