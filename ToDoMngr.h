@@ -13,7 +13,7 @@
 using namespace std;
         
 enum view_t {DAILY, WEEKLY, MONTHLY};
-enum cmdType {_addTask, _eraseTask, _erasePeriod, _addTable1, _addTable2, eraseTable, editTask };
+enum cmdType {_addTask, _eraseTask, _erasePeriod, _addTable1, _addTable2, _eraseTable, _editTask};
 
 class ToDoMngr {
 public:
@@ -29,14 +29,16 @@ public:
 	};
 
 	struct UserTask { 
-		list<Task> _currentTaskList; 
-		Task *_taskptr;
+		Task _task;
+		Task* _task2;
+		Task _updatedTask;
 		cmdType _cmd;
 		int _taskId;
-		list<int> _indexList;
+		list<int> _index;
 		TimePeriod _period;
 		string _tableName;
-		bool _forceAdd;
+		bool _force;
+		TaskElement* _taskElem;
 	};
 
 	ToDoMngr ();
