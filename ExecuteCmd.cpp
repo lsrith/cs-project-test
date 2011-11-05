@@ -79,7 +79,10 @@ bool Add::execute () {
 		list<Task> taskList = _toDoMngr->add (task, force);
 		
 		if (!force && !taskList.empty ()) {
+			cout << (unsigned int) taskList.size () << endl;
+			cout << ToDoMngr::view(taskList) << endl;
 			_result = ToDoMngr::view (task) + MSG_CLASH + ToDoMngr::view (taskList);
+			cout << "yes" << endl;
 			_result += "\nEnter -f to continue adding.\n";
 			insertBreakPoint ();
 			done = false;
@@ -335,8 +338,10 @@ bool View::execute () {
 		case CTODAY:
 		case CTMR:
 			_time = get_time ();
+			cout << _time.string_date () << endl;
 			if (_flagError == NONE) {
 				_activeListAccessible = true;
+				cout << "arrived" << endl;
 				_result = _toDoMngr->view (_viewType, _time);
 			}
 			break;
@@ -733,6 +738,8 @@ Table::~Table () {
 }
 
 bool Table::execute () {
+	cout<<"work!!"<<endl;
+	_result.clear ();
 	bool done = true;
 	splitInput (_input);
 	
@@ -749,9 +756,8 @@ bool Table::execute () {
 			TimePeriod period = get_period ();
 			
 			if (_flagError == NONE) {
-				if (!_toDoMngr->newTable (tableName, period)) {
-					_result = "The table is existed";
-				}
+				_toDoMngr->newTable (tableName, period);
+				_input = getLeftOverInput ();
 				done = true;
 			} else {
 				_input = getLeftOverInput ();
@@ -760,6 +766,7 @@ bool Table::execute () {
 		} else {
 			if (!_toDoMngr->activateTable (tableName)) {
 				_result = _toDoMngr->viewTableNames ();
+				_input = getLeftOverInput ();
 				done = true;
 			}
 		}
