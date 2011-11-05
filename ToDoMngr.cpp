@@ -1377,13 +1377,14 @@ void ToDoMngr::erase(string name)
 // delete from dataStorage given the taskId
 Task ToDoMngr::erase(int taskId)
 {
+  {
 	list<Task>::iterator di = _activeTaskList.begin();
 
 	for(int i=1; i< taskId;i++)
 	{
 		di++;
 	}     
-
+	if(di!=_activeTaskList.end()){
 	Task deleteTask = *di;
 	_activeTaskList.erase(di);     
 
@@ -1396,6 +1397,13 @@ Task ToDoMngr::erase(int taskId)
 	_dataStorage.erase(deleteIdx);
 
 	return deleteTask;  
+	}
+	else
+	{   
+		Task task;
+		return task;
+
+	}
 }
 
 
