@@ -1,67 +1,63 @@
 <--- TASKCAL Help Viewer ---> 
 
 add
-Description: To add a file, just add it!
+Description:
+add (task)
+for example:
+add something at somewhere from 25 Nov 2011 2pm to 25 Nov 2011 3pm
+for force add:
+add -f something at somewhere from today now to tmr 4am
 
 edit
-Description: To add a file, just add it!
+Description:
+edit (task number) (task)
+for example: edit 3 note hello
+edit could be done after view only
 
 delete
-Description: To add a file, just add it!
+Description:
+delete (task number)
+for example: delete 4
+delete could be done after view only
 
 table
-Description: To add a file, just add it!
+Description:
+table (name) (period) to create a new table
+table (name) to enter to the table
+to exit from table, just type exit
+to view the content of table, just type view
 
 view
-Description: To add a file, just add it!
+Description:
+view (period)
+view from today to tomorrow
+view table (name)
+view the content of the table
 
 reminder
-Description: To add a file, just add it!
-
-next
-Description: To add a file, just add it!
-
-previous
-Description: To add a file, just add it!		
-
-first
-Description: To add a file, just add it!
-
-last
-Description: To add a file, just add it!
+Description:
+view the agenda today
 
 undo
-Description: To add a file, just add it!
+Description:
+undo one execution
+shortcut key is ctrl+z
 
 redo
-Description: To add a file, just add it!
+Description:
+redo one execution
+shortcut key is ctrl+y
 
 help
-Description: To add a file, just add it!
-
-sort
-Description: To add a file, just add it!
+Desciption:
+help (command)
+view the content of each command instruction
 
 search
-Description: To add a file, just add it!
+Description:
+search (word)
+search the specified word
 
 clear
-Description: To add a file, just add it!
-
-reset
-Description: To add a file, just add it!
-
-exit
-Description: To add a file, just add it!
-
-discard
-Description: To add a file, just add it!
-
-replace
-Description: To add a file, just add it!
-
-insert
-Description: To add a file, just add it!
-
-void
-Description: To add a file, just add it!
+Description:
+clear everything inside your datastorage
