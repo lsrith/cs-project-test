@@ -1361,7 +1361,7 @@ void ToDoMngr::erase(TimePeriod period){
 		UserTask newErase;
 		newErase._cmd = _erasePeriod;
 		newErase._period = period;
-		newErase._index = deleteIdxList;
+		 newErase._index = deletedIdxList;
 		_undoStack.push(newErase);
 
 		_dataStorage.erase(deletedIdxList);
@@ -1382,7 +1382,6 @@ void ToDoMngr::erase(string name){
 	//add to undoStack
 	UserTask newErase;
 	newErase._cmd = _eraseTable;
-	newErase._period = period;
 	newErase._index = deleteIdxList;
 	newErase._tableName = name;
 	_undoStack.push(newErase);
