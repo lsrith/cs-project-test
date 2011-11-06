@@ -9,11 +9,16 @@
 #include <windows.h>
 using namespace std;
 
-string ToDoMngr::NOTHING_TO_VIEW = "\nThere are no tasks to view during the particular period/time!\n";
+string ToDoMngr::NOTHING_TO_VIEW = "There are no tasks to view during the particular period/time!\n";
 
 list<Task> ToDoMngr::get_active_list () {
 	return _activeTaskList;
 }
+
+list<Task> ToDoMngr::get_alert_list () {
+	return _alertTaskList;
+}
+
 
 string ToDoMngr::view(Task taskId){
 	Time obj;
@@ -293,6 +298,8 @@ string ToDoMngr::view(Task taskId){
 }
 
 string ToDoMngr:: view(list<Task> tasklist){
+	
+	
 	Time obj;
 	int full_date,_date,temp_date,temp_year;
 	temp_date=0;
@@ -805,6 +812,7 @@ string ToDoMngr:: view(list<Task> tasklist){
 
 }
 
+
 string ToDoMngr::view (int taskId){
 	Time obj;
 	ToDoMngr todo;
@@ -1161,11 +1169,14 @@ string ToDoMngr::viewTableNames () {
 
 
 	return table_view.str();
-
-
 }
 
-string ToDoMngr::alert () {
+	
+
+//modify the front task's alert += mins
+//resort ur alertTaskList
+//set the alertActive as false;
+/*string ToDoMngr::alert () {
 	
 
 	list<Task>::iterator time_control;
@@ -1188,7 +1199,7 @@ string ToDoMngr::alert () {
 
 		  }
 	//return "alert";
-}
+}*/
 
 bool ToDoMngr::ifExistedTable (string tableName) {
 	return false;
@@ -1792,6 +1803,7 @@ void ToDoMngr::undo (){
 			_activeTaskList.erase(li);
 			_activeTaskList.insert(li, undoTask._task);
 		}
+
 		_undoStack.pop();
 		_redoStack.push(undoTask);
 	}
@@ -1861,11 +1873,16 @@ void ToDoMngr::clear () {
 
 ToDoMngr::ToDoMngr () {
 	Table_Mode=false;
+	_alertActive=false;
+	
 	_dataStorage.updateStorageName ("");
+	_alertTaskList=_dataStorage.get_alertTasks();
 }
 
 ToDoMngr::ToDoMngr (string storageName) {
 	Table_Mode=false;
+	_alertActive=false;
+	
 	_dataStorage.updateStorageName (storageName);
 }
 
@@ -1873,6 +1890,7 @@ void ToDoMngr::updateStorageName (string storageName) {
 	_dataStorage.exit ();
 	_activeTaskList.clear ();
 	_clashList.clear ();
+	_alertTaskList.clear();
 	_dataStorage.updateStorageName (storageName);
 }
 
@@ -1881,6 +1899,7 @@ list<Task> ToDoMngr::edit (int taskId, Task task, bool forceEdit) {
 	setTaskElem (&taskElem, &task);
 	return edit (taskId, &taskElem, &task, forceEdit);
 }
+
 
 void ToDoMngr::setTaskElem (ToDoMngr::TaskElement* taskElem, Task* task) {
 	Time dfltTime;
@@ -1914,7 +1933,6 @@ void ToDoMngr::setTaskElem (ToDoMngr::TaskElement* taskElem, Task* task) {
 	else
 		taskElem->_repeat = false;
 }
-
 bool ToDoMngr::activateTable (string tableN) {
 
 	//cout<<tableName;
@@ -1945,3 +1963,70 @@ bool ToDoMngr::getTableActivationStatus () {
 	else
 	    return false;
 }
+
+bool ToDoMngr::ifTableMode () {
+	return Table_Mode;
+}
+
+bool ToDoMngr::ifAlertActive (){
+	_alertTaskList.sort(Task::compareByAlert);
+	Time _current;
+	_current.current_time();
+	if(!(_current > _alertTaskList.front().alert) ){
+		_alertActive=true;
+		return true;
+	}
+	else
+		return false;
+
+}
+//compare the currTime with the front of the alertTaskList, do not use currTime == alertTime, but !(currTime > alertTime) (safer)
+//set a boolean private variable alertActive to true
+string ToDoMngr:: alert (){
+
+	return view(DAILY,_alertTaskList.front().alert);
+
+}
+
+//view the front of the alertTaskList;
+//do not pop it, keep the alertActive as true
+void ToDoMngr::deactivateAlert (){
+
+	_alertTaskList.pop_front();
+	_alertActive=false;
+}
+
+//pop the front of the alertTaskList;
+//set the alertActive as false;
+void ToDoMngr:: snoozeAlert (int mins){
+	_alertTaskList.front().alert=_alertTaskList.front().alert+mins;
+	_alertTaskList.sort(Task::compareByAlert);
+	_alertActive=false;
+  }
+
+void ToDoMngr:: push_alertTask (Task tsk){
+	list<Task>::iterator eraser;
+	Time _current;
+	_current.current_time();
+
+	      if(tsk.alert>_current)
+			_alertTaskList.push_back(tsk);
+		
+		  _alertTaskList.sort(Task::compareByAlert);
+	
+}
+//push inside the task if its alert is to be in the future, push it a way that u got it in order
+void ToDoMngr::pop_alertTask (Task tsk){
+	list<Task>::iterator eraser;
+	
+
+	for(eraser=_alertTaskList.begin();eraser!=_alertTaskList.end();eraser++)
+	{ 
+		if(eraser->alert==tsk.alert){
+			_alertTaskList.erase(eraser);
+		
+		}
+
+			 }
+}
+//delete that Task from ur alertTaskList
