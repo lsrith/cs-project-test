@@ -1,6 +1,8 @@
-/*
-*Author Rith
-*/
+/**
+ * This class is used to control all the valid command available
+ * 
+ * @author LY SAMRITH
+ */
 
 #ifndef VLDCMDCTRL_H
 #define VLDCMDCTRL_H

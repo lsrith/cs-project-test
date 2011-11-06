@@ -1,6 +1,9 @@
-/*
-*Author Rith
-*/
+/**
+ * This class is define a Time type
+ * Time consisted of date and clock
+ * 
+ * @author LY SAMRITH
+ */
 
 #ifndef TIME_H_
 #define TIME_H_
