@@ -34,7 +34,6 @@ public:
 	bool search_vldCmd (string, command&);
 
 protected:
-	bool _dotCmd;
 	string _validCmdFile;
 	string _dfltCmdFile;
 	vector<cmd_pair> _validCmd;

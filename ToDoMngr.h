@@ -44,6 +44,7 @@ public:
 	ToDoMngr ();
 	ToDoMngr (string);
 	list<Task> get_active_list ();
+	list<Task> get_alert_list ();
 
 	void updateStorageName (string);
 	void exit ();
@@ -51,6 +52,7 @@ public:
 	// delete everything in the dataStorage
 	string search (search_t, string);
 	bool activateTable (string tableN);
+	bool ifTableMode ();
 	void deactivateTable ();
 	bool getTableActivationStatus ();
 
@@ -76,7 +78,15 @@ public:
 	// return a string of the view of the reminder whenever ToDoMngr is executed;
 	string alert ();
 	// return a string to pop up whenever a task is set to be alert at any specified time
-        
+    void deactivateAlert ();
+	bool ifAlertActive ();
+	void snoozeAlert (int mins);
+
+	void  push_alertTask (Task);
+//push inside the task if its alert is to be in the future, push it a way that u got it in order
+    void pop_alertTask (Task);
+//delete that Task from ur alertTaskList
+    
 	//***Switch User*** function prototype to be completed
 
 	static list<string> tableNames ();
@@ -124,6 +134,8 @@ private:
 	list<Task> _activeTaskList;
 	list<Task> _clashList;
 	list<Task> _erasetasklist;
+	list<Task> _alertTaskList;
+	bool _alertActive;
 	bool Table_Mode;
 	string tableName;
 

@@ -4,18 +4,20 @@
 #include "Logging.h"
 #include "CmdTextChange.h"
 #include <iostream>
+#include <Windows.h>
 #include <direct.h>
 using namespace std;
 
 inline VldCmdCtrl::command getFirstCmd (string*, VldCmdCtrl*);
 inline void eraseFirstWord (string*);
+inline void setConsoleWindowConfig ();
 
 int main () {
 	Logging log;
 	log.log ("main");
 	log.start ("main");
-	const string WELCOME = "\tTASKCAL\n\n";
-	cout << WELCOME << endl;
+
+	setConsoleWindowConfig ();
 
 	string output, input, newInput;
 	log.call ("ToDoMngr");
@@ -28,16 +30,22 @@ int main () {
 		VldCmdCtrl testLoading;
 	} catch (string xcpt) {
 		cout << xcpt << endl;
+		cout << "press Enter to continue..." << endl;
+		getline (cin, xcpt);
 		return 0;
 	}
 	log.end ();
+
+	CmdTextChange console;
+	console.write("                                ------------------\n");
+	console.write ("                                |     TASKCAL    |\n");
+	console.write ("                                |     WELCOME    |\n");
+	console.write("                                ------------------\n\n");
 
 	VldCmdCtrl cmdCtrl;
 	bool prompt;
 	VldCmdCtrl::command cmd = VldCmdCtrl::CUSER;
 
-	CmdTextChange console;
-	Merge merge (cmdCtrl.get_vldCmdList ());
 	ExecuteCmd* exeCmd = NULL;
 	AccCtrl userAcc (toDo);
 	Add add (cmdCtrl.get_vldCmdList (), toDo);
@@ -48,15 +56,19 @@ int main () {
 
 	input = VldCmdCtrl::convertToString (VldCmdCtrl::CUSER);
 
-	log.loop ("main");
-	do {
-		output.erase (0, string::npos);
-		cout << ">> ";
-		newInput = console.read ();
+	userAcc.updateInput (input);
+	userAcc.execute ();
+	output = userAcc.result ();
+	input = userAcc.get_input ();
+	console.write (output + "\n");
+	output.erase (0, string::npos);
 
-		merge.updateInput (input, newInput);
-		merge.execute ();
-		input = merge.result ();
+	do {
+		console.write (">>");
+		if (cmd == VldCmdCtrl::CUSER)
+			input += " " + console.read ();
+		else
+			input = console.read (input);
 		prompt = false;
 
 		log.loop ("sub");
@@ -127,7 +139,12 @@ int main () {
 				exeCmd = &userAcc;
 				break;
 			case VldCmdCtrl::CEXIT:
-				prompt = true;
+				if(toDo->ifTableMode ()) {
+					toDo->deactivateTable ();
+				} else {
+					toDo->exit ();
+					prompt = true;
+				}
 				break;
 			default:
 				eraseFirstWord (&input);
@@ -138,7 +155,6 @@ int main () {
 			if (exeCmd != NULL) {
 				exeCmd->updateInput (input);
 				if (!exeCmd->execute ()) {
-					output += "\n<< " + exeCmd->get_input ();
 					prompt = true;
 				}
 				output += "\n" + exeCmd->result ();
@@ -146,8 +162,23 @@ int main () {
 			}
 		}
 		log.end ();
-
-		cout << output << endl;
+/*
+		if (toDo->ifAlertActive ()) {
+			string strAlert = toDo->alert ();
+			console.write (strAlert);
+			console.write ("Do you want to snooze? (Y/N)");
+			strAlert = console.read ();
+			if (strAlert == "Y" || strAlert == "N" || strAlert == "snooze") {
+				strAlert = console.read ();
+				int mins = atoi (strAlert.c_str ());
+				toDo->snoozeAlert (mins);
+			} else {
+				toDo->deactivateAlert ();
+			}
+		}
+*/
+		console.write (output + "\n");
+		output.erase (0, string::npos);
 	} while (cmd != VldCmdCtrl::CEXIT);
 	log.end ();
 	log.end ();
@@ -166,4 +197,14 @@ void eraseFirstWord (string* input) {
 		input->erase (0, pos);
 	else
 		input->erase (0, pos + 1);
+}
+
+void setConsoleWindowConfig () {
+	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	COORD NewSBSize = {CmdTextChange::MAX_WIDTH, CmdTextChange::MAX_HEIGHT};
+	SMALL_RECT DisplayArea = {CmdTextChange::MAX_WIDTH, 50, 0, 0};
+	SetConsoleTitle ("TaskCal");
+    SetConsoleScreenBufferSize(hOut, NewSBSize);
+    SetConsoleWindowInfo(hOut, TRUE, &DisplayArea);
+	system ("cls");
 }

@@ -30,6 +30,14 @@ bool ExecuteCmd::execute () {
 	return true;
 }
 
+void ExecuteCmd::eraseFirstWord () {
+	unsigned int pos = _input.find (' ', 0);
+	if (pos == string::npos)
+		_input.erase (0, pos);
+	else
+		_input.erase (0, pos + 1);
+}
+
 //-----------------------------------------------------------------
 
 string Add::MSG_CLASH = " is clashed with the following:\n";
@@ -79,10 +87,7 @@ bool Add::execute () {
 		list<Task> taskList = _toDoMngr->add (task, force);
 		
 		if (!force && !taskList.empty ()) {
-			cout << (unsigned int) taskList.size () << endl;
-			cout << ToDoMngr::view(taskList) << endl;
 			_result = ToDoMngr::view (task) + MSG_CLASH + ToDoMngr::view (taskList);
-			cout << "yes" << endl;
 			_result += "\nEnter -f to continue adding.\n";
 			insertBreakPoint ();
 			done = false;
@@ -338,10 +343,8 @@ bool View::execute () {
 		case CTODAY:
 		case CTMR:
 			_time = get_time ();
-			cout << _time.string_date () << endl;
 			if (_flagError == NONE) {
 				_activeListAccessible = true;
-				cout << "arrived" << endl;
 				_result = _toDoMngr->view (_viewType, _time);
 			}
 			break;
@@ -515,7 +518,6 @@ Delete::Delete (vector<cmd_pair> validCmd, ToDoMngr* toDoMngr) {
 	_validCmd = validCmd;
 	_toDoMngr = toDoMngr;
 	initPointers ();
-	log.log ("Delete");
 }
 
 Delete::~Delete () {
@@ -523,30 +525,20 @@ Delete::~Delete () {
 }
 
 bool Delete::execute () {
-	log.clear ();
-	log.start ("execute");
 	Task task;
 	TimePeriod period;
 	int taskId;
 
-	log.call ("splitInput");
 	splitInput (_input);
-	log.end ();
 
-	if (!_sequence->empty () && _sequence->front () == CMD && _cmdInput->front () == CDELETE) {
+	if (!_sequence->empty () && _sequence->front () == CMD && _cmdInput->front () == CDELETE)
 		pop ();
-	} else {
-		return true;
-	}
 
-	log.cond ("sequence");
-	if (_sequence->empty () == false) {
+	if (!_sequence->empty ()) {
 		switch (_sequence->front ()) {
 		case DATA:
 			taskId = convertToInt (_dataInput->front ());
-			log.call ("_toDoMngr->erase (taskId)");
 			task = _toDoMngr->erase (taskId);
-			log.end ();
 			if (task.get_index () != 0) {
 				_result = ToDoMngr::view (task) + MSG_DELETED;
 				pop ();
@@ -557,17 +549,12 @@ bool Delete::execute () {
 			case CFROM:
 			case CTO:
 				period = get_period ();
-				if (_flagError == NONE) {
-					log.call ("_toDoMngr->erase (period)");
+				if (_flagError == NONE)
 					_toDoMngr->erase (period);
-					log.end ();
-				}
 				break;
 			case CTABLE:
 				pop ();
-				log.call ("_toDoMngr->erase (table)");
 				_toDoMngr->erase(mergeSimStringInput ());
-				log.end ();
 				break;
 			default:
 				break;
@@ -576,10 +563,9 @@ bool Delete::execute () {
 			break;
 		}
 	}
-	log.end ();
+
 	_input = getLeftOverInput ();
 
-	log.end ();
 	if (_flagError == NONE)
 		return true;
 	else
@@ -738,7 +724,6 @@ Table::~Table () {
 }
 
 bool Table::execute () {
-	cout<<"work!!"<<endl;
 	_result.clear ();
 	bool done = true;
 	splitInput (_input);
@@ -778,6 +763,7 @@ bool Table::execute () {
 	return done;
 }
 
+
 //---------------------------------------------------------------
 
 bool Help::execute () {
@@ -787,71 +773,70 @@ bool Help::execute () {
 	ostringstream oss;
 
 	eraseFirstWord ();
-//from here, you can change command variable to _input so that you dont need this line
-	string command = _input;
-
-	for(int i=0; i<command.size(); i++)
-		command[i] = tolower(command[i]);
 	
-	if(command == "" || command == "command")
-	{
-		int i=0, k=0;
+        for(unsigned int i=0; i<_input.size(); i++)
+                _input[i] = tolower(_input[i]);
+        
+		if(_input.empty() || _input == "command")
+        {
+                int i=0, k=0;
+                getline(myhelpfile, HELP_LINE);
+                oss << endl << setw(54) << setfill(' ') << HELP_LINE << endl;
+                oss << endl << "  ----------------------------------------------------------------------------  ";
+                while(getline(myhelpfile, HELP_LINE) && !myhelpfile.eof())
+                {
+                        if(HELP_LINE.empty())
+                                oss << endl;
+                        else
+                        {
+                                if(k==0)
+                                {
+                                        oss << "  " << "Command: " << HELP_LINE << endl;
+                                        k++;
+                                }
+                                else
+                                {
+                                        oss << endl << "  " << HELP_LINE << endl; 
+                                        k=0;
+                                }
+                                if(HELP_LINE.empty()) 
+                                        oss << "  ----------------------------------------------------------------------------  "<< endl ;
+                        }
+                        if(i != 0 && HELP_LINE.empty())
+                                oss << "  ----------------------------------------------------------------------------  "<< endl ;
+                        i++;
+                }
+        }
+
 		getline(myhelpfile, HELP_LINE);
-		oss << endl << setw(54) << setfill(' ') << HELP_LINE << endl;
-		oss << endl << "  ----------------------------------------------------------------------------  ";
-		while(getline(myhelpfile, HELP_LINE) && !myhelpfile.eof())
+		getline(myhelpfile, HELP_LINE);
+		while(getline(myhelpfile, HELP_LINE))
 		{
-			if(HELP_LINE.empty())
-				oss << endl;
-			else
-			{
-				if(k==0)
-				{
-					oss << "  " << "Command: " << HELP_LINE << endl;
-					k++;
-				}
-				else
-				{
-					oss << endl << "  " << HELP_LINE << endl; 
-					k=0;
-				}
-				if(HELP_LINE.empty()) 
-					oss << "  ----------------------------------------------------------------------------  "<< endl ;
+			if(_input == HELP_LINE)
+			{	
+				oss << endl << setw(54) << setfill(' ') << "<--- TASKCAL Help Viewer --->"  << endl;
+				oss << endl << "  ----------------------------------------------------------------------------  ";
+				oss << endl << "  " << "Command: " << HELP_LINE << endl;
+				while(getline(myhelpfile, HELP_LINE) && !HELP_LINE.empty())
+					oss << endl << "  " << HELP_LINE << endl;
+				oss << endl << "  ----------------------------------------------------------------------------  ";
+				break;
 			}
-			if(i != 0 && HELP_LINE.empty())
-				oss << "  ----------------------------------------------------------------------------  "<< endl ;
-			i++;
-		}
-		oss << endl << "  ----------------------------------------------------------------------------  ";
-	}
+			else
+				{
+					oss << endl << "  ----------------------------------------------------------------------------  ";
+					oss << endl << "  " << "Sorry, the result is not found!" << endl;
+					oss << endl << "  ----------------------------------------------------------------------------  ";
+					break;
+				}
+		}	
+      
+		_result = oss.str();
 
-	while(getline(myhelpfile, HELP_LINE))
-	{
-		if(command == HELP_LINE)
-		{	
-			oss << endl << setw(54) << setfill(' ') << "<--- TASKCAL Help Viewer --->"  << endl;
-			oss << endl << "  ----------------------------------------------------------------------------  ";
-			oss << endl << "  " << "Command: " << HELP_LINE << endl;
-			while(getline(myhelpfile, HELP_LINE) && !HELP_LINE.empty())
-				oss << endl << "  " << HELP_LINE << endl;
-			oss << endl << "  ----------------------------------------------------------------------------  ";
-			myhelpfile.close();
-			break;
-		}
-	}
-	
 	//this is to make sure that you dont return any leftOverInput
 	_input.erase ();
 
 	return true;
-}
-
-void Help::eraseFirstWord () {
-	unsigned int pos = _input.find_first_of (' ', 0);
-	if (pos == string::npos)
-		_input.erase (0, pos);
-	else
-		_input.erase (0, pos + 1);
 }
 
 //---------------------------------------------------------------
@@ -859,11 +844,183 @@ void Help::eraseFirstWord () {
 AccCtrl::AccCtrl (ToDoMngr* toDoMngr) {
 	assert (toDoMngr != NULL);
 	_toDoMngr = toDoMngr;
+	_userStatus = UNONE;
+	ifstream readFile("userlist.txt"); 
+	
+	if (readFile.is_open ()) {
+		readFile.close ();
+	} else {
+		ofstream writeFile ("userlist.txt");
+		writeFile.close ();
+	}
 }
 
 AccCtrl::~AccCtrl () {
 }
 
-bool AccCtrl::execute () {
-	return true;
+bool AccCtrl::execute () 
+{
+	ifstream readFile("userlist.txt");
+
+	string str, temp;
+	eraseFirstWord ();
+	stringstream iss;
+	iss << _input;
+	_result.erase ();
+
+	if(_username.empty() || _password.empty()) {
+		if(_input.empty())
+		{ 
+			_result = "Are you a new user? (Y/N): ";
+		}
+		else if(_userStatus == UNONE && (_input == "Y" || _input == "y"))
+		{
+			_userStatus = UNEW;
+			_result = "Username: ";
+		}
+		else if(_userStatus == UNONE && (_input == "N" || _input == "n"))
+		{
+			_userStatus = UOLD;
+			_result = "Username: ";
+		}
+		else if(_userStatus != UNONE && _username.empty())
+		{
+			iss >> temp;
+			iss >> temp;
+			bool existedUser = false;
+			_username = temp;
+			while(getline(readFile, str) && !existedUser)
+			{
+				unsigned int pos = str.find_first_of (' ', 1);
+				if(str.substr(0, pos) == _username)
+				{
+					existedUser = true;
+				}
+			}
+			
+			if(_userStatus == UNEW)
+			{
+				if (existedUser) {
+					_result = _username + " has been used before. Please select a new username: ";
+					_username.erase();
+					unsigned int pos = _input.find_last_of (' ', 1);
+					_input = _input.substr (0, pos);
+				} else {
+					_result = "Password: ";
+				}
+			}
+			else
+			{
+				if (existedUser) {
+					_result = "Password: ";
+				} else {
+					_result = _username + " does not exist!\n Are you a new User (Y/N)";
+					_userStatus = UNONE;
+					_username.erase ();
+					_input.erase ();
+				}
+			}
+		}
+		else if(_userStatus == UNEW && _retypedPassword.empty ())
+		{
+			iss >> temp;
+			iss >> temp;
+			iss >> temp;
+			_retypedPassword = temp;
+			_result = "Re-type password: ";
+			unsigned int pos = _input.find_last_of (' ', 0);
+			_input = _input.substr (0, pos);
+		}
+		else if (_userStatus == UNEW && !_retypedPassword.empty ())
+		{
+			iss >> temp;
+			iss >> temp;
+			iss >> temp;
+			iss >> temp;
+			_password = temp;
+			if(_password == _retypedPassword)
+			{
+				_result = "Your account has been created successfully!";
+				ofstream writeFile ("userlist.txt", fstream::app);
+				writeFile << _username + ' ' + _password << endl;
+				_input.erase ();
+				_username.erase ();
+				_password.erase ();
+				_retypedPassword.erase ();
+				_userStatus = UNONE;
+				_toDoMngr = new ToDoMngr(convert(_username));
+				return true; 
+			}
+			else
+			{
+				_result = "Password does not match! Please re-enter the password.";
+				_password = _password.erase();
+				unsigned int pos = _input.find_last_of (' ', 0);
+				_input = _input.substr (0, pos);
+				pos = _input.find_last_of (' ', 0);
+				_input = _input.substr (0, pos);
+			}
+		}
+		else if (_userStatus == UOLD) 
+		{
+			iss >> temp;
+			iss >> temp;
+			iss >> temp;
+			_password = temp;
+
+			if(getline(readFile, str) == false)
+			{
+
+					return false;
+			}
+
+			readFile.close ();
+			readFile.open ("userlist.txt", fstream::in);
+
+			while(getline(readFile, str))
+			{
+				int pos = str.find_first_of(' ', 0);
+				if(str.substr(0, pos) == _username && str.substr(pos+1, string::npos) == _password)
+				{
+					_result = "                                   WELCOME BACK!";
+					_input.erase ();
+					_username.erase ();
+					_password.erase ();
+					_retypedPassword.erase ();
+					_userStatus = UNONE;
+					_toDoMngr = new ToDoMngr(convert(_username));
+					return true; 
+				}
+			}
+		}
+		else
+		{
+			unsigned int pos = _input.find_last_of (' ', 0);
+			_input.erase (pos, string::npos);
+		}
+
+		temp = "switch";
+		if (_input.empty ())
+			_input = temp;
+		else
+			_input = temp + ' ' + _input;
+		return false;
+	}
 }
+
+string AccCtrl::convert(string input)
+{
+	int length = input.size();
+
+	for(int i=0; i<length; i++)
+		input[i] += i;
+
+	return input;
+}
+
+
+
+
+
+
+	
