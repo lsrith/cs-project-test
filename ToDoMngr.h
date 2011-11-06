@@ -29,11 +29,11 @@ public:
 	};
 
 	struct UserTask { 
-		list<Task> _tasklist;
-		Task* _task2;
-		Task _updatedTask;
-		cmdType _cmd;
+		cmdType _cmd;	
+		Task* _eTask;
+		Task _task, _updatedTask;
 		int _taskId;
+		list<Task*> _deletePeriodList;
 		list<int> _index;
 		TimePeriod _period;
 		string _tableName;
@@ -123,6 +123,7 @@ private:
 	DataStorage _dataStorage;
 	list<Task> _activeTaskList;
 	list<Task> _clashList;
+	list<Task> _erasetasklist;
 	bool Table_Mode;
 	string tableName;
 
