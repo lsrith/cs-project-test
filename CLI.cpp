@@ -4,18 +4,20 @@
 #include "Logging.h"
 #include "CmdTextChange.h"
 #include <iostream>
+#include <Windows.h>
 #include <direct.h>
 using namespace std;
 
 inline VldCmdCtrl::command getFirstCmd (string*, VldCmdCtrl*);
 inline void eraseFirstWord (string*);
+inline void setConsoleWindowConfig ();
 
 int main () {
 	Logging log;
 	log.log ("main");
 	log.start ("main");
-	const string WELCOME = "\tTASKCAL\n\n";
-	cout << WELCOME << endl;
+
+	setConsoleWindowConfig ();
 
 	string output, input, newInput;
 	log.call ("ToDoMngr");
@@ -28,15 +30,20 @@ int main () {
 		VldCmdCtrl testLoading;
 	} catch (string xcpt) {
 		cout << xcpt << endl;
+		cout << "press Enter to continue..." << endl;
+		getline (cin, xcpt);
 		return 0;
 	}
 	log.end ();
+
+	CmdTextChange console;
+	const string WELCOME = "                 TASKCAL\n\n";
+	console.write (WELCOME);
 
 	VldCmdCtrl cmdCtrl;
 	bool prompt;
 	VldCmdCtrl::command cmd = VldCmdCtrl::CUSER;
 
-	CmdTextChange console;
 	Merge merge (cmdCtrl.get_vldCmdList ());
 	ExecuteCmd* exeCmd = NULL;
 	AccCtrl userAcc (toDo);
@@ -51,7 +58,8 @@ int main () {
 	log.loop ("main");
 	do {
 		output.erase (0, string::npos);
-		cout << ">> ";
+		console.write (">");
+		console.write ("> ");
 		newInput = console.read ();
 
 		merge.updateInput (input, newInput);
@@ -147,7 +155,7 @@ int main () {
 		}
 		log.end ();
 
-		cout << output << endl;
+		console.write (output + "\n");
 	} while (cmd != VldCmdCtrl::CEXIT);
 	log.end ();
 	log.end ();
@@ -166,4 +174,14 @@ void eraseFirstWord (string* input) {
 		input->erase (0, pos);
 	else
 		input->erase (0, pos + 1);
+}
+
+void setConsoleWindowConfig () {
+	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	COORD NewSBSize = {CmdTextChange::MAX_WIDTH, CmdTextChange::MAX_HEIGHT};
+	SMALL_RECT DisplayArea = {CmdTextChange::MAX_WIDTH, 50, 0, 0};
+	SetConsoleTitle ("TaskCal");
+    SetConsoleScreenBufferSize(hOut, NewSBSize);
+    SetConsoleWindowInfo(hOut, TRUE, &DisplayArea);
+	system ("cls");
 }

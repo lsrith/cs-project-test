@@ -7,7 +7,7 @@ using namespace std;
 
 class CmdTextChange: public CmdTrans {
 private:
-	enum SpCmd {SPCMD = 224, RIGHT = 'M', LEFT = 'K', DEL = 'S', INS = 'R'};
+	enum SpCmd {SPCMD = 224, RIGHT = 'M', LEFT = 'K', UP = 'H', DOWN = 'P', DEL = 'S', INS = 'R'};
 	enum Color {BLACK = 0, GRAY = 7, GREY, BLUE, GREEN, SKY, RED, PINK, YELLOW, WHITE};
 
 	struct chNode {
@@ -19,15 +19,20 @@ public:
 	~CmdTextChange ();
 	string read ();
 	string read (string);
+	void write (string);
+	static unsigned int MAX_WIDTH;
+	static unsigned int MAX_HEIGHT;
 
 private:
 	HANDLE hConsole;
+	COORD __cursor;
 	list<chNode> _chList;
 	unsigned int _cursor;
 	bool _insertActive;
 
 	void checkWord ();
 	void putChar (chNode);
+	void putChar (short int);
 	void spCmdCheck ();
 	void delChar ();
 	void bsChar ();
@@ -44,6 +49,11 @@ private:
 	Color getCmdColor (command);
 	void clear ();
 	void buffer ();
+	void rewrite ();
+	bool moveCursorForward ();
+	bool moveCursorBackward ();
+	bool moveCursorUp ();
+	bool moveCursorDown ();
 };
 
 #endif
