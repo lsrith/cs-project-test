@@ -7,7 +7,7 @@ using namespace std;
 
 class CmdTextChange: public CmdTrans {
 private:
-	enum SpCmd {SPCMD = 224, RIGHT = 'M', LEFT = 'K', UP = 'H', DOWN = 'P', DEL = 'S', INS = 'R'};
+	enum SpCmd {SPCMD = 224, RIGHT = 'M', LEFT = 'K', UP = 'H', DOWN = 'P', DEL = 'S', INS = 'R', UNDO = 26, REDO = 25};
 	enum Color {BLACK = 0, GRAY = 7, GREY, BLUE, GREEN, SKY, RED, PINK, YELLOW, WHITE};
 
 	struct chNode {
