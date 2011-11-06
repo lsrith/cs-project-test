@@ -1,3 +1,19 @@
+/**
+ * This class is used to translate the input from the user to
+ * its corresponding data type.
+ *
+ * For example: date today will be translate as (int) DDMMYYYY
+ * int get_int ()
+ * Task get_task ();
+ * TimePeriod get_period ();
+ * Time get_time ();
+ * Time::date_t get_date ();
+ * Time::clk_t get_clock ();
+ *
+ * @author LY SAMRITH
+ */
+
+
 #ifndef CMDTRANS_H
 #define CMDTRANS_H
 #include "Task.h"

@@ -1,6 +1,9 @@
-/*
-*Author Rith
-*/
+/**
+ * This class is define a Time Period type
+ * TimePeriod consists of start time and end time
+ * 
+ * @author LY SAMRITH
+ */
 
 #ifndef TIMEPERIOD_H
 #define TIMEPERIOD_H

@@ -163,6 +163,8 @@ bool Edit::execute () {
 		taskId = convertToInt (_dataInput->front ());
 		if (taskId < 1) {
 			_flagError = DATA;
+		} else {
+			pop ();
 		}
 	} else {
 		_flagError = DATA;
