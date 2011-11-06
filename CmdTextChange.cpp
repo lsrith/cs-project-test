@@ -40,6 +40,7 @@ string CmdTextChange::read (string __str) {
 		ch = _getch ();
 		
 		if (ch == '\r' || ch == '\n') {
+			checkWord ();
 			ch = '\n';
 			putChar ('\n');
 		} else if (ch == '\b') {
@@ -49,9 +50,28 @@ string CmdTextChange::read (string __str) {
 		} else if (ch >= '!' && ch <= '~') {
 			insChar (ch);
 		} else if (ch == ' ' && (_chList.empty () || _chList.back ()._ch != ' ')) {
+			checkWord ();
+			insChar (' ');
+		} else if (ch == UNDO) {
+			if (_chList.empty ()) {
+				insChar ('u');
+				insChar ('n');
+				insChar ('d');
+				insChar ('o');
 				checkWord ();
-				insChar (' ');
+				ch = '\n';
+			}
+		} else if (ch == REDO) {
+			if (_chList.empty ()) {
+				insChar ('r');
+				insChar ('e');
+				insChar ('d');
+				insChar ('o');
+				checkWord ();
+				ch = '\n';
+			}
 		} else;
+
 	} while (ch != '\n');
 	
 	SetConsoleTextAttribute(hConsole, GRAY);
@@ -474,7 +494,7 @@ CmdTextChange::Color CmdTextChange::getCmdColor (command cmd) {
 	case CNOTE:
 	case CALERT:
 	case CREPEAT:
-		color = GREEN;
+		color = SKY;
 		break;
 	case CHOUR:
 	case CFORTNIGHT:
@@ -509,7 +529,7 @@ CmdTextChange::Color CmdTextChange::getCmdColor (command cmd) {
 	case CREPLACE:
 	case CINSERT:
 	case CVOID:
-		color = SKY;
+		color = GREEN;
 		break;
 	default:
 		color = WHITE;
