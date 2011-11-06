@@ -179,7 +179,13 @@ Task CmdTrans::get_task () {
 					if (_flagError == NONE)
 						task.repeat = clock / 100 * 60 + clock % 100;
 				}
-			} else;
+			} else {
+				break;
+			}
+
+			period = get_period ();
+			if (_flagError == NONE)
+				task.r_period = period;
 			break;
 		default:
 			reachExeCmd = true;

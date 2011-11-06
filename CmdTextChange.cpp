@@ -80,6 +80,28 @@ string CmdTextChange::read (string __str) {
 	return str;
 }
 
+string CmdTextChange::pswdRead () {
+	short int ch;
+	do {
+		buffer ();
+		ch = _getch ();
+		
+		if (ch == '\r' || ch == '\n') {
+			ch = '\n';
+			putChar ('\n');
+		} else {
+			insChar (ch);
+			putChar ('*');
+		}
+
+	} while (ch != '\n');
+	
+	SetConsoleTextAttribute(hConsole, GRAY);
+	string str = mergeChar (&_chList);
+	_cursor = str.size ();
+	return str;
+}
+
 void CmdTextChange::write (string str) {
 	SetConsoleTextAttribute(hConsole, WHITE);
 	clear ();

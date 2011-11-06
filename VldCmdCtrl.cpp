@@ -204,7 +204,7 @@ string VldCmdCtrl::convertToString (command cmd) {
 	case (CSORT):		str = "sort";		break;
 	case (CSEARCH):		str = "search";		break;
 	case (CCLEAR):		str = "clear";		break;
-	case (CUSER):		str = "user";		break;
+	case (CUSER):		str = "switch";		break;
 	case (CEXIT):		str = "exit";		break;
 	case (CDISCARD):	str = "discard";	break;
 	case (CREPLACE):	str = "replace";	break;

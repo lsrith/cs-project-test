@@ -37,14 +37,15 @@ int main () {
 	log.end ();
 
 	CmdTextChange console;
-	console.write ("                                            TASKCAL\n");
-	console.write ("                                            WELCOME\n\n");
+	console.write("                                ------------------\n");
+	console.write ("                                |     TASKCAL    |\n");
+	console.write ("                                |     WELCOME    |\n");
+	console.write("                                ------------------\n\n");
 
 	VldCmdCtrl cmdCtrl;
 	bool prompt;
 	VldCmdCtrl::command cmd = VldCmdCtrl::CUSER;
 
-	Merge merge (cmdCtrl.get_vldCmdList ());
 	ExecuteCmd* exeCmd = NULL;
 	AccCtrl userAcc (toDo);
 	Add add (cmdCtrl.get_vldCmdList (), toDo);
@@ -55,16 +56,19 @@ int main () {
 
 	input = VldCmdCtrl::convertToString (VldCmdCtrl::CUSER);
 
-	log.loop ("main");
-	do {
-		output.erase (0, string::npos);
-		console.write (">");
-		console.write ("> ");
-		newInput = console.read ();
+	userAcc.updateInput (input);
+	userAcc.execute ();
+	output = userAcc.result ();
+	input = userAcc.get_input ();
+	console.write (output + "\n");
+	output.erase (0, string::npos);
 
-		merge.updateInput (input, newInput);
-		merge.execute ();
-		input = merge.result ();
+	do {
+		console.write (">>");
+		if (cmd == VldCmdCtrl::CUSER)
+			input += " " + console.read ();
+		else
+			input = console.read (input);
 		prompt = false;
 
 		log.loop ("sub");
@@ -135,7 +139,12 @@ int main () {
 				exeCmd = &userAcc;
 				break;
 			case VldCmdCtrl::CEXIT:
-				prompt = true;
+				if(toDo->ifTableMode ()) {
+					toDo->deactivateTable ();
+				} else {
+					toDo->exit ();
+					prompt = true;
+				}
 				break;
 			default:
 				eraseFirstWord (&input);
@@ -146,10 +155,6 @@ int main () {
 			if (exeCmd != NULL) {
 				exeCmd->updateInput (input);
 				if (!exeCmd->execute ()) {
-					if (cmd == VldCmdCtrl::CUSER)
-						output.erase ();
-					else
-						output += "\n<< " + exeCmd->get_input ();
 					prompt = true;
 				}
 				output += "\n" + exeCmd->result ();
@@ -157,8 +162,23 @@ int main () {
 			}
 		}
 		log.end ();
-
+/*
+		if (toDo->ifAlertActive ()) {
+			string strAlert = toDo->alert ();
+			console.write (strAlert);
+			console.write ("Do you want to snooze? (Y/N)");
+			strAlert = console.read ();
+			if (strAlert == "Y" || strAlert == "N" || strAlert == "snooze") {
+				strAlert = console.read ();
+				int mins = atoi (strAlert.c_str ());
+				toDo->snoozeAlert (mins);
+			} else {
+				toDo->deactivateAlert ();
+			}
+		}
+*/
 		console.write (output + "\n");
+		output.erase (0, string::npos);
 	} while (cmd != VldCmdCtrl::CEXIT);
 	log.end ();
 	log.end ();

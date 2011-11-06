@@ -831,7 +831,7 @@ bool Help::execute () {
 				}
 		}	
       
-		cout << oss.str();
+		_result = oss.str();
 
 	//this is to make sure that you dont return any leftOverInput
 	_input.erase ();
@@ -891,7 +891,7 @@ bool AccCtrl::execute ()
 			_username = temp;
 			while(getline(readFile, str) && !existedUser)
 			{
-				unsigned int pos = _input.find_last_of (' ', 0);
+				unsigned int pos = str.find_first_of (' ', 1);
 				if(str.substr(0, pos) == _username)
 				{
 					existedUser = true;
@@ -903,7 +903,7 @@ bool AccCtrl::execute ()
 				if (existedUser) {
 					_result = _username + " has been used before. Please select a new username: ";
 					_username.erase();
-					unsigned int pos = _input.find_last_of (' ', 0);
+					unsigned int pos = _input.find_last_of (' ', 1);
 					_input = _input.substr (0, pos);
 				} else {
 					_result = "Password: ";
@@ -914,10 +914,10 @@ bool AccCtrl::execute ()
 				if (existedUser) {
 					_result = "Password: ";
 				} else {
-					_result = _username + " does not exist!";
-					_username.erase();
-					unsigned int pos = _input.find_last_of (' ', 0);
-					_input = _input.substr (0, pos);
+					_result = _username + " does not exist!\n Are you a new User (Y/N)";
+					_userStatus = UNONE;
+					_username.erase ();
+					_input.erase ();
 				}
 			}
 		}
@@ -944,6 +944,10 @@ bool AccCtrl::execute ()
 				ofstream writeFile ("userlist.txt", fstream::app);
 				writeFile << _username + ' ' + _password << endl;
 				_input.erase ();
+				_username.erase ();
+				_password.erase ();
+				_retypedPassword.erase ();
+				_userStatus = UNONE;
 				_toDoMngr = new ToDoMngr(convert(_username));
 				return true; 
 			}
@@ -978,8 +982,12 @@ bool AccCtrl::execute ()
 				int pos = str.find_first_of(' ', 0);
 				if(str.substr(0, pos) == _username && str.substr(pos+1, string::npos) == _password)
 				{
-					_result = "Welcome back!";
+					_result = "                                   WELCOME BACK!";
 					_input.erase ();
+					_username.erase ();
+					_password.erase ();
+					_retypedPassword.erase ();
+					_userStatus = UNONE;
 					_toDoMngr = new ToDoMngr(convert(_username));
 					return true; 
 				}

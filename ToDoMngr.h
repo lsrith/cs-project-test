@@ -52,6 +52,7 @@ public:
 	// delete everything in the dataStorage
 	string search (search_t, string);
 	bool activateTable (string tableN);
+	bool ifTableMode ();
 	void deactivateTable ();
 	bool getTableActivationStatus ();
 
