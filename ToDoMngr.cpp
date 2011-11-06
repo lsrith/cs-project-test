@@ -1803,6 +1803,7 @@ void ToDoMngr::undo (){
 			_activeTaskList.erase(li);
 			_activeTaskList.insert(li, undoTask._task);
 		}
+
 		_undoStack.pop();
 		_redoStack.push(undoTask);
 	}
@@ -1959,6 +1960,10 @@ bool ToDoMngr::getTableActivationStatus () {
 		return true;
 	else
 	    return false;
+}
+
+bool ToDoMngr::ifTableMode () {
+	return Table_Mode;
 }
 
 bool ToDoMngr::ifAlertActive (){

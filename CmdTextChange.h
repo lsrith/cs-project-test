@@ -19,6 +19,7 @@ public:
 	~CmdTextChange ();
 	string read ();
 	string read (string);
+	string pswdRead ();
 	void write (string);
 	static unsigned int MAX_WIDTH;
 	static unsigned int MAX_HEIGHT;
