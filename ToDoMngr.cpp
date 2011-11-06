@@ -293,8 +293,6 @@ string ToDoMngr::view(Task taskId){
 }
 
 string ToDoMngr:: view(list<Task> tasklist){
-	
-	
 	Time obj;
 	int full_date,_date,temp_date,temp_year;
 	temp_date=0;
@@ -806,7 +804,6 @@ string ToDoMngr:: view(list<Task> tasklist){
 	return oss.str();
 
 }
-
 
 string ToDoMngr::view (int taskId){
 	Time obj;
@@ -1374,7 +1371,6 @@ void ToDoMngr::erase(string name){
 	_dataStorage.erase(deletedIdx); 
 }
 
-
 // delete from dataStorage given the taskId
 Task ToDoMngr::erase(int taskId){
 	list<Task>::iterator di = _activeTaskList.begin();
@@ -1404,8 +1400,6 @@ Task ToDoMngr::erase(int taskId){
 
 	return deleteTask;  
 }
-
-
 
 list<Task> ToDoMngr::add(string tableName, Task task, bool forceAdd){
 	if(tableName.size() == 0){
@@ -1524,8 +1518,6 @@ list<Task> ToDoMngr::add(string tableName, Task task, bool forceAdd){
 		}
 	}	
 }
-
-
 
 bool ToDoMngr::tillEnd(int duration, list<Task> taskList, Task task, bool forceAdd, TimePeriod activePeriod){
 	bool got_clash = false;
@@ -1828,7 +1820,6 @@ list<Task> ToDoMngr::edit (int taskId, Task task, bool forceEdit) {
 	return edit (taskId, &taskElem, &task, forceEdit);
 }
 
-
 void ToDoMngr::setTaskElem (ToDoMngr::TaskElement* taskElem, Task* task) {
 	Time dfltTime;
 	if (task->get_time () != dfltTime)
@@ -1861,6 +1852,7 @@ void ToDoMngr::setTaskElem (ToDoMngr::TaskElement* taskElem, Task* task) {
 	else
 		taskElem->_repeat = false;
 }
+
 bool ToDoMngr::activateTable (string tableN) {
 
 	//cout<<tableName;

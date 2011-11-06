@@ -70,6 +70,16 @@ void Task::invConvert (string& str) {
 	strStream >> date >> clock >> repeat;
 	alert.modify_date (date);
 	alert.modify_clock (clock);
+	strStream >> date >> clock;
+	_time.modify_date (date);
+	_time.modify_clock (clock);
+	r_period.modify_start_time (_time);
+	strStream >> date >> clock;
+	_time.modify_date (date);
+	_time.modify_clock (clock);
+	r_period.modify_end_time (_time);
+	_time.modify_date (Time::DFLT_DATE);
+	_time.modify_clock (Time::DFLT_CLOCK);
 
 	note = strStream.str ();
 	int pos = note.find (spaceMarker, 0);
@@ -90,6 +100,8 @@ string Task::stringConvert () {
 		str << " " << _period.get_end_time ().get_date () << " " << _period.get_end_time ().get_clock ();
 	}
 	str << " " << alert.get_date () << " " << alert.get_clock () << " " << repeat;
+	str << " " << r_period.get_start_time ().get_date () << " " << r_period.get_start_time ().get_clock ();
+	str << " " << r_period.get_end_time ().get_date () << " " << r_period.get_end_time ().get_clock ();
 	str << spaceMarker << venue << spaceMarker << note;
 	
 	return str.str ();

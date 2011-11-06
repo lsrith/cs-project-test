@@ -105,7 +105,22 @@ vector<string> DataStorage::load_table_name () {
 	
 	return tableNames;
 }
+
+list<DataStorage::Table> DataStorage::load_tables () {
+	list<Table> tables;
+	Table table;
+	list<TableNode*>::iterator iter;
+	for (iter = _tables.begin (); iter != _tables.end (); iter++)
+		if ((*iter)->_active) {
+			table.name = (*iter)->_name;
+			table.period = (*iter)->_period;
+			tables.push_back (table);
+		}
 	
+	return tables;
+	
+}
+
 void DataStorage::erase (list<int> taskIndex) {
 	if (taskIndex.empty ()) return;
 	
@@ -161,6 +176,22 @@ void DataStorage::clear () {
 	tableFile.close ();
 }
 
+void DataStorage::save (list<int> taskIndx) {
+	list<TaskNode*> newTasks;
+	list<TaskNode*>::iterator nodeIter = _indxTasks.begin ();
+	list<int>::iterator iter;
+	taskIndx.sort ();
+	unsigned int i = 0;
+
+	for (iter = taskIndx.begin (); iter != taskIndx.end (); iter++) {
+		for (; i < *iter; i++, nodeIter++);
+		(*nodeIter)->_active = true;
+		newTasks.push_back (*nodeIter);
+	}
+
+	appendToFile (&newTasks);
+}
+
 void DataStorage::save (list<Task>* taskList) {
 	if (taskList->empty ()) return;
 
@@ -177,7 +208,7 @@ void DataStorage::save (list<Task>* taskList) {
 			_indxTasks.push_back (node);
 			newTasks.push_back (node);
 		} else {
-			int i;
+			unsigned int i;
 			for (i = 0, nodeIter = _indxTasks.begin (); i < iter->_index; i++, nodeIter++);
 			(*nodeIter)->_task = *iter;
 			(*nodeIter)->_active = true;
@@ -210,7 +241,7 @@ void DataStorage::save (TableNode* table, list<Task>* taskList) {
 			table->_tasks.push_back (node);
 			newTasks.push_back (node);
 		} else {
-			int i;
+			unsigned int i;
 			for (i = 0, nodeIter = _indxTasks.begin (); i < iter->_index; i++, nodeIter++);
 			(*nodeIter)->_task = *iter;
 			(*nodeIter)->_table = table->_name;

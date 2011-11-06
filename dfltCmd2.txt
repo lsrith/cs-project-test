@@ -57,6 +57,7 @@
 39 search
 40 clear
 40 clr
+41 
 42 exit
 42 quit
 43 discard
