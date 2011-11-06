@@ -1205,8 +1205,9 @@ bool ToDoMngr::ifExistedTable (string tableName) {
 	return false;
 }
 
-// check if there is clashed of period tasks
+//debugged
 bool ToDoMngr::clashed(Task task){
+// check if there is clashed of period tasks
 	list<Task> checkList;
 	checkList = _dataStorage.load(task.get_period());
 	
@@ -1242,7 +1243,7 @@ bool ToDoMngr::clashed(Task task){
 	}
 }
 
-
+//debugged
 list<Task> ToDoMngr::add(Task task, bool forceAdd)                                                                      
 {
 	cout<<tableName;
@@ -1346,70 +1347,53 @@ bool ToDoMngr::newTable(string name, TimePeriod period){
 	}
 }
 
+//debugged
 void ToDoMngr::erase(TimePeriod period){
-        //get the id of tasks in that period
-        list<Task> deleteList;
+	    list<Task> deleteList;
         deleteList = _dataStorage.load(period);
-        list<int> deletedIdx;
-        list<Task>::iterator di = deleteList.begin();
-		Task* ptr;
-		list<Task*> ptrlist;
-
-		
-
-        for(int i=1; i<=deleteList.size(); i++){
-				*ptr = *di;
-				ptrlist.push_back(ptr);
-                deletedIdx.push_back(di->get_index());
-				di++;
-        }
+		list<int> deletedIdxList;
+		list<Task>::iterator di = deleteList.begin();
+		for(int i=0; i<deleteList.size(); i++){
+			deletedIdxList.push_back(di->get_index());
+		}
 
 		//add to undoStack
-		UserTask newerase;
-		newerase._cmd = _eraseTask;
-		newerase._period = period;
-		newerase._deletePeriodList = ptrlist;
-		_undoStack.push(newerase);
-		
+		UserTask newErase;
+		newErase._cmd = _erasePeriod;
+		newErase._period = period;
+		newErase._index = deleteIdxList;
+		_undoStack.push(newErase);
 
-        //delete from dataStorage the tasks with the id in the list
-        _dataStorage.erase(deletedIdx); 
-
+		_dataStorage.erase(deletedIdxList);
 } 
 
+//debugged
 void ToDoMngr::erase(string name){
-	// load back the list of task in the timetable
-	// get the idx of the tasks in the list
 
 	list<Task> deleteList;
 
 	deleteList = _dataStorage.load(name);
+	list<int> deleteIdxList;
 	list<Task>::iterator di = deleteList.begin();
-	list<Task*> deletePtrList;
-
-	for(int i=1; i<deleteList.size();i++)
-	{
-		Task task = *di;
-		Task *ptr;
-		*ptr = task;
-		deletePtrList.push_back(ptr);
-		di++;
+	for(int i=0; i<deleteList.size(); i++){
+		deleteIdxList.push_back(di->get_index());
 	}
 
 	//add to undoStack
-	UserTask newerase;
-	newerase._cmd = _erasePeriod;
-	newerase._tableName = name;
-	newerase._deletePeriodList = deletePtrList;
-	_undoStack.push(newerase);
+	UserTask newErase;
+	newErase._cmd = _eraseTable;
+	newErase._period = period;
+	newErase._index = deleteIdxList;
+	newErase._tableName = name;
+	_undoStack.push(newErase);
 
-	// delete from dataStorage
-	_dataStorage.erase(name); 
+	_dataStorage.erase(deleteIdxList);		
 }
 
-// delete from dataStorage given the taskId
+//debugged
 Task ToDoMngr::erase(int taskId){
-	
+// delete from dataStorage given the taskId
+
 	// locate the task in the _activeTaskList
 	list<Task>::iterator di = _activeTaskList.begin();
 
@@ -1429,12 +1413,12 @@ Task ToDoMngr::erase(int taskId){
 		deleteIdxList.push_back(deleteTask.get_index());
 
 		//add to undoStack
-		UserTask newerase;
-		newerase._cmd = _eraseTask;
-		newerase._task = deleteTask;
-		newerase._taskId = taskId;
-		newerase._index.push_back(deleteTask.get_index());
-		_undoStack.push(newerase);
+		UserTask newErase;
+		newErase._cmd = _eraseTask;
+		newErase._task = deleteTask;
+		newErase._taskId = taskId;
+		newErase._index.push_back(deleteTask.get_index());
+		_undoStack.push(newErase);
 
 		_dataStorage.erase(deleteIdxList);
 		return deleteTask; 
@@ -1443,9 +1427,7 @@ Task ToDoMngr::erase(int taskId){
 	{
 	 Task blanktask;
 	 return blanktask;
-	}
-
-	 
+	} 
 }
 
 list<Task> ToDoMngr::add(string tableName, Task task, bool forceAdd){
@@ -1638,6 +1620,7 @@ bool ToDoMngr::tillStart(int duration, list<Task> taskList, Task task, bool forc
 	return got_clash;
 }
 
+//debugged
 list<Task> ToDoMngr::edit(int taskId, TaskElement* taskElem, Task* task, bool forceEdit){
         list<Task> _blankList;
         // get the task that will be edited
@@ -1729,7 +1712,6 @@ list<Task> ToDoMngr::edit(int taskId, TaskElement* taskElem, Task* task, bool fo
         }
 }
 
-
 void ToDoMngr::undo (){
 	// if undoStack is not empty, get the top of the stack
 	if(_undoStack.empty () == false){
@@ -1746,22 +1728,15 @@ void ToDoMngr::undo (){
 				li++;
 			}
 		
-		//insert to dataStorage
+			//insert to dataStorage
 			_activeTaskList.insert(li, undoTask._updatedTask);
-
-		//add task to dataStorage
-		_dataStorage.save(undoTask._index);
+			
+			//add task to dataStorage
+			_dataStorage.save(undoTask._index);
 		}
 		else if(undoTask._cmd == _erasePeriod){
-			//prev eraseperiod, add period of task back to dataStorage
-			list<Task*>::iterator li = undoTask._deletePeriodList.begin();
-			list<Task> newList;
+			_dataStorage.save(undoTask._index);
 			
-			for(int i=1; i<=undoTask._deletePeriodList.size(); i++){
-				Task* ptr = *li;
-				newList.push_back(*ptr);
-			}
-			_dataStorage.save(newList);
 		}
 		else if(undoTask._cmd == _addTable1){
 			//prev add timetable, delete timetable from dataStorage
@@ -1769,28 +1744,20 @@ void ToDoMngr::undo (){
 		}
 		else if(undoTask._cmd == _addTable2){
 			//prev add task into timetable, delete timetable from dataStorage
-		_dataStorage.erase(undoTask._tableName);
+			_dataStorage.erase(undoTask._tableName);
 
-		//add a blank timetable with the same name back to dataStorage
-		list<Task> blankList;
-		_dataStorage.save(undoTask._tableName, blankList);
+			//add a blank timetable with the same name back to dataStorage
+			list<Task> blankList;
+			_dataStorage.save(undoTask._tableName, blankList);
 		}
 		else if(undoTask._cmd == _eraseTable){
-			//prev is eraseTable, add table back to dataStorage
-			bool blankBool;
-			list<Task> blankList;
+			//add new table with no task
+			list<Task>blankList;
+			_dataStorage.save(undoTask._tableName, blankList);
 
-			// create the table again in dataStorage
-			blankBool = newTable(undoTask._tableName, undoTask._period);
-			list<Task*>::iterator li = undoTask._deletePeriodList.begin();
-			list<Task> newList;
+			//add add task into the table back
+			_dataStorage.save(undoTask._index);
 			
-			// add the tasks in timetable back to dataStorage
-			for(int i=1; i<undoTask._deletePeriodList.size(); i++){
-				Task* ptr = *li;
-				newList.push_back(*ptr);
-			}
-			_dataStorage.save(newList);
 		}
 		else if(undoTask._cmd == _editTask){
 			//prev function is edit, undo the change
@@ -1844,7 +1811,10 @@ void ToDoMngr::redo () {
 		_redoStack.pop();
 		_undoStack.push(redoTask);
 	}
+	else{
+	}
 }
+
 
 
 //Rith
