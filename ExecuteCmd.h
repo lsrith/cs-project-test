@@ -25,6 +25,7 @@ protected:
 	string _input;
 	string _result;
 	ToDoMngr* _toDoMngr;
+	void eraseFirstWord ();
 };
 
 class Add: public CmdTrans, public ExecuteCmd {
@@ -84,7 +85,6 @@ public:
 	bool execute ();
 
 private:
-	Logging log;
 	static string MSG_DELETED;
 };
 
@@ -112,18 +112,24 @@ private:
 	void discard ();
 };
 
-class Help:public ExecuteCmd {
+class Help : public ExecuteCmd {
 public:
 	bool execute ();
 
-private:
-	void eraseFirstWord ();
 };
 
-class AccCtrl: public ExecuteCmd {
+class AccCtrl : public ExecuteCmd {
 public:
 	AccCtrl (ToDoMngr*);
 	~AccCtrl ();
 	bool execute ();
+
+private:
+	enum UserStatus {UNEW, UOLD, UNONE};
+	UserStatus _userStatus;
+	string _username;
+	string _password;
+	string _retypedPassword;
+	string convert(string);
 };
 #endif
