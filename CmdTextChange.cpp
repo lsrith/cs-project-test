@@ -63,6 +63,8 @@ void CmdTextChange::checkWord () {
 	string str;
 	str = getCurrWord ();
 	command cmd = convertToCommand (str);
+	setCurrWord (getCmdColor (cmd));
+/*
 	if (cmd == CNULL) {
 		if (prevWord () == BLACK || prevWord () == RED)
 			setCurrWord (RED);
@@ -76,6 +78,7 @@ void CmdTextChange::checkWord () {
 				setPrevWords (RED);
 		}
 	}
+*/
 }
 
 bool CmdTextChange::ifDataError (command cmd, string str) {
@@ -398,7 +401,59 @@ CmdTextChange::Color CmdTextChange::getCmdColor (command cmd) {
 	case CSIMILAR:
 	case CEACH:
 	case CCOMMAND:
-		color = 
+	case CLEFT:
+	case CRIGHT:
+		color = GRAY;
+		break;
+	case CTIME:
+	case CDATE:
+	case CFROM:
+	case CTO:
+	case CNAME:
+	case CVENUE:
+	case CNOTE:
+	case CALERT:
+	case CREPEAT:
+		color = GREEN;
+		break;
+	case CHOUR:
+	case CFORTNIGHT:
+	case CYEAR:
+	case CDAY:
+	case CWEEK:
+	case CMONTH:
+	case CNOW:
+	case CTODAY:
+	case CTMR:
+		color = PINK;
+		break;
+	case CADD:
+	case CEDIT:
+	case CDELETE:
+	case CTABLE:
+	case CVIEW:
+	case CREMINDER:
+	case CNEXT:
+	case CPREVIOUS:
+	case CFIRST:
+	case CLAST:
+	case CUNDO:
+	case CREDO:
+	case CHELP:
+	case CSORT:
+	case CSEARCH:
+	case CCLEAR:
+	case CUSER:
+	case CEXIT:
+	case CDISCARD:
+	case CREPLACE:
+	case CINSERT:
+	case CVOID:
+		color = SKY;
+		break;
+	default:
+		color = WHITE;
+		break;
 	}
-	return 0;
+	return color;
 }

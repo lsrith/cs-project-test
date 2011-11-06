@@ -27,6 +27,11 @@ private:
 	};
 
 public:	
+	struct Table {
+		string name;
+		TimePeriod period;
+	};
+
 	DataStorage ();
 	~DataStorage ();
 
@@ -56,6 +61,7 @@ public:
 	list<Task> load (string tableName);
 	// return a list of tasks of the timetable
 	vector<string> load_table_name ();
+	list<Table> load_tables ();
 	// return a list of names of existing timetable
 
 	list<Task> search (string searchedWord, search_t type);

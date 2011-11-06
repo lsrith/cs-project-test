@@ -269,6 +269,7 @@ TimePeriod CmdTrans::get_period () {
 					time = time + Time::DAY;
 
 				time.modify_clock (clock);
+				period.modify_end_time (time);
 			} else {
 				_flagError = NONE;
 

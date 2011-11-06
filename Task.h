@@ -16,6 +16,7 @@ public:
 	Time alert;					//if it need to be alerted
 	unsigned int repeat;		//num = 0 if no repeat, num = 1 if monthly repeat, num = 2 if yearly repeat
 								//else represents the difference of mins between each repeat
+	TimePeriod r_period;		//repeat period
 	bool timeTask;
 
 	Task ();
