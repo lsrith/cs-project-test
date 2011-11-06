@@ -1407,25 +1407,34 @@ Task ToDoMngr::erase(int taskId){
 		di++;
 	}     
 
-	//erase task for _activeTaskList
-	Task deleteTask = *di;
-	_activeTaskList.erase(di);     
+	if(taskId <=_activeTaskList.size() && taskId > 0){
 
-	//delete from dataStorage
-	list<int> deleteIdxList;
-	deleteIdxList.push_back(deleteTask.get_index());
+		//erase task for _activeTaskList
+		Task deleteTask = *di;
+		_activeTaskList.erase(di);     
 
-	//add to undoStack
-	UserTask newerase;
-	newerase._cmd = _eraseTask;
-	newerase._task = deleteTask;
-	newerase._taskId = taskId;
-	newerase._index.push_back(deleteTask.get_index());
-	_undoStack.push(newerase);
+		//delete from dataStorage
+		list<int> deleteIdxList;
+		deleteIdxList.push_back(deleteTask.get_index());
 
-	_dataStorage.erase(deleteIdxList);
+		//add to undoStack
+		UserTask newerase;
+		newerase._cmd = _eraseTask;
+		newerase._task = deleteTask;
+		newerase._taskId = taskId;
+		newerase._index.push_back(deleteTask.get_index());
+		_undoStack.push(newerase);
 
-	return deleteTask;  
+		_dataStorage.erase(deleteIdxList);
+		return deleteTask; 
+	}
+	else 
+	{
+	 Task blanktask;
+	 return blanktask;
+	}
+
+	 
 }
 
 list<Task> ToDoMngr::add(string tableName, Task task, bool forceAdd){
@@ -1619,87 +1628,94 @@ bool ToDoMngr::tillStart(int duration, list<Task> taskList, Task task, bool forc
 }
 
 list<Task> ToDoMngr::edit(int taskId, TaskElement* taskElem, Task* task, bool forceEdit){
-	list<Task> _blankList;
-	// get the task that will be edited
-	list<Task>::iterator taskIterator = _activeTaskList.begin();
-	for(int i=1;i<=taskId; i++){
-		taskIterator++;
-	}
+        list<Task> _blankList;
+        // get the task that will be edited
+        list<Task>::iterator taskIterator = _activeTaskList.begin();
+        for(int i=1;i<taskId; i++){
+                taskIterator++;
+        }
 
-	// store information into the undoStack;
-	UserTask newEdit; 
-	newEdit._cmd = _editTask;
-	newEdit._force = forceEdit;
-	newEdit._eTask = task;
-	newEdit._taskElem = taskElem;
-	newEdit._task = *taskIterator;
+        // store information into the undoStack;
+        UserTask newEdit; 
+        newEdit._cmd = _editTask;
+        newEdit._force = forceEdit;
+        newEdit._eTask = task;
+        newEdit._taskElem = taskElem;
+        newEdit._task = *taskIterator;
 
-	// check taskElem for what to edit
-	if(taskElem->_time == true){
-		//edit time
-		taskIterator->modify_time(task->get_time());
-		//add the updated task to the UserTask
-		newEdit._updatedTask = *taskIterator;
-		_undoStack.push(newEdit);
-		return _blankList;
-	}
-	else if(taskElem->_period == true){
-		//edit period when forcEdit == true
-		if(forceEdit == true){
-			taskIterator->modify_period(task->get_period());
-			//add the updated task to the UserTask
-			newEdit._updatedTask = *taskIterator;
-			_undoStack.push(newEdit);
-			return _blankList;
-		}
-		else{
-			//check for clash
-			bool clash;
-			//modify period and check if there is clash
-			taskIterator->modify_period(task->get_period());
-			clash = clashed(*taskIterator);
-			
-			if(clash == false){
-				newEdit._updatedTask = *taskIterator;
-				_undoStack.push(newEdit);
-				return _blankList;
-			}
-			else{
-				//return clashList, note there is no UserTask added to the undoStack
-				return _clashList;
-			}
-		}
-	}
-	else if(taskElem->_note == true){
-		//edit note
-		taskIterator->note = task->note;
-		//add the updated task to the UserTask
-		newEdit._updatedTask = *taskIterator;
-		_undoStack.push(newEdit);
-		return _blankList;
-	}
-	else if(taskElem->_venue == true){
-		//edit venue
-		taskIterator->venue = task->venue;
-		//add the updated task to the UserTask
-		newEdit._updatedTask = *taskIterator;
-		_undoStack.push(newEdit);
-		return _blankList;
-	}
-	else if(taskElem->_alert== true){
-		taskIterator->alert = task->alert;
-		//add the updated task to the UserTask
-		newEdit._updatedTask = *taskIterator;
-		_undoStack.push(newEdit);
-		return _blankList;
-	}
-	else if(taskElem->_repeat== true){
-		taskIterator->repeat = task->repeat;
-		//add the updated task to the UserTask
-		newEdit._updatedTask = *taskIterator;
-		_undoStack.push(newEdit);
-		return _blankList;
-	}
+        // check taskElem for what to edit
+        if(taskElem->_time == true){
+                //edit time
+                taskIterator->modify_time(task->get_time());
+                //add the updated task to the UserTask
+                newEdit._updatedTask = *taskIterator;
+                _undoStack.push(newEdit);
+				_dataStorage.save(_activeTaskList);
+                return _blankList;
+        }
+        else if(taskElem->_period == true){
+                //edit period when forcEdit == true
+                if(forceEdit == true){
+                        taskIterator->modify_period(task->get_period());
+                        //add the updated task to the UserTask
+                        newEdit._updatedTask = *taskIterator;
+                        _undoStack.push(newEdit);
+						_dataStorage.save(_activeTaskList);
+                        return _blankList;
+                }
+                else{
+                        //check for clash
+                        bool clash;
+                        //modify period and check if there is clash
+                        taskIterator->modify_period(task->get_period());
+                        clash = clashed(*taskIterator);
+                        
+                        if(clash == false){
+                                newEdit._updatedTask = *taskIterator;
+                                _undoStack.push(newEdit);
+								_dataStorage.save(_activeTaskList);
+                                return _blankList;
+                        }
+                        else{
+                                //return clashList, note there is no UserTask added to the undoStack
+                                return _clashList;
+                        }
+                }
+        }
+        else if(taskElem->_note == true){
+                //edit note
+                taskIterator->note = task->note;
+                //add the updated task to the UserTask
+                newEdit._updatedTask = *taskIterator;
+                _undoStack.push(newEdit);
+				_dataStorage.save(_activeTaskList);
+                return _blankList;
+        }
+        else if(taskElem->_venue == true){
+                //edit venue
+                taskIterator->venue = task->venue;
+                //add the updated task to the UserTask
+                newEdit._updatedTask = *taskIterator;
+                _undoStack.push(newEdit);
+				_dataStorage.save(_activeTaskList);
+                return _blankList;
+        }
+        else if(taskElem->_alert== true){
+                taskIterator->alert = task->alert;
+                //add the updated task to the UserTask
+                newEdit._updatedTask = *taskIterator;
+                _undoStack.push(newEdit);
+				_dataStorage.save(_activeTaskList);
+                return _blankList;
+        }
+        else if(taskElem->_repeat== true){
+                taskIterator->repeat = task->repeat;
+                //add the updated task to the UserTask
+                newEdit._updatedTask = *taskIterator;
+                _undoStack.push(newEdit);
+				_dataStorage.save(_activeTaskList);
+                return _blankList;
+        }
 }
 
 
