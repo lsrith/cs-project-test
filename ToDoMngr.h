@@ -1,7 +1,10 @@
-/*
-*Author Ris and Ben
-*/
-
+/**
+ * This class is the main logic layer of TaskCal
+ * It add, edit, delete and view the task inside its calendar
+ * 
+ * @author Rishov Prabhah Barman: view and alert
+ * @author Yeo Lock Wei Ben: add, edit, delete, undo and redo
+ */
 #ifndef TODOMNGR_H
 #define TODOMNGR_H
 #include "Task.h"

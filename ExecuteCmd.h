@@ -9,6 +9,11 @@ using namespace std;
 template <typename data_t>
 void append_back (list<data_t>* main, list<data_t> sub);
 
+/**
+ * This class is used as an interface to othe execute command key
+ *
+ * @author LY SAMRITH
+ */
 class ExecuteCmd {
 public:
 	ExecuteCmd ();
@@ -28,6 +33,11 @@ protected:
 	void eraseFirstWord ();
 };
 
+/**
+ * This class is used to execute add command
+ *
+ * @author LY SAMRITH
+ */
 class Add: public CmdTrans, public ExecuteCmd {
 public:
 	Add (vector<cmd_pair>, ToDoMngr*);
@@ -40,7 +50,11 @@ private:
 	void insertBreakPoint ();
 };
 
-//think of wrong id??
+/**
+ * This class is used to execute edit command
+ *
+ * @author LY SAMRITH
+ */
 class Edit: public CmdTrans, public ExecuteCmd {
 public:
 	Edit (vector<cmd_pair>, ToDoMngr*);
@@ -52,6 +66,11 @@ private:
 	void insertBreakPoint ();
 };
 
+/**
+ * This class is used to execute view command
+ *
+ * @author LY Samrith
+ */
 class View: public CmdTrans, public ExecuteCmd {
 public:
 	View (vector<cmd_pair>, ToDoMngr*);
@@ -78,6 +97,11 @@ private:
 	bool _activeListAccessible;
 };
 
+/**
+ * This class is used to execute delete command
+ *
+ * @author LY SAMRITH
+ */
 class Delete: public CmdTrans, public ExecuteCmd {
 public:
 	Delete (vector<cmd_pair>, ToDoMngr*);
@@ -95,6 +119,11 @@ public:
 	bool execute ();
 };
 
+/**
+ * This class is used to merge two input consisted of [break] point
+ *
+ * @author LY SAMRITH
+ */
 class Merge: public CmdTrans, public ExecuteCmd {
 public:
 	Merge (vector<cmd_pair>);
@@ -112,12 +141,22 @@ private:
 	void discard ();
 };
 
+/**
+ * This class is used to retrieve help information
+ *
+ * @author Chew Sin Chen
+ */
 class Help : public ExecuteCmd {
 public:
 	bool execute ();
 
 };
 
+/**
+ * This class is used to control user account
+ *
+ * @author Chew Sin Chen
+ */
 class AccCtrl : public ExecuteCmd {
 public:
 	AccCtrl (ToDoMngr*);
