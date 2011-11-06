@@ -1,7 +1,8 @@
-/*
-*Author Rith
-*/
-
+/**
+ * This class is define a Task type
+ * 
+ * @author LY SAMRITH
+ */
 #ifndef TEMPLATE_H_
 #define TEMPLATE_H_
 #include "Time.h"

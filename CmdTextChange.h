@@ -1,3 +1,15 @@
+/**
+ * This class is used to read and write to the command prompt window
+ * It works more than a simple cin and cout in iostream
+ * It can be use to detect keywords and set the corresponding color
+ *
+ * read () will read the input to the console screen
+ * write (string) will write the output to the console screen
+ * read (string) will write the output to the console screen to edit and read back
+ * 
+ * @author LY SAMRITH
+ */
+
 #ifndef CMDTXCH_H
 #define CMDTXCH_H
 #include "CmdTranslator.h"

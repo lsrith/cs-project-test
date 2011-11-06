@@ -1,3 +1,10 @@
+/**
+ * This class is used save the data from the logic layer to data storage
+ * It will save the Tasks in .txt file
+ *
+ * @author LY SAMRITH
+ */
+
 #ifndef DATASTORAGE_H_
 #define DATASTORAGE_H_
 #include "TimePeriod.h"
