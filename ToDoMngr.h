@@ -29,7 +29,7 @@ public:
 	};
 
 	struct UserTask { 
-		Task _task;
+		list<Task> _tasklist;
 		Task* _task2;
 		Task _updatedTask;
 		cmdType _cmd;
