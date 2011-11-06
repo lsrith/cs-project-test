@@ -37,8 +37,8 @@ int main () {
 	log.end ();
 
 	CmdTextChange console;
-	const string WELCOME = "                 TASKCAL\n\n";
-	console.write (WELCOME);
+	console.write ("                                            TASKCAL\n");
+	console.write ("                                            WELCOME\n\n");
 
 	VldCmdCtrl cmdCtrl;
 	bool prompt;
@@ -146,7 +146,10 @@ int main () {
 			if (exeCmd != NULL) {
 				exeCmd->updateInput (input);
 				if (!exeCmd->execute ()) {
-					output += "\n<< " + exeCmd->get_input ();
+					if (cmd == VldCmdCtrl::CUSER)
+						output.erase ();
+					else
+						output += "\n<< " + exeCmd->get_input ();
 					prompt = true;
 				}
 				output += "\n" + exeCmd->result ();
