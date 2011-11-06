@@ -1795,6 +1795,8 @@ void ToDoMngr::undo (){
 		_undoStack.pop();
 		_redoStack.push(undoTask);
 	}
+  else{
+  }
 }
 
 void ToDoMngr::redo () {
