@@ -1170,9 +1170,7 @@ string ToDoMngr::viewTableNames () {
 
 	return table_view.str();
 }
-
 	
-
 //modify the front task's alert += mins
 //resort ur alertTaskList
 //set the alertActive as false;
@@ -1204,6 +1202,7 @@ string ToDoMngr::viewTableNames () {
 bool ToDoMngr::ifExistedTable (string tableName) {
 	return false;
 }
+
 
 //debugged
 bool ToDoMngr::clashed(Task task){
@@ -1241,7 +1240,7 @@ bool ToDoMngr::clashed(Task task){
 			return false;
 		}
 	}
-}
+} 
 
 //debugged
 list<Task> ToDoMngr::add(Task task, bool forceAdd)                                                                      
@@ -1258,10 +1257,6 @@ list<Task> ToDoMngr::add(Task task, bool forceAdd)
 			_addList.push_back(task);
 			_dataStorage.save(_addList); 
 
-			// and return empty list
-			_addList.clear();
-			return _addList;
-
 			//add to undoStack;
 			UserTask newAdd;
 			newAdd._cmd = _addTask;
@@ -1270,6 +1265,10 @@ list<Task> ToDoMngr::add(Task task, bool forceAdd)
 			int index = ptr->get_index();
 			newAdd._index.push_back(index); 
 			_undoStack.push(newAdd);
+
+			// and return empty list
+			_addList.clear();
+			return _addList;
 
 		}
 		else{
@@ -1280,9 +1279,9 @@ list<Task> ToDoMngr::add(Task task, bool forceAdd)
 			}
 			else{
 				//ptr to address of task to get the index after adding to _dataStorage
-				Task *ptr = &task;
+				Task* ptr = &task;
 				_addList.push_back(task);
-				_dataStorage.save(_addList); 
+				_dataStorage.save(&_addList); 
 				
 				//add to undoStack;
 				UserTask newAdd;
@@ -1355,13 +1354,14 @@ void ToDoMngr::erase(TimePeriod period){
 		list<Task>::iterator di = deleteList.begin();
 		for(int i=0; i<deleteList.size(); i++){
 			deletedIdxList.push_back(di->get_index());
+			di++;
 		}
 
 		//add to undoStack
 		UserTask newErase;
 		newErase._cmd = _erasePeriod;
 		newErase._period = period;
-		 newErase._index = deletedIdxList;
+		newErase._index = deletedIdxList;
 		_undoStack.push(newErase);
 
 		_dataStorage.erase(deletedIdxList);
@@ -1766,8 +1766,15 @@ void ToDoMngr::undo (){
 				li++;
 			}
 			//erase the edited task and add the original task
+			list<Task> dummyList;
+			list<int> dummyIntList;
 			_activeTaskList.erase(li);
+			_dataStorage.erase(dummyIntList);
+
+			// add back original task
+			dummyList.push_back(*li);
 			_activeTaskList.insert(li, undoTask._task);
+			_dataStorage.save(dummyList);
 		}
 
 		_undoStack.pop();
@@ -1813,7 +1820,6 @@ void ToDoMngr::redo () {
 	else{
 	}
 }
-
 
 
 //Rith

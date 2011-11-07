@@ -4,7 +4,7 @@
 #include <string>
 #include <ctime>
 using namespace std;
-
+/*
 int main () {
 	VldCmdCtrl vldCmdCtrl;
 	vector<VldCmdCtrl::cmd_pair> vldCmd = vldCmdCtrl.get_vldCmdList ();
@@ -18,7 +18,7 @@ int main () {
 
 	return 0;
 }
-
+*/
 /*
 int main () {
 	string str;
@@ -114,7 +114,7 @@ int main () {
 }
 */
 
-/*
+
 int main ()
 {
 	Time start (23092011, 1600);
@@ -123,31 +123,27 @@ int main ()
 //cout << "-1-" << endl;
 	Task B (start);
 	B.note = "GOOGLE";
-	B.forceAdd = true;
-	B.priority = HIGH;
-	B.repeat_t = COSTOM;
-	B.repeat = end;
+	B.repeat = 5;
 //cout << "-2-" << endl;
 	Task A (period);
-	A.name = "BABE";
 	A.venue = "NUS";
 	A.note = "I LOVE YOU";
 //cout << "\n-3-" << endl;
 	string a, b, c, d;
 a = A.stringConvert ();
-cout << a << endl;
+cout <<"a = " << a << endl;
 	Task C;
 	C.invConvert (A.stringConvert ());
 //cout << "\n-4-" << endl;
 b = B.stringConvert ();
-cout << b << endl;
+cout <<"b = " << b << endl;
 	Task D (B.stringConvert ());
 //cout << "\n-5-" << endl;
 	c = C.stringConvert ();
-	cout << c << endl;
+cout << "a = " << c << endl;
 //cout << "\n-6-" << endl;
 	d = D.stringConvert ();
-	cout << d << endl;
+cout <<"b = " << d << endl;
 
 	if (a == c)
 		cout << "true" << endl;
@@ -157,9 +153,7 @@ cout << b << endl;
 		cout << "true" << endl;
 	else
 		cout << "false" << endl;
-
-	cout << B.priority << " " << D.priority << endl;
-
+/*
 	Time now;
 	now.current_time ();
 	cout << now.string_date () << " at " << now.string_clock () << endl;
@@ -174,7 +168,7 @@ cout << b << endl;
 	Time time2 (17092011, 849);
 	Time time3;
 	time3.modify_date (11092011);
-	time3.modify_time (1523);
+	time3.modify_clock (1523);
 	Time time4;
 	Time time5 (12092011, 2000);
 
@@ -198,7 +192,9 @@ cout << b << endl;
 	cout << period4 - period3 << endl;
 	cout << period5 - period2 << endl;
 	cout << period4 - period5 << endl;
+*/
+	system ("pause");
 
 	return 0;
 }
-*/
+
