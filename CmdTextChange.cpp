@@ -39,9 +39,8 @@ string CmdTextChange::read (string __str) {
 		buffer ();
 		ch = _getch ();
 		
-		if (ch == '\r' || ch == '\n') {
+		if (ch == '\n') {
 			checkWord ();
-			ch = '\n';
 			putChar ('\n');
 		} else if (ch == '\b') {
 			bsChar ();
@@ -49,7 +48,7 @@ string CmdTextChange::read (string __str) {
 			spCmdCheck ();
 		} else if (ch >= '!' && ch <= '~') {
 			insChar (ch);
-		} else if (ch == ' ' && (_chList.empty () || _chList.back ()._ch != ' ')) {
+		} else if (ch == ' ') {
 			checkWord ();
 			insChar (' ');
 		} else if (ch == UNDO) {
@@ -81,18 +80,21 @@ string CmdTextChange::read (string __str) {
 }
 
 string CmdTextChange::pswdRead () {
+	_cursor = 0;
 	short int ch;
 	do {
 		buffer ();
 		ch = _getch ();
 		
-		if (ch == '\r' || ch == '\n') {
-			ch = '\n';
+		if (ch == '\n') {
 			putChar ('\n');
-		} else {
-			insChar (ch);
-			putChar ('*');
-		}
+		} else if (ch == '\b') {
+			bsChar ();
+		} else if (ch == SPCMD) {
+			_getch ();
+		} else if (ch >= '!' && ch <= '~') {
+			insPswdChar (ch);
+		} else;
 
 	} while (ch != '\n');
 	
@@ -147,6 +149,9 @@ bool CmdTextChange::ifDataError (command cmd, string str) {
 
 string CmdTextChange::getCurrWord () {
 	string str, temp;
+	if (_chList.empty ())
+		return str;
+
 	list<chNode>::iterator iter = getNode (_cursor - 1);
 
 	while (iter->_ch != ' ') {
@@ -199,6 +204,9 @@ void CmdTextChange::getPrevWords (command& cmd, string& str) {
 }
 
 void CmdTextChange::setCurrWord (Color color) {
+	if (_chList.empty ())
+		return;
+
 	unsigned short int i, numChar = 0;
 	list<chNode>::iterator iter = getNode (_cursor - 1);
 	while (iter->_ch != ' ') {
@@ -405,14 +413,24 @@ void CmdTextChange::bsChar () {
 void CmdTextChange::insChar (short int ch) {
 	chNode node = {ch, WHITE};
 
+	if (_chList.empty () && ch == ' ')
+		return;
+
 	if (_cursor == _chList.size ()) {
-		putChar (node);
-		_chList.push_back (node);
-		_cursor++;
+		if (_chList.empty () || _chList.back ()._ch != ' ') {
+			putChar (node);
+			_chList.push_back (node);
+			_cursor++;
+		}
 		return;
 	}
 
-	list<chNode>::iterator iter = getNode (_cursor);
+	list<chNode>::iterator iter = getNode (_cursor - 1);
+	if (iter->_ch ==  ' ' && ch == ' ')
+		return;
+	else
+		iter++;
+
 	if (_insertActive) {
 		iter = _chList.insert (iter, node);
 		while (iter != _chList.end ()) {
@@ -425,6 +443,33 @@ void CmdTextChange::insChar (short int ch) {
 	} else {
 		*iter = node;
 		putChar (node);
+	}
+}
+
+//to be edited
+void CmdTextChange::insPswdChar (short int ch) {
+	chNode node = {ch, WHITE};
+
+	if (_cursor == _chList.size ()) {
+		putChar ('*');
+		_chList.push_back (node);
+		_cursor++;
+		return;
+	}
+
+	list<chNode>::iterator iter = getNode (_cursor);
+	if (_insertActive) {
+		iter = _chList.insert (iter, node);
+		while (iter != _chList.end ()) {
+			putChar ('*');
+			iter++;
+		}
+		_cursor++;
+		for (unsigned int i = _chList.size (); i > _cursor; i--)
+			assert (moveCursorBackward ());
+	} else {
+		*iter = node;
+		putChar ('*');
 	}
 }
 

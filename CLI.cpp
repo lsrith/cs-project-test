@@ -44,7 +44,10 @@ int main () {
 
 	VldCmdCtrl cmdCtrl;
 	bool prompt;
+/*
 	VldCmdCtrl::command cmd = VldCmdCtrl::CUSER;
+*/
+	VldCmdCtrl::command cmd = VldCmdCtrl::CNULL;
 
 	ExecuteCmd* exeCmd = NULL;
 	AccCtrl userAcc (toDo);
@@ -52,20 +55,23 @@ int main () {
 	Edit edit (cmdCtrl.get_vldCmdList (), toDo);
 	View view (cmdCtrl.get_vldCmdList (), toDo);
 	Delete erase (cmdCtrl.get_vldCmdList (), toDo);
+	Table table (cmdCtrl.get_vldCmdList (), toDo);
 	Help help;
 
+/*
 	input = VldCmdCtrl::convertToString (VldCmdCtrl::CUSER);
-
 	userAcc.updateInput (input);
 	userAcc.execute ();
 	output = userAcc.result ();
 	input = userAcc.get_input ();
 	console.write (output + "\n");
 	output.erase (0, string::npos);
-
+*/
 	do {
-		console.write (">>");
-		if (cmd == VldCmdCtrl::CUSER)
+		console.write (">> ");
+		if (cmd == VldCmdCtrl::CUSER && userAcc.ifPassword ())
+			input += " " + console.pswdRead ();
+		else if (cmd == VldCmdCtrl::CUSER)
 			input += " " + console.read ();
 		else
 			input = console.read (input);
@@ -138,8 +144,15 @@ int main () {
 			case VldCmdCtrl::CUSER:
 				exeCmd = &userAcc;
 				break;
+			case VldCmdCtrl::CTABLE:
+				exeCmd = &table;
+				break;
 			case VldCmdCtrl::CEXIT:
-				if(toDo->ifTableMode ()) {
+				if (userAcc.ifAccCtrl ()) {
+					input.erase ();
+					cmd = VldCmdCtrl::CNULL;
+					exeCmd = &userAcc;
+				} else if(toDo->ifTableMode ()) {
 					toDo->deactivateTable ();
 				} else {
 					toDo->exit ();
@@ -186,7 +199,11 @@ int main () {
 }
 
 VldCmdCtrl::command getFirstCmd (string* input, VldCmdCtrl* cmdCtrl) {
-	unsigned int pos = input->find_first_of (' ', 0);
+	unsigned int pos = input->find (" exit", 0);
+	if (pos != string::npos)
+		return VldCmdCtrl::CEXIT;
+
+	pos = input->find_first_of (' ', 0);
 	string firstWord = input->substr (0, pos);
 	return cmdCtrl->convertToCommand (firstWord);
 }

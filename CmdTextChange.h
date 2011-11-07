@@ -50,6 +50,7 @@ private:
 	void delChar ();
 	void bsChar ();
 	void insChar (short int);
+	void insPswdChar (short int);
 	void splitString (string&);
 	string mergeChar (list<chNode>*);
 	list<chNode>::iterator getNode (unsigned int);

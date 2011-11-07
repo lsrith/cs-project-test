@@ -16,6 +16,12 @@ DataStorage::~DataStorage () {
 }
 
 void DataStorage::updateStorageName (string storageName) {
+	if (!_taskFile.empty ()) {
+		exit ();
+		_indxTasks.clear ();
+		_tables.clear ();
+	}
+
 	_largestIndex = 1;
 	TaskNode* node = new TaskNode;
 	_indxTasks.push_back (node);

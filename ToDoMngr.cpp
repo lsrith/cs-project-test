@@ -1303,50 +1303,53 @@ list<Task> ToDoMngr::add(Task task, bool forceAdd)
 
 bool ToDoMngr::newTable(string name, TimePeriod period){  
 	
-	//check if the timetable period is valid
-	if(period.get_start_time().get_date() == Time::INF_DATE || period.get_start_time().get_date() == Time::DFLT_DATE ||
-		period.get_end_time().get_date() == Time::DFLT_DATE || period.get_end_time().get_date() == Time::DFLT_DATE) {
-			cout<<"Error in Timetable Period."<<endl;
-	}
+	if(ifTableMode () == true)
+	{
+		//check if the timetable period is valid
+		if(period.get_start_time().get_date() == Time::INF_DATE || period.get_start_time().get_date() == Time::DFLT_DATE ||
+			period.get_end_time().get_date() == Time::DFLT_DATE || period.get_end_time().get_date() == Time::DFLT_DATE) {
+				cout<<"Error in Timetable Period."<<endl;
+		}
 
-	else{
-		bool clashName=false;
-		vector<string> existedTableName;  
-
-		//load existing table name
-		existedTableName = _dataStorage.load_table_name();                                                                    
-
-		//check for clashes of name with existing table names
-		for(int i=0; i<existedTableName.size(); i++) {
-			if(existedTableName[i] == name)	{
-				clashName= true;
+		else{
+			bool clashName=false;
+			vector<string> existedTableName;  
+	
+			//load existing table name
+			existedTableName = _dataStorage.load_table_name();                                                                    
+		
+			//check for clashes of name with existing table names
+			for(int i=0; i<existedTableName.size(); i++) {
+				if(existedTableName[i] == name)	{
+					clashName= true;
+				}
 			}
-		}
 
-		if(clashName == true){ 
-			// got clash return false 
-			return false;
-		}
-		else{ 
-			// no clash return true and save to dataStorage with empty taskIdxList
-			list<Task> taskList;
-			_dataStorage.save(name, period, taskList);   
-			Table_Mode=true;
-			tableName=name;
+			if(clashName == true){ 
+				// got clash return false 
+				return false;
+			}
+			else{ 
+				// no clash return true and save to dataStorage with empty taskIdxList
+				list<Task> taskList;
+				_dataStorage.save(name, period, taskList);   
+				Table_Mode=true;
+				tableName=name;
 
-			//add to undoStack
-			UserTask newAdd;
-			newAdd._cmd = _addTable1;
-			newAdd._tableName = name;
-			newAdd._period = period;
-			_undoStack.push(newAdd);
+				//add to undoStack
+				UserTask newAdd;
+				newAdd._cmd = _addTable1;
+				newAdd._tableName = name;
+				newAdd._period = period;
+				_undoStack.push(newAdd);
 
-			return true;
+				return true;
+			}
 		}
 	}
 }
 
-//debugged
+
 void ToDoMngr::erase(TimePeriod period){
 	    list<Task> deleteList;
         deleteList = _dataStorage.load(period);
@@ -1356,7 +1359,7 @@ void ToDoMngr::erase(TimePeriod period){
 			deletedIdxList.push_back(di->get_index());
 			di++;
 		}
-
+		
 		//add to undoStack
 		UserTask newErase;
 		newErase._cmd = _erasePeriod;
@@ -1859,6 +1862,7 @@ ToDoMngr::ToDoMngr (string storageName) {
 	_alertActive=false;
 	
 	_dataStorage.updateStorageName (storageName);
+	_alertTaskList=_dataStorage.get_alertTasks();
 }
 
 void ToDoMngr::updateStorageName (string storageName) {
@@ -1867,6 +1871,7 @@ void ToDoMngr::updateStorageName (string storageName) {
 	_clashList.clear ();
 	_alertTaskList.clear();
 	_dataStorage.updateStorageName (storageName);
+	_alertTaskList=_dataStorage.get_alertTasks();
 }
 
 list<Task> ToDoMngr::edit (int taskId, Task task, bool forceEdit) {
