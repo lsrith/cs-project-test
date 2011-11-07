@@ -38,9 +38,11 @@ string CmdTextChange::read (string __str) {
 	do {
 		buffer ();
 		ch = _getch ();
-		
-		if (ch == '\n') {
+		if (ch == '\r' || ch == '\n') {
 			checkWord ();
+			for (; _cursor < _chList.size (); _cursor++)
+				moveCursorForward ();
+			ch = '\n';
 			putChar ('\n');
 		} else if (ch == '\b') {
 			bsChar ();
@@ -80,22 +82,23 @@ string CmdTextChange::read (string __str) {
 }
 
 string CmdTextChange::pswdRead () {
-	_cursor = 0;
 	short int ch;
 	do {
 		buffer ();
 		ch = _getch ();
 		
-		if (ch == '\n') {
+		if (ch == '\r' || ch == '\n') {
+			for (unsigned int i = _cursor; i < _chList.size (); i++)
+				moveCursorForward ();
+			ch = '\n';
 			putChar ('\n');
 		} else if (ch == '\b') {
 			bsChar ();
-		} else if (ch == SPCMD) {
-			_getch ();
 		} else if (ch >= '!' && ch <= '~') {
 			insPswdChar (ch);
+		} else if (ch == SPCMD) {
+			_getch ();
 		} else;
-
 	} while (ch != '\n');
 	
 	SetConsoleTextAttribute(hConsole, GRAY);
@@ -105,7 +108,7 @@ string CmdTextChange::pswdRead () {
 }
 
 void CmdTextChange::write (string str) {
-	SetConsoleTextAttribute(hConsole, WHITE);
+	SetConsoleTextAttribute(hConsole, GRAY);
 	clear ();
 	unsigned int i, size = str.size ();
 	for (i = 0; i < size; i++) {
@@ -149,7 +152,7 @@ bool CmdTextChange::ifDataError (command cmd, string str) {
 
 string CmdTextChange::getCurrWord () {
 	string str, temp;
-	if (_chList.empty ())
+	if (_cursor == 0)
 		return str;
 
 	list<chNode>::iterator iter = getNode (_cursor - 1);
@@ -204,7 +207,7 @@ void CmdTextChange::getPrevWords (command& cmd, string& str) {
 }
 
 void CmdTextChange::setCurrWord (Color color) {
-	if (_chList.empty ())
+	if (_cursor == 0)
 		return;
 
 	unsigned short int i, numChar = 0;
@@ -327,14 +330,6 @@ void CmdTextChange::spCmdCheck () {
 	switch (ch) {
 	case RIGHT:
 		if (_cursor < _chList.size ()) {
-/*
-			list<chNode>::iterator iter = getNode (_cursor);
-			
-			if (iter->_ch == ' ')
-				checkWord ();
-
-			putChar (*iter);
-*/
 			assert (moveCursorForward ());
 			_cursor++;
 		}
@@ -346,7 +341,7 @@ void CmdTextChange::spCmdCheck () {
 		}
 		break;
 	case UP:
-		if (_cursor > MAX_WIDTH) {
+		if (_cursor >= MAX_WIDTH) {
 			assert (moveCursorUp ());
 			_cursor -= MAX_WIDTH;
 		}
@@ -355,7 +350,10 @@ void CmdTextChange::spCmdCheck () {
 		if (_cursor + MAX_WIDTH <= _chList.size ()) {
 			assert (moveCursorDown ());
 			_cursor += MAX_WIDTH;
-		}
+		} else if (__cursor.X + _chList.size () - _cursor > MAX_WIDTH - 1){
+			for (; _cursor < _chList.size (); _cursor++)
+				moveCursorForward ();
+		} else;
 		break;
 	case DEL:
 		delChar ();
@@ -380,56 +378,50 @@ void CmdTextChange::delChar () {
 	}
 	putChar (' ');
 
-	for (unsigned int i = _chList.size (); i >= _cursor; i--)
-		assert (moveCursorBackward ());
+	if (_cursor == 0) {
+		__cursor.X = 0;
+		__cursor.Y = 0;
+		SetConsoleCursorPosition(hConsole, __cursor);
+	} else {
+		for (unsigned int i = _chList.size (); i >= _cursor; i--)
+			assert (moveCursorBackward ());
+	}
 }
 
 void CmdTextChange::bsChar () {
 	if (_cursor == 0) {
-	} else if (_cursor == _chList.size ()) {
-		assert (moveCursorBackward ());
-		putChar (' ');
-		assert (moveCursorBackward ());
-		_chList.pop_back ();
-		_cursor--;
 	} else {
 		assert (moveCursorBackward ());
-		list<chNode>::iterator iter = getNode (_cursor);
-		iter = _chList.erase (iter);
-		while (iter != _chList.end ()) {
-			putChar (*iter);
-			iter++;
-		}
-
-		chNode node = {' ', WHITE};
-		putChar (node);
-	
-		for (unsigned int i = _chList.size (); i >= _cursor; i--)
-			assert (moveCursorBackward ());
 		_cursor--;
+		delChar ();
 	}
 }
 
 void CmdTextChange::insChar (short int ch) {
-	chNode node = {ch, WHITE};
-
-	if (_chList.empty () && ch == ' ')
+	if (ch == ' ' && _cursor == 0)
 		return;
 
+	chNode node = {ch, WHITE};
+
 	if (_cursor == _chList.size ()) {
-		if (_chList.empty () || _chList.back ()._ch != ' ') {
+		if (_chList.empty () || ch != ' ' || _chList.back ()._ch != ' ') {
 			putChar (node);
 			_chList.push_back (node);
 			_cursor++;
+			return;
 		}
-		return;
 	}
 
+ 	assert (!_chList.empty ());
+
 	list<chNode>::iterator iter = getNode (_cursor - 1);
-	if (iter->_ch ==  ' ' && ch == ' ')
+	if (iter->_ch == ' ' && ch == ' ') {
 		return;
-	else
+	} else {
 		iter++;
+		if (iter->_ch == ' ' && ch == ' ')
+			return;
+	}
 
 	if (_insertActive) {
 		iter = _chList.insert (iter, node);
@@ -446,31 +438,26 @@ void CmdTextChange::insChar (short int ch) {
 	}
 }
 
-//to be edited
+//assumption:: no space, _insertActive has no power
 void CmdTextChange::insPswdChar (short int ch) {
 	chNode node = {ch, WHITE};
 
 	if (_cursor == _chList.size ()) {
-		putChar ('*');
+		putChar (node);
 		_chList.push_back (node);
 		_cursor++;
 		return;
 	}
 
 	list<chNode>::iterator iter = getNode (_cursor);
-	if (_insertActive) {
-		iter = _chList.insert (iter, node);
-		while (iter != _chList.end ()) {
-			putChar ('*');
-			iter++;
-		}
-		_cursor++;
-		for (unsigned int i = _chList.size (); i > _cursor; i--)
-			assert (moveCursorBackward ());
-	} else {
-		*iter = node;
-		putChar ('*');
+	iter = _chList.insert (iter, node);
+	while (iter != _chList.end ()) {
+		putChar (*iter);
+		iter++;
 	}
+	_cursor++;
+	for (unsigned int i = _chList.size (); i > _cursor; i--)
+		assert (moveCursorBackward ());
 }
 
 void CmdTextChange::splitString (string& str) {
