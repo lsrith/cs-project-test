@@ -180,9 +180,9 @@ Time::date_t Time::get_date ()
 string Time::string_date ()
 {
 	if (_date == DFLT_DATE) {
-		return "   NO   DATE   ";
+		return "               ";
 	} else if (_date == INF_DATE) {
-		return "       -       ";
+		return "               ";
 	} else {
 		ostringstream str;
 		str << display_day (get_day ()) << " " << setw (2) << setfill ('0')
@@ -232,9 +232,9 @@ string Time::display_day (int day)
 string Time::string_clock ()
 {
 	if (_clk == DFLT_CLOCK) {
-		return "NO CLOCK";
+		return "        ";
 	} else if (_clk == INF_CLOCK) {
-		return "    -   ";
+		return "        ";
 	} else {
 		ostringstream str;
 		clk_t hour, min;
@@ -263,9 +263,9 @@ string Time::string_clock ()
 
 string Time::string_clock_24 () {
 	if (_clk == DFLT_CLOCK) {
-		return "NO CLOCK";
+		return "        ";
 	} else if (_clk == INF_CLOCK) {
-		return "    -   ";
+		return "        ";
 	} else {
 		ostringstream str;
 		str << setw(2) << setfill ('0') << _clk / 100 << ":" << setw(2) << setfill ('0') << _clk % 100 << "  ";
