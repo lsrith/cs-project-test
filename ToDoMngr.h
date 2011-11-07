@@ -21,6 +21,7 @@ enum cmdType {_addTask, _eraseTask, _erasePeriod, _addTable1, _addTable2, _erase
 class ToDoMngr {
 public:
 	static string NOTHING_TO_VIEW;
+	static string WRONG_ID;
 
 	struct TaskElement {
 		bool _time;
@@ -61,7 +62,9 @@ public:
 
 //Ris:
 	static list<string> wrapSentence (string, short int);
-	static string view (Task taskId);
+	static string intToString (int, int);
+	static string view (Task task);
+	static string view (Task task, int, int);
 	// return a string of the view of the specific task
 	static string view (list<Task> taskList);
 
@@ -152,9 +155,9 @@ private:
 
 	static string NOTE;
 	static string VENUE;
-	static string __time;
-	static string __space;
-	static string __start;
-	static string __end;
+	static string TIME;
+	static string SPACE;
+	static string START;
+	static string END;
 };
 #endif
