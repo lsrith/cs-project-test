@@ -9,6 +9,12 @@
 #include <windows.h>
 using namespace std;
 
+string ToDoMngr::NOTE = "Note:";
+string ToDoMngr::VENUE = "Venue:";
+string ToDoMngr::__space = "       ";
+string ToDoMngr::__time = "Time:  ";
+string ToDoMngr::__start = "From:  ";
+string ToDoMngr::__end = "To:    ";
 string ToDoMngr::NOTHING_TO_VIEW = "There are no tasks to view during the particular period/time!\n";
 
 list<Task> ToDoMngr::get_active_list () {
@@ -19,282 +25,82 @@ list<Task> ToDoMngr::get_alert_list () {
 	return _alertTaskList;
 }
 
+list<string> ToDoMngr::wrapSentence (string str, short int len) {
+	list<string> sentences;
+	string sentence;
+	unsigned int pos = 0;
 
-string ToDoMngr::view(Task taskId){
-	Time obj;
-	int  pos=0;
-	int endpos=0;
-	int end_word=65;
-	int pos_venue=0;
-	int endpos_venue=0;
-	int end_word_venue=65;
+	do {
+		pos = str.find ("  ", 0);
+		
+		if (pos == string::npos)
+			break;
 
-	Time _t;       
+		str.erase (pos, 1);
+	} while (pos != string::npos);
 
-	int full_date,_date,temp_date;
-	temp_date=0;
-	string month,temp_month;
-	temp_month=" ";
-	int year;
-	std::ostringstream oss;
-
-	// list<Task> _activeTasklist;
-
-
-	if(taskId.get_time()==obj){
-
-		full_date=taskId.get_period().get_start_time().get_date();
-		_date=full_date/1000000;
-		month=taskId.get_period().get_start_time().display_month((full_date % 1000000) / 10000);
-		year=full_date%10000;
-
-		oss<<"\n";
-		if(taskId.get_period().get_start_time().get_date()!=Time::DFLT_DATE){
-			oss<<setw(24)<<setfill(' ')<<month<<" "<<year<<"  "<<_date<<" "<<taskId.get_period().get_start_time().display_day(taskId.get_period().get_start_time().get_day())<<"\n";
-
-			oss<<"\n";
-		}
-		else{
-			oss<<"\n\n";
-
-		}
-
-		if(taskId.get_period().get_start_time().get_clock()!=Time::DFLT_CLOCK)
-			oss<<taskId.get_period().get_start_time().string_clock()<<" "<<"-"<<" "<<taskId.get_period().get_end_time().string_clock()<<"\n";
-
-
-
-
-
-		oss<<"Note :"<<" ";  
-		while( pos<taskId.note.length())      
-
-		{   
-			if(pos<end_word){
-
-			   pos=taskId.note.find_first_of(' ',endpos+1);
-			    oss<<taskId.note.substr(endpos,pos-endpos)<<" ";
-                endpos=pos+1;
-
-			}
-
-
-			else
-
-			{
-
-				oss<<"\n";
-
-
-				end_word+=65;//l->note.length();
-
+	while (!str.empty ()) {
+		if (str.size () <= len) {
+			sentence = str;
+			str.erase ();
+		} else if (str[len] == ' ') {
+			sentence = str.substr (0, len - 1);
+			str.erase (0, len - 1);
+		} else {
+			pos = str.find_last_of (' ', len - 1);
+			if (pos == string::npos && str.size () > len) {
+				sentence = str.substr (0, len);
+				str.erase (0, len);
+			} else if (pos == string::npos) {
+				sentence = str.substr (0, pos);
+				str.erase (0, pos);
+			} else {
+				sentence = str.substr (0, pos);
+				str.erase (0, pos + 1);
 			}
 		}
-		pos=0;
-		endpos=0;
-		end_word=40;
-
-
-		oss<<"\n";
-		oss<<"Venue :"<<" ";//<<taskId.venue;
-
-		while( pos_venue<taskId.venue.length())      
-
-		{   
-			if(pos_venue<end_word_venue){
-				pos_venue=taskId.venue.find_first_of(' ',endpos_venue+1);
-				oss<<taskId.venue.substr(endpos_venue,pos_venue-endpos_venue)<<" ";
-				endpos_venue=pos_venue+1;
-			}
-			else{
-				oss<<"\n"<<"                                ";
-				end_word_venue+=65;
-			}
-		}
-		pos_venue=0;
-		endpos_venue=0;
-		end_word_venue=40;
-		oss<<"\n\n";
-
+		sentences.push_back (sentence);
 	}
 
+	return sentences;
+}
 
-	else
-	{
-		full_date=taskId.get_time().get_date();
-		_date=full_date/1000000;
-		month=taskId.get_time().display_month((full_date % 1000000) / 10000);
-		year=full_date%10000;
+string ToDoMngr::view (Task task) {
+	list<string> strList;
+	list<string>::iterator iter;
+	int __len = 72;
+	string __note, __venue, __duration;
 
-
-		oss<<"\n";
-		if(taskId.get_time().get_date()!=Time::DFLT_DATE){
-			oss<<setw(24)<<setfill(' ')<<month<<" "<<year<<"  "<<_date<<" "<<taskId.get_time().display_day(taskId.get_time().get_day())<<"\n";
-
-			oss<<"\n";
-		}
-		else
-		{
-			oss<<"\n";
-		}
-
-		if(taskId.get_time().get_clock()!=Time::DFLT_CLOCK)
-			oss<<taskId.get_time().string_clock();
-
-
-
-
-		oss<<"Note :"<<" ";  
-		while( pos<taskId.note.length())      
-
-		{   
-			if(pos<end_word)
-
-			{
-
-				pos=taskId.note.find_first_of(' ',endpos+1);
-
-				oss<<taskId.note.substr(endpos,pos-endpos)<<" ";
-
-				endpos=pos+1;
-
-			}
-
-
-			else
-
-			{
-
-				oss<<"\n";
-
-
-				end_word+=65;//l->note.length();
-
-			}
-		}
-		pos=0;
-		endpos=0;
-		end_word=40;
-
-		oss<<"\n";
-
-		oss<<"Venue :"<<" ";//<<taskId.venue;
-
-		while( pos_venue<taskId.venue.length())      
-
-		{   
-			if(pos_venue<end_word_venue){
-				pos_venue=taskId.venue.find_first_of(' ',endpos_venue+1);
-				oss<<taskId.venue.substr(endpos_venue,pos_venue-endpos_venue)<<" ";
-				endpos_venue=pos_venue+1;
-			}
-			else{
-				oss<<"\n"<<"                                ";
-				end_word_venue+=65;
-			}
-		}
-		pos_venue=0;
-		endpos_venue=0;
-		end_word_venue=40;
-		oss<<"\n\n";		
-		/* oss<<l->get_period().string_time_period()<<"\n"<<index<<"."
-		<<" "<<l->note<<" "<<"at"<<" "<<l->venue<<endl;*/
+	if (!task.note.empty ()) {
+		strList = wrapSentence (task.note, __len);
+		for (iter = strList.begin (); iter != strList.end (); iter++)
+			__note += __space + *iter + "\n";
+		__note.replace (0, NOTE.size (), NOTE);
+	} else {
+		__note = NOTE + '\n';
 	}
 
-	//cout<<oss.str();
-	return oss.str();
-
-	/*list<Task> _tempList;
-	_tempList.push_back(taskId);
-	return view(_tempList);*/
-
-	/* Time _time;
-	std::ostringstream tsk;
-	int full_date,_date,temp_date;
-	temp_date=0;
-	string month,temp_month;
-	temp_month=" ";
-	int year;
-
-	if(taskId.get_time()==_time)
-	{
-	full_date=taskId.get_period().get_start_time().get_date();
-	_date=full_date/1000000;
-
-
-	month=taskId.get_time().display_month((full_date % 1000000) / 10000);
-	year=full_date%10000;
-
-	if(temp_month==month){
-	}
-	else{
-	tsk<<"\n";
-	tsk<<month<<" "<<year<<"\n";
-	tsk<<"--------"<<"\n";
-	temp_month=month;
-	temp_date=0;
+	if (!task.venue.empty ()) {
+		strList = wrapSentence (task.venue, __len);
+		for (iter = strList.begin (); iter != strList.end (); iter++)
+			__venue += __space + *iter + "\n";
+		__venue.replace (0, VENUE.size (), VENUE);
+	} else {
+		__venue = VENUE + '\n';
 	}
 
-	if(temp_date==_date){
-
-	//oss<<index<<"."<<" ";
-	tsk<<taskId.get_period().get_start_time().string_clock()<<" "<<"-"<<" "<<taskId.get_period().get_end_time().string_clock();
-	tsk<<" "<<taskId.note<<" "<<"at"<<" "<<taskId.venue<<endl;
-	}
-	else
-	{
-	tsk<<"\n";              
-	tsk<<_date<<" "<<l->get_time().display_day(l->get_period().get_start_time().get_day())<<"\n";
-	tsk<<"\n";
-	//oss<<index<<"."<<" ";
-	tsk<<taskId.get_period().get_start_time().string_clock()<<" "<<"-"<<" "<<taskId.get_period().get_end_time().string_clock();
-	tsk<<" "<<taskId.note<<" "<<"at"<<" "<<taskId.venue<<endl;
-	temp_date=_date;
-
+	Time* time;
+	if (task.timeTask) {
+		time = &(task.get_time ());
+		__duration =  __time + time->string_date () + ' ' + time->string_clock () + '\n';
+	} else {
+		time = &(task.get_period ().get_start_time ());
+		__duration =  __start + time->string_date () + ' ' + time->string_clock () + '\n';
+		time = &(task.get_period ().get_start_time ());
+		__duration +=  __end + time->string_date () + ' ' + time->string_clock () + '\n';
 	}
 
-	//tsk<<taskId.get_period().string_time_period()<<" "<<" "<<taskId.note<<" "<<taskId.venue;
-	}
-	else
-	{
-	full_date=taskId.get_time().get_date();
-	_date=full_date/1000000;
-
-
-	month=taskId.get_time().display_month((full_date % 1000000) / 10000);
-	year=full_date%10000;
-
-	if(temp_month==month){
-	}
-	else{
-	tsk<<"\n";
-	tsk<<month<<" "<<year<<"\n";
-	tsk<<"--------"<<"\n";
-	temp_month=month;
-	temp_date=0;
-	}
-
-	if(temp_date==_date){
-
-	//oss<<index<<"."<<" ";
-	tsk<<taskId.get_time().string_clock();
-	tsk<<" "<<taskId.note<<" "<<"at"<<" "<<taskId.venue<<endl;
-	}
-	else
-	{
-	tsk<<"\n";              
-	tsk<<_date<<" "<<taskId.get_time().display_day(taskId.get_time().get_day())<<"\n";
-	tsk<<"\n";
-	//oss<<index<<"."<<" ";
-	tsk<<taskId.get_time().string_clock();
-	tsk<<" "<<taskId.note<<" "<<"at"<<" "<<taskId.venue<<endl;
-	temp_date=_date;
-
-	}
-
-	//tsk<<taskId.get_time().string_date()<<" "<<taskId.get_time().string_clock()<<" "<<taskId.note<<" "<<taskId.venue;
-	}
-	return tsk.str();*/
+	return __note + __venue + __duration;
 }
 
 string ToDoMngr:: view(list<Task> tasklist){

@@ -60,6 +60,7 @@ public:
 	bool getTableActivationStatus ();
 
 //Ris:
+	static list<string> wrapSentence (string, short int);
 	static string view (Task taskId);
 	// return a string of the view of the specific task
 	static string view (list<Task> taskList);
@@ -146,10 +147,14 @@ private:
 	stack<UserTask> _undoStack;
 
 	bool clashed(Task task);
-	
 	bool tillStart(int, list<Task> taskList, Task task, bool forceAdd, TimePeriod activePeriod);
 	bool tillEnd(int i, list<Task> taskList, Task task, bool forceAdd, TimePeriod activePeriod);
 
-
+	static string NOTE;
+	static string VENUE;
+	static string __time;
+	static string __space;
+	static string __start;
+	static string __end;
 };
 #endif
