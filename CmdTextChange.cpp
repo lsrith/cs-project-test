@@ -378,13 +378,10 @@ void CmdTextChange::delChar () {
 	}
 	putChar (' ');
 
-	if (_cursor == 0) {
-		__cursor.X = 0;
-		__cursor.Y = 0;
-		SetConsoleCursorPosition(hConsole, __cursor);
-	} else {
-		for (unsigned int i = _chList.size (); i >= _cursor; i--)
-			assert (moveCursorBackward ());
+	for (unsigned int i = _chList.size (); i >= _cursor; i--) {
+		assert (moveCursorBackward ());
+		if (i == 0)
+			break;
 	}
 }
 
