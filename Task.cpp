@@ -46,6 +46,7 @@ Task::Task (string& str) {
 void Task::invConvert (string& str) {
 	Time::date_t date;
 	Time::clk_t clock;
+	Time time;
 
 	stringstream strStream;
 	strStream << str;
@@ -56,30 +57,26 @@ void Task::invConvert (string& str) {
 		_time.modify_clock (clock);
 	} else {
 		strStream >> date >> clock;
-		_time.modify_date (date);
-		_time.modify_clock (clock);
-		_period.modify_start_time (_time);
+		time.modify_date (date);
+		time.modify_clock (clock);
+		_period.modify_start_time (time);
 		strStream >> date >> clock;
-		_time.modify_date (date);
-		_time.modify_clock (clock);
-		_period.modify_end_time (_time);
-		_time.modify_date (Time::DFLT_DATE);
-		_time.modify_clock (Time::DFLT_CLOCK);
+		time.modify_date (date);
+		time.modify_clock (clock);
+		_period.modify_end_time (time);
 	}
 
 	strStream >> date >> clock >> repeat;
 	alert.modify_date (date);
 	alert.modify_clock (clock);
 	strStream >> date >> clock;
-	_time.modify_date (date);
-	_time.modify_clock (clock);
-	r_period.modify_start_time (_time);
+	time.modify_date (date);
+	time.modify_clock (clock);
+	r_period.modify_start_time (time);
 	strStream >> date >> clock;
-	_time.modify_date (date);
-	_time.modify_clock (clock);
-	r_period.modify_end_time (_time);
-	_time.modify_date (Time::DFLT_DATE);
-	_time.modify_clock (Time::DFLT_CLOCK);
+	time.modify_date (date);
+	time.modify_clock (clock);
+	r_period.modify_end_time (time);
 
 	note = strStream.str ();
 	int pos = note.find (spaceMarker, 0);

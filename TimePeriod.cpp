@@ -63,18 +63,18 @@ TimePeriod::time_period_cmp TimePeriod::compare (TimePeriod timePeriod)
 
 bool TimePeriod::operator== (TimePeriod timePeriod)
 {
- if (timePeriod._end < this->_start && this->_end < timePeriod._start)
-		return false;
-	else
+ if (timePeriod._end != this->_start && this->_end != timePeriod._start)
 		return true;
+	else
+		return false;
 }
 
 bool TimePeriod::operator== (Time time)
 {
- if (_end > time && time > _start)
-  return true;
- else
-  return false;
+	if (!(_end < time) && !(time < _start))
+		return true;
+	else
+		return false;
 }
 
 bool TimePeriod::operator!= (TimePeriod timePeriod) {
