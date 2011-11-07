@@ -162,6 +162,8 @@ public:
 	AccCtrl (ToDoMngr*);
 	~AccCtrl ();
 	bool execute ();
+	bool ifPassword ();
+	bool ifAccCtrl ();
 
 private:
 	enum UserStatus {UNEW, UOLD, UNONE};
@@ -169,6 +171,7 @@ private:
 	string _username;
 	string _password;
 	string _retypedPassword;
+	bool _accCtrl;
 	string convert(string);
 };
 #endif

@@ -847,6 +847,7 @@ AccCtrl::AccCtrl (ToDoMngr* toDoMngr) {
 	assert (toDoMngr != NULL);
 	_toDoMngr = toDoMngr;
 	_userStatus = UNONE;
+	_accCtrl = false;
 	ifstream readFile("userlist.txt"); 
 	
 	if (readFile.is_open ()) {
@@ -862,6 +863,17 @@ AccCtrl::~AccCtrl () {
 
 bool AccCtrl::execute () 
 {
+	if (_input.empty ()) {
+		_username.erase ();
+		_password.erase ();
+		_retypedPassword.erase ();
+		_userStatus = UNONE;
+		_accCtrl = false;
+		return true;
+	} else {
+		_accCtrl = true;
+	}
+
 	ifstream readFile("userlist.txt");
 
 	string str, temp;
@@ -946,11 +958,12 @@ bool AccCtrl::execute ()
 				ofstream writeFile ("userlist.txt", fstream::app);
 				writeFile << _username + ' ' + _password << endl;
 				_input.erase ();
-				_username.erase ();
 				_password.erase ();
 				_retypedPassword.erase ();
 				_userStatus = UNONE;
-				_toDoMngr = new ToDoMngr(convert(_username));
+				_toDoMngr->updateStorageName (convert(_username));
+				_username.erase ();
+				_accCtrl = false;
 				return true; 
 			}
 			else
@@ -986,19 +999,24 @@ bool AccCtrl::execute ()
 				{
 					_result = "                                   WELCOME BACK!";
 					_input.erase ();
-					_username.erase ();
 					_password.erase ();
 					_retypedPassword.erase ();
 					_userStatus = UNONE;
-					_toDoMngr = new ToDoMngr(convert(_username));
+					_toDoMngr->updateStorageName (convert(_username));
+					_username.erase ();
+					_accCtrl = false;
 					return true; 
 				}
 			}
 		}
-		else
+		else if (_userStatus != UNONE)
 		{
 			unsigned int pos = _input.find_last_of (' ', 0);
 			_input.erase (pos, string::npos);
+		}
+		else
+		{
+			_input.erase ();
 		}
 
 		temp = "switch";
@@ -1010,6 +1028,14 @@ bool AccCtrl::execute ()
 	}
 }
 
+bool AccCtrl::ifPassword () {
+	return !_username.empty ();
+}
+
+bool AccCtrl::ifAccCtrl () {
+	return _accCtrl;
+}
+
 string AccCtrl::convert(string input)
 {
 	int length = input.size();
@@ -1019,8 +1045,6 @@ string AccCtrl::convert(string input)
 
 	return input;
 }
-
-
 
 
 
