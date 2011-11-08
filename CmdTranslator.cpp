@@ -2,7 +2,7 @@
 #include <cassert>
 using namespace std;
 
-string CmdTrans::BREAK = "[break]";
+string CmdTrans::BREAK = "";
 
 CmdTrans::CmdTrans () {
 	try {
