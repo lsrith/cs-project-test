@@ -39,7 +39,7 @@ public:
 		Task* _eTask;
 		Task _task, _updatedTask;
 		int _taskId;
-		list<Task*> _deletePeriodList;
+		Task* _ptr;
 		list<int> _index;
 		TimePeriod _period;
 		string _tableName;
