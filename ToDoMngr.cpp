@@ -587,6 +587,7 @@ list<Task> ToDoMngr::add(string tableName, Task task, bool forceAdd){
 			// if periodtask is within table period
 			if(task.get_period().get_start_time().operator>(_table.period.get_start_time()) && task.get_period().get_end_time().operator<(_table.period.get_end_time()))
 			{
+        taskList.push_back(task);
 				_dataStorage.save(_table, taskList);
 			}
 			//if task period is earlier than table period
