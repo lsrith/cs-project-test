@@ -63,7 +63,8 @@ TimePeriod::time_period_cmp TimePeriod::compare (TimePeriod timePeriod)
 
 bool TimePeriod::operator== (TimePeriod timePeriod)
 {
- if (timePeriod._end != this->_start && this->_end != timePeriod._start)
+	time_period_cmp cmp = compare (timePeriod);
+	if (cmp == CLASH)
 		return true;
 	else
 		return false;
@@ -184,8 +185,33 @@ int TimePeriod::operator- (TimePeriod timePeriod)
 
 string TimePeriod::string_time_period ()
 {
+	string str;
+	string __to = " to ";
+
+	if (_start == _end) {
+		str = _start.string_date () + ' ' + _start.string_clock ();
+	} else if (_start.get_date () == _end.get_date ()) {
+		str = _start.string_date ();
+
+		if (_start.get_clock () != Time::DFLT_CLOCK && _start.get_clock () != Time::INF_CLOCK)
+			str += ' ' + _start.string_clock ();
+
+		if (_end.get_clock () != Time::DFLT_CLOCK && _end.get_clock () != Time::INF_CLOCK)
+			str += __to + _end.string_clock ();
+	} else {
+		str = _start.string_date ();
+		if (_start.get_clock () != Time::DFLT_CLOCK && _start.get_clock () != Time::INF_CLOCK)
+			str += ' ' + _start.string_clock ();
+
+		str += __to + _end.string_date ();
+		if (_end.get_clock () != Time::DFLT_CLOCK && _end.get_clock () != Time::INF_CLOCK)
+			str += ' ' + _end.string_clock ();
+	}
+/*
 	ostringstream str;
 	str << "From: " << _start.string_date () << " at " << _start.string_clock ()
 		<< "\nTo:   " << _end.string_date () << " at " << _end.string_clock ();
 	return str.str ();
+*/
+	return str;
 }

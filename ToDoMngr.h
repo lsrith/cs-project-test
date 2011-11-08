@@ -22,6 +22,7 @@ class ToDoMngr {
 public:
 	static string NOTHING_TO_VIEW;
 	static string WRONG_ID;
+	static string MSG_REPEAT_ERR;
 
 	struct TaskElement {
 		bool _time;
@@ -59,6 +60,8 @@ public:
 	bool ifTableMode ();
 	void deactivateTable ();
 	bool getTableActivationStatus ();
+
+	static list<Task>* listTask (Task task);
 
 //Ris:
 	static list<string> wrapSentence (string, short int);
@@ -157,7 +160,7 @@ private:
 	static string VENUE;
 	static string TIME;
 	static string SPACE;
-	static string START;
-	static string END;
+	static string ALERT;
+	static string REPEAT;
 };
 #endif
