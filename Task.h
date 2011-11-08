@@ -39,6 +39,7 @@ public:
 	static bool compareByEndTime (Task task1, Task task2);
 	static bool compareByAlert (Task task1, Task task2);
 	static bool compareByVenue (Task task1, Task task2);
+	static bool compareByIndex (Task task1, Task task2);
 private:
 	Time _time;
 	TimePeriod _period;

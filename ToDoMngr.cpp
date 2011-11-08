@@ -133,10 +133,41 @@ string ToDoMngr::view (Task task, int id, int numTasks) {
 
 	//to be modified
 	if (task.repeat != 0) {
-		__repeat = _space + REPEAT + task.r_period.string_time_period () + '\n';
+		__repeat = _space + REPEAT + repeat (task.repeat) + task.r_period.string_time_period () + '\n';
 	}
 
 	return __note + __venue + __duration + __alert + __repeat + '\n';
+}
+
+string ToDoMngr::repeat (unsigned int __repeat) {
+	string str;
+	switch (__repeat) {
+	case 0:
+		break;
+	case 1:
+		str = "Every month ";
+		break;
+	case 2:
+		str = "Every year  ";
+		break;
+	case 60:
+		str = "Every hour  ";
+		break;
+	case 1440:
+		str = "Every day   ";
+		break;
+	case 10080:
+		str = "Every week  ";
+		break;
+	case 20160:
+		str = "Every 2 weeks ";
+		break;
+	default:
+		str = intToString (__repeat, __repeat) + "mins ";
+		break;
+	}
+
+	return str;
 }
 
 string ToDoMngr::view (list<Task> taskList) {
@@ -191,15 +222,11 @@ string ToDoMngr::view (view_t viewType, Time time) {
 //to be modified
 string ToDoMngr::view (TimePeriod period){
 
-	if(Table_Mode)
-       return view (tableName);
-
-	else{
-	_activeTaskList= _dataStorage.load(period);
-
-	//cout << ToDoMngr::view (_activeTaskList) << endl;
-
-	return view(_activeTaskList);
+	if (Table_Mode) {
+		return view (_table.name);
+	} else {
+		_activeTaskList = _dataStorage.load(period);
+		return view (_activeTaskList);
 	}
 }
 
@@ -289,7 +316,6 @@ bool ToDoMngr::ifExistedTable (string tableName) {
 	return false;
 }
 
-
 //ok
 bool ToDoMngr::clashed(Task task){
 // check if there is clashed of period tasks
@@ -333,7 +359,7 @@ list<Task> ToDoMngr::add(Task task, bool forceAdd)
 {
 //	cout<<tableName;
 	if(Table_Mode)
-     return add(tableName,task,forceAdd);
+		return add (_table.name, task, forceAdd);
 
 	else{
 		list<Task> _addList;
@@ -387,7 +413,6 @@ list<Task> ToDoMngr::add(Task task, bool forceAdd)
 	}
 }
 
-
 //ok
 bool ToDoMngr::newTable(string name, TimePeriod period){  
 	
@@ -398,29 +423,16 @@ bool ToDoMngr::newTable(string name, TimePeriod period){
 		}
 
 		else{
-			bool clashName=false;
-			vector<string> existedTableName;  
-	
-			//load existing table name
-			existedTableName = _dataStorage.load_table_name();                                                                    
-		
-			//check for clashes of name with existing table names
-			for(int i=0; i<existedTableName.size(); i++) {
-				if(existedTableName[i] == name)	{
-					clashName= true;
-				}
-			}
-
-			if(clashName == true){ 
-				// got clash return false 
-				return false;
-			}
-			else{ 
+			if (activateTable (name)) {
+				deactivateTable ();
+				return true;
+			} else {
 				// no clash return true and save to dataStorage with empty taskIdxList
 				list<Task> taskList;
-				_dataStorage.save(name, period, taskList);   
+				_table.name = name;
+				_table.period = period;
+				_dataStorage.save(_table, taskList);   
 				Table_Mode=true;
-				tableName=name;
 
 				//add to undoStack
 				UserTask newAdd;
@@ -521,33 +533,24 @@ Task ToDoMngr::erase(int taskId){
 
 list<Task> ToDoMngr::add(string tableName, Task task, bool forceAdd){
 
-	list<DataStorage::Table> tableList;
-	tableList = _dataStorage.load_tables();
-	list<DataStorage::Table>::iterator li = tableList.begin();
-	TimePeriod activePeriod;
-
-	for(int i=0; i<tableList.size(); i++){
-		if(li->name == tableName){
-			activePeriod = li->period;
-		}
-		li++;
-	}
-
+	TimePeriod activePeriod = _table.period;
 	list<Task> taskList;
+	task.repeat = 7 * Time::DAY;
+	task.r_period = _table.period;
 	taskList.push_back(task);
 
 	//if is time task
 	if(task.timeTask == true){
 		// time task is in the repeat period
-		if(task.get_time().operator>(activePeriod.get_start_time()) && task.get_time().operator<(activePeriod.get_end_time())){
+		if(task.get_time().operator>(_table.period.get_start_time()) && task.get_time().operator<(_table.period.get_end_time())){
 			//add to dataStorage
-			_dataStorage.save(tableName, activePeriod, taskList);
+			_dataStorage.save(_table, taskList);
 			}
 		}
 	else{
-			if((task.r_period.get_end_time().operator>(activePeriod.get_end_time()) && task.r_period.get_start_time().operator<(activePeriod.get_start_time()))){
+		if((task.r_period.get_end_time().operator>(_table.period.get_end_time()) && task.r_period.get_start_time().operator<(_table.period.get_start_time()))){
 			//add to dataStorage
-			_dataStorage.save(tableName, activePeriod, taskList);
+			_dataStorage.save(_table, taskList);
 		}
 	}
 
@@ -830,10 +833,35 @@ void ToDoMngr::redo () {
 	}
 }
 
-
 //Rith
 string ToDoMngr::search (search_t type, string phrase) {
-	return ToDoMngr::view (_dataStorage.search (phrase, type));
+	list<Task> taskList;
+	if (type == SEXACT) {
+		taskList = _dataStorage.search (phrase);
+	} else if (type == SEACH) {
+		list<string> keyWords;
+		string str;
+		int end_pos;
+
+		while (!phrase.empty ()) {
+			end_pos = phrase.find_first_of (' ', 0);
+			str = phrase.substr (0, end_pos);
+			keyWords.push_back (str);
+			if (end_pos == string::npos)
+				phrase.erase ();
+			else
+				phrase.erase (0, end_pos + 1);
+		}
+
+		list<string>::iterator iter;
+		for (iter = keyWords.begin (); iter != keyWords.end (); iter++) {
+			taskList.splice (taskList.end (), _dataStorage.search (*iter));
+		}
+
+		removeSameIdx (&taskList);
+	} else;
+
+	return view (taskList);
 }
 
 void ToDoMngr::exit () {
@@ -920,17 +948,14 @@ void ToDoMngr::setTaskElem (ToDoMngr::TaskElement* taskElem, Task* task) {
 }
 
 bool ToDoMngr::activateTable (string tableN) {
+	list<DataStorage::Table> tables = _dataStorage.load_tables();
 
-	//cout<<tableName;
-	vector<string> table_names=_dataStorage.load_table_name();
-
-	vector<string>::iterator browse;
-	bool found=false;;
-	for(browse=table_names.begin();browse!=table_names.end();browse++){
-
-		if(tableN==*browse){
-			Table_Mode=true;
-			tableName=tableN;
+	list<DataStorage::Table>::iterator browse;
+	bool found = false;;
+	for(browse = tables.begin() ; browse != tables.end(); browse++){
+		if(tableN == browse->name){
+			Table_Mode = true;
+			_table = *browse;
             found= true;
 			break;
 		}		
@@ -940,14 +965,6 @@ bool ToDoMngr::activateTable (string tableN) {
 
 void ToDoMngr::deactivateTable () {
 	Table_Mode=false;
-}
-
-bool ToDoMngr::getTableActivationStatus () {
-
-	if(Table_Mode==true)
-		return true;
-	else
-	    return false;
 }
 
 bool ToDoMngr::ifTableMode () {
@@ -1133,4 +1150,20 @@ list<Task>* ToDoMngr::listTask (Task _task) {
 	} else;
 
 	return taskList;
+}
+
+void ToDoMngr::removeSameIdx (list<Task>* taskList) {
+	taskList->sort (Task::compareByIndex);
+	if (taskList->size () < 2)
+		return;
+
+	list<Task>::iterator prev, curr = taskList->begin ();
+	do {
+		prev = curr;
+		curr++;
+		
+		if (curr != taskList->end () && curr->get_index () == prev->get_index ())
+			curr = taskList->erase (prev);
+
+	} while (curr != taskList->end ());
 }

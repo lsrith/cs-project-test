@@ -11,6 +11,7 @@ using namespace std;
 inline VldCmdCtrl::command getFirstCmd (string*, VldCmdCtrl*);
 inline void eraseFirstWord (string*);
 inline void setConsoleWindowConfig ();
+inline void buffer ();
 
 int main () {
 	Logging log;
@@ -42,6 +43,8 @@ int main () {
 	console.write ("                                |     WELCOME    |\n");
 	console.write("                                ------------------\n\n");
 
+	buffer ();
+
 	VldCmdCtrl cmdCtrl;
 	bool prompt;
 /*
@@ -56,6 +59,7 @@ int main () {
 	View view (cmdCtrl.get_vldCmdList (), toDo);
 	Delete erase (cmdCtrl.get_vldCmdList (), toDo);
 	Table table (cmdCtrl.get_vldCmdList (), toDo);
+	Search search (cmdCtrl.get_vldCmdList (), toDo);
 	Help help;
 
 /*
@@ -147,6 +151,9 @@ int main () {
 			case VldCmdCtrl::CTABLE:
 				exeCmd = &table;
 				break;
+			case VldCmdCtrl::CSEARCH:
+				exeCmd = &search;
+				break;
 			case VldCmdCtrl::CEXIT:
 				if (userAcc.ifAccCtrl ()) {
 					input.erase ();
@@ -155,10 +162,12 @@ int main () {
 					output += "\nDefault TaskCal returns :)";
 				} else if(toDo->ifTableMode ()) {
 					toDo->deactivateTable ();
+					input.erase ();
+					cmd = VldCmdCtrl::CNULL;
 					output += "\nTaskCal's task mode returns.";
 				} else {
 					toDo->exit ();
-					output += "\n\nTaskCal Bye Bye";
+					output += "\nTaskCal Bye Bye";
 					prompt = true;
 				}
 				break;
@@ -199,6 +208,8 @@ int main () {
 	log.end ();
 	log.end ();
 
+	buffer ();
+
 	return 0;
 }
 
@@ -228,4 +239,11 @@ void setConsoleWindowConfig () {
     SetConsoleScreenBufferSize(hOut, NewSBSize);
     SetConsoleWindowInfo(hOut, TRUE, &DisplayArea);
 	system ("cls");
+}
+
+void buffer () {
+	unsigned long int currTick, prevTick = GetTickCount ();
+	do {
+		currTick = GetTickCount ();
+	} while (currTick - prevTick < 2000);
 }
