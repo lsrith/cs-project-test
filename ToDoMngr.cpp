@@ -188,6 +188,7 @@ string ToDoMngr::view (view_t viewType, Time time) {
 	return view(_activeTaskList);
 }
 
+//to be modified
 string ToDoMngr::view (TimePeriod period){
 
 	if(Table_Mode)
@@ -207,15 +208,14 @@ string ToDoMngr::reminder(){
 	Time time;
 	time.current_time ();
 
-	_format<<setw(42)<<setfill(' ')<<"--------------------------";
-	_format<<"\n"<<setw(20)<<setfill(' ')<<"| "<<"AGENDA  FOR  TODAY"<<" |"<<"\n";
-	_format<<setw(42)<<setfill(' ')<<"--------------------------"<<"\n";
+	_format << setw(42) << setfill(' ') <<"--------------------------";
+	_format << "\n" << setw(20) << setfill(' ') <<"| "<<"AGENDA  FOR  TODAY"<<" |"<<"\n";
+	_format << setw(42) << setfill(' ') <<"--------------------------"<<"\n";
 
-	_format<<"\n";
-	//_format<<"Your Tasks for the day are as follows -->"<<"\n";
-	_format<<view(DAILY,time);
+	_format << "\n";
+	_format << view(DAILY,time);
 
-	return _format.str();//+view(DAILY,time);   //pass to view() to search for the tasks on that particular date and display it...year is not taken into account at present.
+	return _format.str();
 }
 
 /*pos = str.find_first_of (" ", 0)
@@ -959,10 +959,10 @@ void ToDoMngr::updateStorageName (string storageName) {
 	_alertTaskList=_dataStorage.get_alertTasks();
 }
 
-list<Task> ToDoMngr::edit (int taskId, Task task, bool forceEdit) {
+list<Task> ToDoMngr::edit (int taskId, Task* task, bool forceEdit) {
 	TaskElement taskElem;
-	setTaskElem (&taskElem, &task);
-	return edit (taskId, &taskElem, &task, forceEdit);
+	setTaskElem (&taskElem, task);
+	return edit (taskId, &taskElem, task, forceEdit);
 }
 
 

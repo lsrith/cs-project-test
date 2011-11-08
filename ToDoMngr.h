@@ -2,7 +2,8 @@
  * This class is the main logic layer of TaskCal
  * It add, edit, delete and view the task inside its calendar
  * 
- * @author Rishov Prabhah Barman: view and alert
+ * @author Ly Samrith: view
+ * @author Rishov Prabhah Barman: alert
  * @author Yeo Lock Wei Ben: add, edit, delete, undo and redo
  */
 #ifndef TODOMNGR_H
@@ -110,7 +111,7 @@ public:
 	// if forceAdd is true, just add and return a fresh list
 	// else return the clashed tasks
 
-	list<Task> edit (int taskId, Task task, bool forceEdit);
+	list<Task> edit (int taskId, Task* task, bool forceEdit);
 	void setTaskElem (TaskElement*, Task*);
 	list<Task> edit (int taskId, TaskElement* taskElem, Task* task, bool forceEdit);
 	// edit elements in the tasks, for any of the taskElem->element = true, edit task->element

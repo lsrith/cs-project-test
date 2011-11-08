@@ -16,6 +16,7 @@ ExecuteCmd::~ExecuteCmd () {
 
 void ExecuteCmd::updateInput (string& input) {
 	_input = input;
+	_result.clear ();
 };
 
 string ExecuteCmd::get_input () {
@@ -168,12 +169,64 @@ bool Edit::execute () {
 		}
 	} else {
 		_flagError = DATA;
+	}
+
+	if (_flagError == DATA)
 		return false;
+
+	if (_sequence->size () == 1 && _sequence->front () == CMD) {
+		list<Task> taskList = _toDoMngr->get_active_list ();
+		list<Task>::iterator iter = taskList.begin (); 
+		for (unsigned int i = 1; i < taskId; i++, iter++);
+
+		switch (_cmdInput->front ()) {
+		case CNOTE:
+			_splitedInput->push_back (iter->note);
+			break;
+		case CVENUE:
+			_splitedInput->push_back (iter->venue);
+			break;
+		case CFROM:
+		case CTO:
+			_splitedInput->push_back ("from");
+			_splitedInput->push_back (iter->get_period ().string_time_period ());
+			break;
+		case CTIME:
+		case CDATE:
+			_splitedInput->push_back ("on");
+			_splitedInput->push_back (iter->get_time ().string_date ());
+			_splitedInput->push_back (iter->get_time ().string_clock ());
+			break;
+		case CALERT:
+			_splitedInput->push_back ("on");
+			_splitedInput->push_back (iter->alert.string_date ());
+			_splitedInput->push_back (iter->alert.string_clock ());
+			break;
+		default:
+			break;
+		}
+
+		switch (_cmdInput->front ()) {
+		case CNOTE:
+		case CVENUE:
+		case CFROM:
+		case CTO:
+		case CTIME:
+		case CDATE:
+		case CALERT:
+			pop ();
+			_flagError = DATA;
+			_input = getLeftOverInput ();
+			return false;
+			break;
+		default:
+			break;
+		}
 	}
 
 	Task task = get_task ();
 	if (_flagError == NONE) {
-		list<Task> taskList = _toDoMngr->edit (taskId, task, force);
+		list<Task> taskList = _toDoMngr->edit (taskId, &task, force);
 		if (!force && !taskList.empty ()) {
 			_result = ToDoMngr::view (task) + Add::MSG_CLASH + ToDoMngr::view (taskList);
 			insertBreakPoint ();
@@ -1045,8 +1098,3 @@ string AccCtrl::convert(string input)
 
 	return input;
 }
-
-
-
-
-	
