@@ -245,5 +245,5 @@ void buffer () {
 	unsigned long int currTick, prevTick = GetTickCount ();
 	do {
 		currTick = GetTickCount ();
-	} while (currTick - prevTick < 2000);
+	} while (currTick - prevTick < 1000);
 }

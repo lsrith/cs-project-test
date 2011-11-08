@@ -183,9 +183,34 @@ Task CmdTrans::get_task () {
 				break;
 			}
 
-			period = get_period ();
-			if (_flagError == NONE)
-				task.r_period = period;
+			//get repeat period
+			if (!_sequence->empty () && _sequence->front () == CMD) {
+				if (_cmdInput->front () == CFROM) {
+					period = get_period ();
+					if (_flagError == NONE)
+						task.r_period = period;
+				} else if (_cmdInput->front () == CTO) {
+					pop ();
+					Time startTime;
+					if (task.timeTask && task.get_time () != startTime)
+						startTime = task.get_time ();
+					else if (!task.timeTask)
+						startTime = task.get_period ().get_start_time ();
+					else
+						_flagError = CMD;
+
+					if (_flagError == NONE && !_sequence->empty ()) {
+						Time endTime = get_time ();
+						if (_flagError == NONE && endTime > startTime) {
+							task.r_period.modify_start_time (startTime);
+							task.r_period.modify_end_time (endTime);
+						} else
+							_flagError = DATA;
+					}
+				} else {
+					_flagError = CMD;
+				}
+			}
 			break;
 		default:
 			reachExeCmd = true;
