@@ -94,16 +94,15 @@ bool DataStorage::checkTimeClash (TaskNode* node, TimePeriod* period) {
 			if (period->operator== (time))
 				break;
 		}
-		if (time > start)
+		if (time > start || time == start )
 			clash = true;
 
-		time = node->_task.get_time ();
 		while (time < end) {
 			++time;
 			if (period->operator== (time))
 				break;
 		}
-		if (time < end)
+		if (time < end || time == end)
 			clash = true;
 
 		break;
@@ -113,22 +112,35 @@ bool DataStorage::checkTimeClash (TaskNode* node, TimePeriod* period) {
 			if (period->operator== (time))
 				break;
 		}
-		if (time > start)
+		if (time > start || time == start )
 			clash = true;
 
-		time = node->_task.get_time ();
 		while (time < end) {
 			time.modify_date (time.get_date () + 1);
 			if (period->operator== (time))
 				break;
 		}
-		if (time < end)
+		if (time < end || time == end)
 			clash = true;
 
 		break;
 	default:
-		clash = ((period->get_end_time () - time) / node->_task.repeat) !=
-			((period->get_start_time () - time) / node->_task.repeat);
+		while (time > start) {
+			time = time - node->_task.repeat;
+			if (period->operator== (time))
+				break;
+		}
+		if (time > start || time == start )
+			clash = true;
+
+		while (time < end) {
+			time = time + node->_task.repeat;
+			if (period->operator== (time))
+				break;
+		}
+		if (time < end || time == end)
+			clash = true;
+
 		break;
 	}
 
@@ -199,11 +211,24 @@ bool DataStorage::checkPeriodClash (TaskNode* node, TimePeriod* period) {
 
 		break;
 	default:
-		clash = ((period->get_end_time () - __period.get_end_time ()) / node->_task.repeat) !=
-			((period->get_start_time () - __period.get_end_time ()) / node->_task.repeat);
+		time = __period.get_start_time ();
+		while (time > start) {
+			time = time - node->_task.repeat;
+			if (period->operator== (time))
+				break;
+		}
+		if (time > start || time == start )
+			clash = true;
 
-		clash |= ((period->get_end_time () - __period.get_start_time ()) / node->_task.repeat) !=
-			((period->get_start_time () - __period.get_start_time ()) / node->_task.repeat);
+		time = __period.get_end_time ();
+		while (time < end) {
+			time = time + node->_task.repeat;
+			if (period->operator== (time))
+				break;
+		}
+		if (time < end || time == end)
+			clash = true;
+
 		break;
 	}
 
