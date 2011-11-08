@@ -358,43 +358,20 @@ bool ToDoMngr::clashed(Task task){
 list<Task> ToDoMngr::add(Task task, bool forceAdd)                                                                      
 {
 //	cout<<tableName;
-	if(Table_Mode)
+	if(Table_Mode){
 		return add (_table.name, task, forceAdd);
+	}
 
 	else{
 		list<Task> _addList;
 		if(forceAdd == true || task.timeTask == true){ 
-		// forceAdd is true or is timetask 
-			Task *ptr = &task;
-			_addList.push_back(task);
-			_dataStorage.save(_addList); 
-
-			//add to undoStack;
-			UserTask newAdd;
-			newAdd._cmd = _addTask;
-			newAdd._force = forceAdd;
-			newAdd._task = task;
-			int index = ptr->get_index();
-			newAdd._index.push_back(index); 
-			_undoStack.push(newAdd);
-
-			// and return empty list
-			_addList.clear();
-			return _addList;
-
-		}
-		else{
-			bool clash = clashed(task);
-
-			if(clash == true){
-				return _clashList;
-			}
-			else{
-				//ptr to address of task to get the index after adding to _dataStorage
-				Task* ptr = &task;
+			if(task.repeat == 0 || (task.get_time().operator>(task.r_period.get_start_time()) 
+				&& task.get_time().operator<(task.r_period.get_end_time()))){
+				// forceAdd is true or is timetask 
+				Task *ptr = &task;
 				_addList.push_back(task);
-				_dataStorage.save(&_addList); 
-				
+				_dataStorage.save(_addList); 
+
 				//add to undoStack;
 				UserTask newAdd;
 				newAdd._cmd = _addTask;
@@ -404,10 +381,45 @@ list<Task> ToDoMngr::add(Task task, bool forceAdd)
 				newAdd._index.push_back(index); 
 				_undoStack.push(newAdd);
 
-
 				// and return empty list
 				_addList.clear();
 				return _addList;
+			}
+			else {
+			 throw("task is not in repeated period");
+			}
+		}
+		else{
+			bool clash = clashed(task);
+
+			if(clash == true){
+				return _clashList;
+			}
+			else{
+				if(task.repeat == 0 || (task.get_period().get_start_time().operator>(task.r_period.get_start_time()) && 
+					task.get_period().get_end_time().operator<(task.r_period.get_end_time()))){
+					//ptr to address of task to get the index after adding to _dataStorage
+					Task* ptr = &task;
+					_addList.push_back(task);
+					_dataStorage.save(&_addList); 
+				
+					//add to undoStack;
+					UserTask newAdd;
+					newAdd._cmd = _addTask;
+					newAdd._force = forceAdd;
+					newAdd._task = task;
+					int index = ptr->get_index();
+					newAdd._index.push_back(index); 
+					_undoStack.push(newAdd);
+
+
+					// and return empty list
+					_addList.clear();
+					return _addList;
+				}
+				else{
+					throw("task is not in repeated period");
+				}
 			}
 		}
 	}
@@ -530,30 +542,84 @@ Task ToDoMngr::erase(int taskId){
 	} 
 }
 
-
 list<Task> ToDoMngr::add(string tableName, Task task, bool forceAdd){
 
 	TimePeriod activePeriod = _table.period;
 	list<Task> taskList;
 	task.repeat = 7 * Time::DAY;
 	task.r_period = _table.period;
-	taskList.push_back(task);
 
 	//if is time task
 	if(task.timeTask == true){
-		// time task is in the repeat period
+		// if timetask is within table period
 		if(task.get_time().operator>(_table.period.get_start_time()) && task.get_time().operator<(_table.period.get_end_time())){
-			//add to dataStorage
+			taskList.push_back(task);
 			_dataStorage.save(_table, taskList);
+		}
+		else{
+			// if timetask is before table period
+			if(task.get_time().operator<(_table.period.get_start_time()))
+			{
+				do{
+					Time time = task.get_time () + 7*Time::DAY;
+					task.modify_time(time);
+				}while(task.get_time().operator<(_table.period.get_start_time()));
+				taskList.push_back(task);
+				_dataStorage.save(_table, taskList);
+			}
+			// if timetask is after table period
+			else if(task.get_time().operator>(_table.period.get_end_time()))
+			{
+				while(task.get_time().operator>(_table.period.get_end_time()))
+				{
+					Time time = task.get_time () - 7*Time::DAY;
+					task.modify_time(time);
+				}
+				taskList.push_back(task);
+				_dataStorage.save(_table, taskList);
 			}
 		}
+	}
+	// if is period task
 	else{
-		if((task.r_period.get_end_time().operator>(_table.period.get_end_time()) && task.r_period.get_start_time().operator<(_table.period.get_start_time()))){
-			//add to dataStorage
-			_dataStorage.save(_table, taskList);
+		if((task.get_period().get_end_time().operator-(task.get_period().get_start_time())) - ((_table.period.get_end_time().operator-(_table.period.get_start_time()) <0 )))
+		{
+			// if periodtask is within table period
+			if(task.get_period().get_start_time().operator>(_table.period.get_start_time()) && task.get_period().get_end_time().operator<(_table.period.get_end_time()))
+			{
+				_dataStorage.save(_table, taskList);
+			}
+			//if task period is earlier than table period
+			else if(task.get_period().get_start_time().operator<(_table.period.get_start_time()))
+			{
+				do
+				{
+					Time startTime = task.get_period().get_start_time()  + 7*Time::DAY;
+					Time endTime = task.get_period().get_end_time()  + 7*Time::DAY;
+					TimePeriod newPeriod(startTime, endTime);
+
+					task.modify_period(newPeriod);
+				}while(task.get_period().get_start_time().operator<(_table.period.get_start_time()));
+				taskList.push_back(task);
+				_dataStorage.save(_table, taskList);
+			}
+			// if task period is later than table period
+			else if(task.get_period().get_start_time().operator>(_table.period.get_end_time()))
+			{
+				do
+				{
+					Time startTime = task.get_period().get_start_time()  - 7*Time::DAY;
+					Time endTime = task.get_period().get_end_time()  - 7*Time::DAY;
+					TimePeriod newPeriod(startTime, endTime);
+
+					task.modify_period(newPeriod);
+				}while(task.get_period().get_start_time().operator>(_table.period.get_end_time()));
+				taskList.push_back(task);
+				_dataStorage.save(_table, taskList);
+			}
 		}
 	}
-
+		
 	
 	taskList.clear();
 	return taskList;
@@ -730,6 +796,8 @@ void ToDoMngr::undo (){
 
 		if(undoTask._cmd == _addTask){
 			//prev add, delete task from dataStorage
+			undoTask._index.push_back (undoTask._ptr->get_index());
+
 			_dataStorage.erase(undoTask._index);
 		}
 		else if(undoTask._cmd == _eraseTask){
@@ -788,7 +856,6 @@ void ToDoMngr::undo (){
 			_activeTaskList.insert(li, undoTask._task);
 			_dataStorage.save(dummyList);
 		}
-
 		_undoStack.pop();
 		_redoStack.push(undoTask);
 	}
@@ -804,28 +871,28 @@ void ToDoMngr::redo () {
 			list <Task> blankList;
 			blankList = add(redoTask._updatedTask, redoTask._force);
 		}
-		else if(redoTask._cmd = _eraseTask){
+		else if(redoTask._cmd == _eraseTask){
 			Task blankTask;
 			blankTask = erase(redoTask._taskId);
 		}
-		else if(redoTask._cmd = _erasePeriod){
-			erase(redoTask._taskId);
-		}
-		else if(redoTask._cmd = _addTable1){
+		else if(redoTask._cmd == _addTable1){
 			bool blankBool;
 			blankBool = newTable(redoTask._tableName, redoTask._period);
 		}
-		else if(redoTask._cmd = _addTable2){
+		else if(redoTask._cmd == _addTable2){
 			list <Task> blankList;
 			blankList = add(redoTask._tableName, redoTask._period, redoTask._force);
 		}
-		else if(redoTask._cmd = _eraseTable){
+		else if(redoTask._cmd == _eraseTable){
 			erase(redoTask._tableName);
 		}
-		else if(redoTask._cmd = _editTask){
+		else if(redoTask._cmd == _editTask){
 			list<Task>blankList;
 			blankList = edit(redoTask._taskId, redoTask._taskElem, redoTask._eTask, redoTask._force);
 		}	
+		else if(redoTask._cmd == _erasePeriod){
+			erase(redoTask._period);
+		}
 		_redoStack.pop();
 		_undoStack.push(redoTask);
 	}
