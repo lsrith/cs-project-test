@@ -6,16 +6,19 @@
 #include <sstream>
 #include <fstream>
 #include <iomanip>
+#include <assert.h>
+#include <iostream>
 using namespace std;
 
-string ToDoMngr::NOTE = "Note:";
-string ToDoMngr::VENUE = "Venue:";
-string ToDoMngr::SPACE = "       ";
-string ToDoMngr::TIME = "Time:  ";
-string ToDoMngr::START = "From:  ";
-string ToDoMngr::END = "To:    ";
+string ToDoMngr::NOTE =   "Note:   ";
+string ToDoMngr::VENUE =  "Venue:  ";
+string ToDoMngr::SPACE =  "        ";
+string ToDoMngr::TIME =   "Time:   ";
+string ToDoMngr::ALERT =  "Alert:  ";
+string ToDoMngr::REPEAT = "Repeat: ";
 string ToDoMngr::NOTHING_TO_VIEW = "There are no tasks to view during the particular period/time!\n";
 string ToDoMngr::WRONG_ID = "The entered idex is wrong";
+string ToDoMngr::MSG_REPEAT_ERR = "The repeatition could not be made!";
 
 list<Task> ToDoMngr::get_active_list () {
 	return _activeTaskList;
@@ -40,7 +43,7 @@ list<string> ToDoMngr::wrapSentence (string str, short int len) {
 	} while (pos != string::npos);
 
 	while (!str.empty ()) {
-		if (str.size () <= len) {
+		if (str.size () <= (unsigned int) len) {
 			sentence = str;
 			str.erase ();
 		} else if (str[len] == ' ') {
@@ -48,7 +51,7 @@ list<string> ToDoMngr::wrapSentence (string str, short int len) {
 			str.erase (0, len - 1);
 		} else {
 			pos = str.find_last_of (' ', len - 1);
-			if (pos == string::npos && str.size () > len) {
+			if (pos == string::npos && str.size () > (unsigned int) len) {
 				sentence = str.substr (0, len);
 				str.erase (0, len);
 			} else if (pos == string::npos) {
@@ -95,7 +98,7 @@ string ToDoMngr::view (Task task, int id, int numTasks) {
 	string __space = _space + SPACE;
 	int __len = CmdTextChange::MAX_WIDTH - __space.size ();
 	__id = intToString (id, numTasks);
-	string __note, __venue, __duration;
+	string __note, __venue, __duration, __alert, __repeat;
 	string _note = __id + NOTE;
 	string _venue = _space + VENUE;
 
@@ -117,21 +120,23 @@ string ToDoMngr::view (Task task, int id, int numTasks) {
 		__venue = _venue + '\n';
 	}
 
-	Time* time;
-	if (task.timeTask) {
-		string __time = _space + TIME;
-		time = &(task.get_time ());
-		__duration =  __time + time->string_date () + ' ' + time->string_clock () + '\n';
-	} else {
-		string __start = _space + START;
-		string __end = _space + END;
-		time = &(task.get_period ().get_start_time ());
-		__duration =  __start + time->string_date () + ' ' + time->string_clock () + '\n';
-		time = &(task.get_period ().get_end_time ());
-		__duration +=  __end + time->string_date () + ' ' + time->string_clock () + '\n';
+	__duration = _space + TIME;
+	if (task.timeTask)
+		__duration += task.get_time ().string_date () + ' ' + task.get_time ().string_clock () + '\n';
+	else
+		__duration += task.get_period ().string_time_period () + '\n';
+
+	Time dfltTime;
+	if (task.alert != dfltTime) {
+		__alert = _space + ALERT + task.alert.string_date () + ' ' + task.get_time ().string_clock () + '\n';
 	}
 
-	return __note + __venue + __duration + '\n';
+	//to be modified
+	if (task.repeat != 0) {
+		__repeat = _space + REPEAT + task.r_period.string_time_period () + '\n';
+	}
+
+	return __note + __venue + __duration + __alert + __repeat + '\n';
 }
 
 string ToDoMngr::view (list<Task> taskList) {
@@ -148,7 +153,7 @@ string ToDoMngr::view (list<Task> taskList) {
 }
 
 string ToDoMngr::view (int taskId) {
-	if (taskId < 1 || taskId > _activeTaskList.size ())
+	if (taskId < 1 || taskId > (int) _activeTaskList.size ())
 		return WRONG_ID;
 
 	list<Task>::iterator iter = _activeTaskList.begin ();
@@ -171,7 +176,7 @@ string ToDoMngr::view (view_t viewType, Time time) {
 		period.modify_end_time (time);
 		break;
 	case MONTHLY:
-		time++;
+		++time;
 		period.modify_end_time (time);
 		break;
 	default:
@@ -197,22 +202,11 @@ string ToDoMngr::view (TimePeriod period){
 	}
 }
 
-
 string ToDoMngr::reminder(){
-
-	string Date;
-	string Month;
-	string FINAL_FORMAT;
 	std::ostringstream oss,_format;
+	Time time;
+	time.current_time ();
 
-	time_t t = time(0);   //get the current time
-	struct tm * now = localtime( & t );
-	oss<<now->tm_mday<<(now->tm_mon + 1)<<(now->tm_year + 1900) ;
-
-	Date=oss.str();        //Stores the current computer date
-
-	Time time(atoi(Date.c_str()),t);
-	string newline="\n";
 	_format<<setw(42)<<setfill(' ')<<"--------------------------";
 	_format<<"\n"<<setw(20)<<setfill(' ')<<"| "<<"AGENDA  FOR  TODAY"<<" |"<<"\n";
 	_format<<setw(42)<<setfill(' ')<<"--------------------------"<<"\n";
@@ -294,7 +288,6 @@ string ToDoMngr::viewTableNames () {
 bool ToDoMngr::ifExistedTable (string tableName) {
 	return false;
 }
-
 
 //debugged
 bool ToDoMngr::clashed(Task task){
@@ -1102,3 +1095,121 @@ void ToDoMngr::pop_alertTask (Task tsk){
 			 }
 }
 //delete that Task from ur alertTaskList
+
+list<Task>* ToDoMngr::listTask (Task _task) {
+	list<Task>* taskList = new list<Task>;
+	taskList->push_back (_task);
+	if (_task.repeat == 0) {
+		return taskList;
+	}
+
+	TimePeriod* r_period = &_task.r_period;
+	int __dur = r_period->get_end_time () - r_period->get_start_time ();
+
+	if (_task.repeat == 1) {
+		if (__dur / (30 * Time::DAY) > 5000)
+			throw (MSG_REPEAT_ERR);
+
+		if (_task.timeTask) {
+			Time* time = &(_task.get_time ());
+
+			if (_task.r_period != *time)
+				throw (MSG_REPEAT_ERR);
+
+			while (time->operator< (r_period->get_end_time ())) {
+				if (time->operator++ ())
+					break;
+
+				_task.modify_time (*time);
+				taskList->push_back (_task);
+			}
+
+			*time = _task.get_time ();
+			while (time->operator> (r_period->get_start_time ())) {
+				if (time->operator-- ())
+					break;
+
+				_task.modify_time (*time);
+				taskList->push_back (_task);
+			}
+		} else {
+			TimePeriod* period = &(_task.get_period ());
+			if ((_task.r_period < *period && _task.r_period > *period) ||
+				((_task.r_period.get_end_time () - _task.r_period.get_start_time ())
+				< (period->get_end_time () - period->get_start_time ())))
+				throw (MSG_REPEAT_ERR);
+			
+			Time start = period->get_start_time ();
+			Time end = period->get_end_time ();
+			while (period->operator< (r_period->get_end_time ())) {
+				if (++start || ++end)
+					break;
+
+				period->modify_end_time (end);
+				period->modify_start_time (start);
+				_task.modify_period (*period);
+				taskList->push_back (_task);
+			}
+
+			period = &(_task.get_period ());
+			start = period->get_start_time ();
+			end = period->get_end_time ();
+			while (period->operator> (r_period->get_start_time ())) {
+				if (--start || --end)
+					break;
+
+				period->modify_start_time (start);
+				period->modify_end_time (end);
+				_task.modify_period (*period);
+				taskList->push_back (_task);
+			}
+		}
+	} else if (_task.repeat == 2) {
+	} else if (_task.repeat > 3) {
+		if (__dur / _task.repeat > 5000)
+			throw (MSG_REPEAT_ERR);
+
+		if (_task.timeTask) {
+			Time* time = &(_task.get_time ());
+
+			if (_task.r_period != *time)
+				throw (MSG_REPEAT_ERR);
+
+			while (time->operator< (r_period->get_end_time ())) {
+				*time = (time->operator+ (_task.repeat));
+				_task.modify_time (*time);
+				taskList->push_back (_task);
+			}
+
+			*time = _task.get_time ();
+			while (time->operator> (r_period->get_start_time ())) {
+				*time = (time->operator- (_task.repeat));
+				_task.modify_time (*time);
+				taskList->push_front (_task);
+			}
+		} else {
+			TimePeriod* period = &(_task.get_period ());
+			if ((_task.r_period < *period && _task.r_period > *period) ||
+				((_task.r_period.get_end_time () - _task.r_period.get_start_time ())
+				< (period->get_end_time () - period->get_start_time ())))
+				throw (MSG_REPEAT_ERR);
+
+			while (period->operator< (r_period->get_end_time ())) {
+				period->modify_end_time (period->get_end_time () + _task.repeat);
+				period->modify_start_time (period->get_start_time () + _task.repeat);
+				_task.modify_period (*period);
+				taskList->push_back (_task);
+			}
+
+			*period = _task.get_period ();
+			while (period->operator> (r_period->get_start_time ())) {
+				period->modify_start_time (period->get_start_time () - _task.repeat);
+				period->modify_end_time (period->get_end_time () - _task.repeat);
+				_task.modify_period (*period);
+				taskList->push_back (_task);
+			}
+		}
+	} else;
+
+	return taskList;
+}

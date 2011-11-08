@@ -93,6 +93,8 @@ private:
 	inline void writeToFile ();
 	inline void appendToFile (list<TaskNode*>*);
 	inline void appendToFile (TableNode*);
+	inline bool checkTimeClash (TaskNode*, TimePeriod*);
+	inline bool checkPeriodClash (TaskNode*, TimePeriod*);
 
 	list<Task> exactSearch (string);
 	list<Task> similarSearch (string);

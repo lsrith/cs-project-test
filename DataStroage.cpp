@@ -50,9 +50,9 @@ list<Task> DataStorage::load (TimePeriod period)
 		for (iter = _indxTasks.begin (); iter != endIter; iter++) {
 			if ((*iter)->_active) {
 				if ((*iter)->_task.timeTask)
-					clash = period.operator== ((*iter)->_task.get_time ());
+					clash = checkTimeClash (*iter, &period);
 				else
-					clash = period.operator== ((*iter)->_task.get_period ());
+					clash = checkPeriodClash (*iter, &period);
 			}
 
 			if (clash == true) {
@@ -65,6 +65,234 @@ list<Task> DataStorage::load (TimePeriod period)
 	return taskList;
 }
 
+bool DataStorage::checkTimeClash (TaskNode* node, TimePeriod* period) {
+	if (period->operator== (node->_task.get_time ()))
+		return true;
+
+	Time time = node->_task.get_time ();
+	Time start, end;
+
+	if (node->_task.r_period.get_end_time () < period->get_end_time ())
+		end = node->_task.r_period.get_end_time ();
+	else
+		end = period->get_end_time ();
+
+	if (node->_task.r_period.get_start_time () < period->get_start_time ())
+		start = period->get_start_time ();
+	else
+		start = node->_task.r_period.get_start_time ();
+
+	bool clash = false;
+
+	switch (node->_task.repeat) {
+	case 0:
+		clash = period->operator== (node->_task.get_time ());
+		break;
+	case 1:
+		while (time > start) {
+			--time;
+			if (period->operator== (time))
+				break;
+		}
+		if (time > start)
+			clash = true;
+
+		time = node->_task.get_time ();
+		while (time < end) {
+			++time;
+			if (period->operator== (time))
+				break;
+		}
+		if (time < end)
+			clash = true;
+
+		break;
+	case 2:
+		while (time > start) {
+			time.modify_date (time.get_date () - 1);
+			if (period->operator== (time))
+				break;
+		}
+		if (time > start)
+			clash = true;
+
+		time = node->_task.get_time ();
+		while (time < end) {
+			time.modify_date (time.get_date () + 1);
+			if (period->operator== (time))
+				break;
+		}
+		if (time < end)
+			clash = true;
+
+		break;
+	default:
+		clash = ((period->get_end_time () - time) / node->_task.repeat) !=
+			((period->get_start_time () - time) / node->_task.repeat);
+		break;
+	}
+
+	return clash;
+}
+
+bool DataStorage::checkPeriodClash (TaskNode* node, TimePeriod* period) {
+	if (period->operator== (node->_task.get_period ()))
+		return true;
+
+	TimePeriod __period = node->_task.get_period ();
+	Time start, end, time;
+
+	if (node->_task.r_period.get_end_time () < period->get_end_time ())
+		end = node->_task.r_period.get_end_time ();
+	else
+		end = period->get_end_time ();
+
+	if (node->_task.r_period.get_start_time () < period->get_start_time ())
+		start = period->get_start_time ();
+	else
+		start = node->_task.r_period.get_start_time ();
+
+	bool clash = false;
+
+	switch (node->_task.repeat) {
+	case 0:
+		clash = period->operator== (node->_task.get_period ());
+		break;
+	case 1:
+		time = __period.get_start_time ();
+		while (time > start) {
+			--time;
+			if (period->operator== (time))
+				break;
+		}
+		if (time > start || time == start )
+			clash = true;
+
+		time = __period.get_end_time ();
+		while (time < end) {
+			++time;
+			if (period->operator== (time))
+				break;
+		}
+		if (time < end || time == end)
+			clash = true;
+
+		break;
+	case 2:
+		time = __period.get_start_time ();
+		while (time > start) {
+			time.modify_date (time.get_date () - 1);
+			if (period->operator== (time))
+				break;
+		}
+		if (time > start || time == start )
+			clash = true;
+
+		time = __period.get_end_time ();
+		while (time < end) {
+			time.modify_date (time.get_date () + 1);
+			if (period->operator== (time))
+				break;
+		}
+		if (time < end || time == end)
+			clash = true;
+
+		break;
+	default:
+		clash = ((period->get_end_time () - __period.get_end_time ()) / node->_task.repeat) !=
+			((period->get_start_time () - __period.get_end_time ()) / node->_task.repeat);
+
+		clash |= ((period->get_end_time () - __period.get_start_time ()) / node->_task.repeat) !=
+			((period->get_start_time () - __period.get_start_time ()) / node->_task.repeat);
+		break;
+	}
+
+	return clash;}
+
+/*
+bool DataStorage::checkClash (TaskNode* node, TimePeriod* period) {
+	if (node->_task.timeTask)
+		return period->operator== (node->_task.get_time ());
+	else
+		return period->operator== (node->_task.get_period ());
+}
+
+bool DataStorage::checkRepeatClash (TaskNode* node, TimePeriod* period) {
+	if (node->_task.r_period != *period)
+		return false;
+
+	bool clash;
+	switch (node->_task.repeat) {
+	case 0:
+		clash = false;
+		break;
+	case 1:
+		break;
+	case 2:
+		break;
+	default:
+		if (node->_task.timeTask) {
+			Time time = node->_task.get_time ();
+			if (period->operator== (time)) {
+				clash = true;
+			} else if (period->operator< (time)) {
+				while (period->operator< (time)) {
+					time = time - node->_task.repeat;
+					if (period->operator== (time)) {
+						clash = true;
+						break;
+					}
+				}
+
+				if (period->operator> (time))
+					clash = false;
+			} else {
+				while (period->operator> (time)) {
+					time = time - node->_task.repeat;
+					if (period->operator== (time)) {
+						clash = true;
+						break;
+					}
+				}
+
+				if (period->operator< (time))
+					clash = false;
+			}
+		} else {
+			TimePeriod _period = node->_task.get_period ();
+			if (period->operator== (_period)) {
+				clash = true;
+			} else if (period->operator< (_period)) {
+				while (period->operator< (_period)) {
+					_period = time - node->_task.repeat;
+					if (period->operator== (_period)) {
+						clash = true;
+						break;
+					}
+				}
+
+				if (period->operator> (_period))
+					clash = false;
+			} else {
+				while (period->operator> (_period)) {
+					time = time - node->_task.repeat;
+					if (period->operator== (time)) {
+						clash = true;
+						break;
+					}
+				}
+
+				if (period->operator< (time))
+					clash = false;
+			}
+		}
+		break;
+	}
+
+	return clash;
+
+}
+*/
 list<Task> DataStorage::load (string tableName) {
 	list<Task> taskList;
 	list<TableNode*>::iterator iter;
