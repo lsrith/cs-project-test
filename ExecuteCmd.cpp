@@ -204,7 +204,7 @@ bool Edit::execute () {
 			_splitedInput->push_back (iter->alert.string_clock ());
 			break;
 		default:
-			_flagError == CMD;
+			_flagError = CMD;
 			break;
 		}
 
@@ -224,6 +224,12 @@ bool Edit::execute () {
 		default:
 			break;
 		}
+	}
+
+	if (_sequence->empty ()) {
+		_flagError = CMD;
+		_input = getLeftOverInput ();
+		return false;
 	}
 
 	Task task = get_task ();
@@ -392,6 +398,9 @@ bool View::execute () {
 			if (_flagError == NONE) {
 				_activeListAccessible = true;
 				_result = _toDoMngr->view (_period);
+				done = true;
+			} else {
+				done = false;
 			}
 			break;
 		case CTIME:
@@ -403,6 +412,9 @@ bool View::execute () {
 			if (_flagError == NONE) {
 				_activeListAccessible = true;
 				_result = _toDoMngr->view (_viewType, _time);
+				done = true;
+			} else {
+				done = false;
 			}
 			break;
 		case CTABLE:
@@ -412,6 +424,7 @@ bool View::execute () {
 				_result = _toDoMngr->view (mergeStringInput ());
 			} else {
 				_flagError = DATA;
+				done = false;
 			}
 			break;
 		default:
@@ -425,6 +438,10 @@ bool View::execute () {
 	}
 
 	_input = getLeftOverInput ();
+
+	if (_flagError != NONE)
+		done = false;
+
 	return done;
 }
 
