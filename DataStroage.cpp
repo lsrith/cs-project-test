@@ -108,6 +108,8 @@ bool DataStorage::checkTimeClash (TaskNode* node, TimePeriod* period) {
 		break;
 	case 2:
 		while (time > start) {
+			if (Time::LeapYear (time.get_date ()) && time.get_date () / 10000 == 2902)
+				time = time - Time::DAY;
 			time.modify_date (time.get_date () - 1);
 			if (period->operator== (time))
 				break;
@@ -116,6 +118,8 @@ bool DataStorage::checkTimeClash (TaskNode* node, TimePeriod* period) {
 			clash = true;
 
 		while (time < end) {
+			if (Time::LeapYear (time.get_date ()) && time.get_date () / 10000 == 2902)
+				time = time - Time::DAY;
 			time.modify_date (time.get_date () + 1);
 			if (period->operator== (time))
 				break;
@@ -193,6 +197,8 @@ bool DataStorage::checkPeriodClash (TaskNode* node, TimePeriod* period) {
 	case 2:
 		time = __period.get_start_time ();
 		while (time > start) {
+			if (Time::LeapYear (time.get_date ()) && time.get_date () / 10000 == 2902)
+				time = time - Time::DAY;
 			time.modify_date (time.get_date () - 1);
 			if (period->operator== (time))
 				break;
@@ -202,6 +208,8 @@ bool DataStorage::checkPeriodClash (TaskNode* node, TimePeriod* period) {
 
 		time = __period.get_end_time ();
 		while (time < end) {
+			if (Time::LeapYear (time.get_date ()) && time.get_date () / 10000 == 2902)
+				time = time - Time::DAY;
 			time.modify_date (time.get_date () + 1);
 			if (period->operator== (time))
 				break;
