@@ -204,3 +204,7 @@ bool Task::compareByVenue (Task task1, Task task2) {
 		return venue1 < venue2;
 	}
 }
+
+bool Task::compareByIndex (Task task1, Task task2) {
+	return task1._index < task2._index;
+}

@@ -516,11 +516,12 @@ void DataStorage::save (string tableName, list<Task> tasks) {
 	if (_tables.empty ())
 		return;
 
-	TimePeriod period;
+	Table __table;
+	__table.name = tableName;
 	list<TableNode*>::iterator tableIter;
 	for (tableIter = _tables.begin (); tableIter != _tables.end (); tableIter++) {
 		if ((*tableIter)->_name == tableName) {
-			period = (*tableIter)->_period;
+			__table.period = (*tableIter)->_period;
 			break;
 		}
 	}
@@ -528,24 +529,24 @@ void DataStorage::save (string tableName, list<Task> tasks) {
 	if (tableIter == _tables.end ())
 		return;
 	else
-		save (tableName, period, tasks);
+		save (__table, tasks);
 }
 
-void DataStorage::save (string tableName, TimePeriod period, list<Task> tasks) {
+void DataStorage::save (Table __table, list<Task> tasks) {
 	bool existingTable = false;
 	TableNode* table;
 	list<TableNode*>::iterator tableIter;
 	
 	if (!_tables.empty ()) {
 		for (tableIter = _tables.begin (); tableIter != _tables.end (); tableIter++) {
-			if ((*tableIter)->_name == tableName) {
+			if ((*tableIter)->_name == __table.name) {
 				if ((*tableIter)->_active &&
-					(*tableIter)->_period.get_start_time () == period.get_start_time () &&
-					(*tableIter)->_period.get_end_time () == period.get_end_time ()) {
+					(*tableIter)->_period.get_start_time () == __table.period.get_start_time () &&
+					(*tableIter)->_period.get_end_time () == __table.period.get_end_time ()) {
 					save (*tableIter, &tasks);
 				} else {
 					setInactive (&((*tableIter)->_tasks));
-					(*tableIter)->_period = period;
+					(*tableIter)->_period = __table.period;
 					(*tableIter)->_active = true;
 					(*tableIter)->_tasks.clear ();
 					save (*tableIter, &tasks);
@@ -561,8 +562,8 @@ void DataStorage::save (string tableName, TimePeriod period, list<Task> tasks) {
 	if (!existingTable) {
 		TableNode* node = new TableNode;
 		node->_active = true;
-		node->_name = tableName;
-		node->_period = period;
+		node->_name = __table.name;
+		node->_period = __table.period;
 		_tables.push_back (node);
 		save (node, &tasks);
 		table = node;
@@ -594,9 +595,10 @@ void DataStorage::reIndexing () {
 	_largestIndex = newIndx;
 }
 
+//to be modified
 void DataStorage::removeInactiveTasks (list<TaskNode*>* tasks) {
 	list<TaskNode*>::iterator taskIter = tasks->begin ();
-	taskIter++;
+//	taskIter++;
 	while (taskIter != tasks->end ())
 		if (!(*taskIter)->_active) {
 			taskIter = _indxTasks.erase (taskIter);
@@ -726,87 +728,25 @@ void DataStorage::loadFromFile () {
 	}
 }
 
-list<Task> DataStorage::search (string searchedWord, search_t type) {
+list<Task> DataStorage::search (string keyword) {
+	unsigned int pos;
 	list<Task> taskList;
-
-	switch (type) {
-	case SEACH:
-		taskList = eachSearch (searchedWord);
-		break;
-	case SEXACT:
-		taskList = exactSearch (searchedWord);
-		break;
-	case SSIMILAR:
-		taskList = similarSearch (searchedWord);
-		break;
-	default:
-		break;
-	}
-
-	return taskList;
-}
-
-list<Task> DataStorage::exactSearch (string searchedWord) {
-	list<Task> taskList;
-	string str;
-	ifstream taskFile (_taskFile);
-	int pos;
-	if (taskFile.is_open ()) {
-		while (getline (taskFile, str)) {
-			if (getline (taskFile, str)) {
-				pos = str.find (searchedWord);
-				if (pos != string::npos) {
-					Task task (str);
-					taskList.push_back (task);
-				}
+	list<TaskNode*>::iterator iter;
+	for (iter = _indxTasks.begin (); iter != _indxTasks.end (); iter++) {
+		if ((*iter)->_active) {
+			pos = (*iter)->_task.note.find (keyword, 0);
+			if (pos != string::npos) {
+				taskList.push_back ((*iter)->_task);
+				continue;
 			}
-		}
-		taskFile.close ();
-	}
 
-	return taskList;
-}
-
-list<Task> DataStorage::similarSearch (string searchedWord) {
-	list<Task> taskList;
-	return taskList;
-}
-
-list<Task> DataStorage::eachSearch (string searchedWord) {
-	list<Task> taskList;
-	list<string> keyWords;
-	string str;
-	int end_pos;
-
-	while (!searchedWord.empty ()) {
-		end_pos = searchedWord.find_first_of (" ", 0);
-		str = searchedWord.substr (0, end_pos);
-		keyWords.push_back (str);
-		if (end_pos == string::npos)
-			searchedWord.erase ();
-		else
-			searchedWord.erase (0, end_pos + 1);
-	}
-
-	int pos;
-	list<string>::iterator iter;
-	ifstream taskFile (_taskFile);
-	if (!taskFile.is_open ())
-		return taskList;
-
-	while (getline (taskFile, str)) {
-		if (getline (taskFile, str)) {
-			for (iter = keyWords.begin (); iter != keyWords.end (); iter++) {
-				pos = str.find (*iter);
-				if (pos != string::npos) {
-					Task task (str);
-					taskList.push_back (task);
-				}
+			pos = (*iter)->_task.venue.find (keyword, 0);
+			if (pos != string::npos) {
+				taskList.push_back ((*iter)->_task);
+				continue;
 			}
 		}
 	}
-	taskFile.close ();
-	
 	return taskList;
 }
 

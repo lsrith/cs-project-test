@@ -112,6 +112,11 @@ private:
 	static string MSG_DELETED;
 };
 
+/**
+ * This class is used to execute table command
+ *
+ * @author LY SAMRITH
+ */
 class Table:public CmdTrans, public ExecuteCmd {
 public:
 	Table (vector<cmd_pair>, ToDoMngr*);
@@ -122,6 +127,18 @@ private:
 	static string MSG_TABLE_ACTIVATED;
 	static string MSG_TABLE_CREATED;
 	static string MSG_TABLE_NOT_CREATED;
+};
+
+/**
+ * This class is used to execute search command
+ *
+ * @author LY SAMRITH
+ */
+class Search:public CmdTrans, public ExecuteCmd {
+public:
+	Search (vector<cmd_pair>, ToDoMngr*);
+	~Search ();
+	bool execute ();
 };
 
 /**

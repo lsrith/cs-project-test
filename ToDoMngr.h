@@ -57,10 +57,10 @@ public:
 	void clear ();
 	// delete everything in the dataStorage
 	string search (search_t, string);
+	void removeSameIdx (list<Task>*);
 	bool activateTable (string tableN);
 	bool ifTableMode ();
 	void deactivateTable ();
-	bool getTableActivationStatus ();
 
 	static list<Task>* listTask (Task task);
 
@@ -71,6 +71,7 @@ public:
 	static string view (Task task, int, int);
 	// return a string of the view of the specific task
 	static string view (list<Task> taskList);
+	static string repeat (unsigned int);
 
 	string view (int taskId);
 	// get the task from the _activeTaskList
@@ -148,7 +149,7 @@ private:
 	list<Task> _alertTaskList;
 	bool _alertActive;
 	bool Table_Mode;
-	string tableName;
+	DataStorage::Table _table;
 
 	stack<UserTask> _redoStack;
 	stack<UserTask> _undoStack;

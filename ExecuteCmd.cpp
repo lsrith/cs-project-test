@@ -141,6 +141,7 @@ bool Edit::execute () {
 	bool done;
 	bool force = false;
 
+	_flagError = NONE;
 	splitInput (_input);
 
 	if (!_sequence->empty () && _sequence->front () == CMD && _cmdInput->front () == CEDIT) {
@@ -203,6 +204,7 @@ bool Edit::execute () {
 			_splitedInput->push_back (iter->alert.string_clock ());
 			break;
 		default:
+			_flagError == CMD;
 			break;
 		}
 
@@ -280,7 +282,7 @@ View::~View () {
 
 bool View::execute () {
 	bool done;
-	
+	_flagError = NONE;
 	splitInput (_input);
 
 	if (!_sequence->empty () && _sequence->front () == CMD) {
@@ -583,7 +585,7 @@ bool Delete::execute () {
 	Task task;
 	TimePeriod period;
 	int taskId;
-
+	_flagError = NONE;
 	splitInput (_input);
 
 	if (!_sequence->empty () && _sequence->front () == CMD && _cmdInput->front () == CDELETE)
@@ -830,6 +832,67 @@ bool Table::execute () {
 	return done;
 }
 
+//---------------------------------------------------------------
+
+Search::Search (vector<cmd_pair> validCmd, ToDoMngr* toDoMngr) {
+	assert (toDoMngr != NULL);
+	_validCmd = validCmd;
+	_toDoMngr = toDoMngr;
+	_sequence = NULL;
+	_dataInput = NULL;
+	_cmdInput = NULL;
+	_splitedInput = NULL;
+}
+
+Search::~Search () {
+	clear ();
+}
+
+bool Search::execute () {
+	bool done = true;
+	splitInput (_input);
+
+	if (_sequence->empty ())
+		return true;
+	else if (_sequence->front () == CMD && _cmdInput->front () == CSEARCH)
+		pop ();
+	else
+		return true;
+
+	if (_sequence->empty ()) {
+		_flagError = CMD;
+		_input = getLeftOverInput ();
+		return false;
+	}
+
+	search_t type = SEACH;
+	if (_sequence->front () == CMD) {
+		switch (_cmdInput->front ()) {
+		case CEXACT:
+			type = SEXACT;
+			pop ();
+			break;
+		case CEACH:
+			type = SEACH;
+			pop ();
+			break;
+		case CSIMILAR:
+			type = SSIMILAR;
+			pop ();
+			break;
+		default:
+			_flagError = CMD;
+			break;
+		}
+	}
+
+	if (_flagError == NONE && _sequence->front () == DATA) {
+		_result = _toDoMngr->search (type, mergeStringInput ());
+	}
+
+	_input = getLeftOverInput ();
+	return true;
+}
 
 //---------------------------------------------------------------
 
@@ -933,6 +996,7 @@ bool AccCtrl::execute ()
 		_password.erase ();
 		_retypedPassword.erase ();
 		_userStatus = UNONE;
+		_toDoMngr->updateStorageName ("");
 		_accCtrl = false;
 		return true;
 	} else {

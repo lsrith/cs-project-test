@@ -61,7 +61,7 @@ public:
 	void exit ();
 
 	void save (string tableName, list<Task> tasks);
-	void save (string tableName, TimePeriod period, list<Task> tasks);
+	void save (Table __table, list<Task> tasks);
 	// save the timetable with the name and period so that you can load back all tasks
 	// if the tableName is the existing one, check the period
 	// if the period is the same, add more index inside; else, overwrite the old one
@@ -71,10 +71,7 @@ public:
 	list<Table> load_tables ();
 	// return a list of names of existing timetable
 
-	list<Task> search (string searchedWord, search_t type);
-	// search based on any specified word.. return a string to be displayed
-	// type to indicate exact match or similar match
-
+	list<Task> search (string);
 	list<Task> get_alertTasks ();
 
 private:
@@ -95,9 +92,5 @@ private:
 	inline void appendToFile (TableNode*);
 	inline bool checkTimeClash (TaskNode*, TimePeriod*);
 	inline bool checkPeriodClash (TaskNode*, TimePeriod*);
-
-	list<Task> exactSearch (string);
-	list<Task> similarSearch (string);
-	list<Task> eachSearch (string);
 };
 #endif
