@@ -965,7 +965,6 @@ list<Task> ToDoMngr::edit (int taskId, Task* task, bool forceEdit) {
 	return edit (taskId, &taskElem, task, forceEdit);
 }
 
-
 void ToDoMngr::setTaskElem (ToDoMngr::TaskElement* taskElem, Task* task) {
 	Time dfltTime;
 	if (task->get_time () != dfltTime)
@@ -998,6 +997,7 @@ void ToDoMngr::setTaskElem (ToDoMngr::TaskElement* taskElem, Task* task) {
 	else
 		taskElem->_repeat = false;
 }
+
 bool ToDoMngr::activateTable (string tableN) {
 
 	//cout<<tableName;

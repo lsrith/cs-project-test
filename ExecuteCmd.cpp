@@ -764,6 +764,10 @@ string Merge::appendStrings (string& str1, string& str2, string& str3) {
 
 //---------------------------------------------------------------
 
+string Table::MSG_TABLE_ACTIVATED = " is activated.";
+string Table::MSG_TABLE_CREATED = " is created and activated.";
+string Table::MSG_TABLE_NOT_CREATED = " is not created!";
+
 Table::Table (vector<cmd_pair> validCmd, ToDoMngr* toDoMngr) {
 	assert (toDoMngr != NULL);
 	_validCmd = validCmd;
@@ -796,7 +800,12 @@ bool Table::execute () {
 			TimePeriod period = get_period ();
 			
 			if (_flagError == NONE) {
-				_toDoMngr->newTable (tableName, period);
+				if (_toDoMngr->newTable (tableName, period)) {
+					_result = tableName + MSG_TABLE_CREATED;
+				} else {
+					_result = tableName + MSG_TABLE_NOT_CREATED + '\n';
+					_result += _toDoMngr->viewTableNames ();
+				}
 				_input = getLeftOverInput ();
 				done = true;
 			} else {
@@ -805,10 +814,13 @@ bool Table::execute () {
 			}
 		} else {
 			if (!_toDoMngr->activateTable (tableName)) {
-				_result = _toDoMngr->viewTableNames ();
-				_input = getLeftOverInput ();
-				done = true;
+				_result = tableName + MSG_TABLE_NOT_CREATED + '\n';
+				_result += _toDoMngr->viewTableNames ();
+			} else {
+				_result = tableName + MSG_TABLE_ACTIVATED;
 			}
+			_input = getLeftOverInput ();
+			done = true;
 		}
 	} else {
 		_input = getLeftOverInput ();

@@ -5,7 +5,7 @@
 #include "CmdTextChange.h"
 #include <iostream>
 #include <Windows.h>
-#include <direct.h>
+#include <time.h>
 using namespace std;
 
 inline VldCmdCtrl::command getFirstCmd (string*, VldCmdCtrl*);
@@ -152,10 +152,13 @@ int main () {
 					input.erase ();
 					cmd = VldCmdCtrl::CNULL;
 					exeCmd = &userAcc;
+					output += "\nDefault TaskCal returns :)";
 				} else if(toDo->ifTableMode ()) {
 					toDo->deactivateTable ();
+					output += "\nTaskCal's task mode returns.";
 				} else {
 					toDo->exit ();
+					output += "\n\nTaskCal Bye Bye";
 					prompt = true;
 				}
 				break;
@@ -195,6 +198,7 @@ int main () {
 	} while (cmd != VldCmdCtrl::CEXIT);
 	log.end ();
 	log.end ();
+
 	return 0;
 }
 

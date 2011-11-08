@@ -117,10 +117,15 @@ public:
 	Table (vector<cmd_pair>, ToDoMngr*);
 	~Table ();
 	bool execute ();
+
+private:
+	static string MSG_TABLE_ACTIVATED;
+	static string MSG_TABLE_CREATED;
+	static string MSG_TABLE_NOT_CREATED;
 };
 
 /**
- * This class is used to merge two input consisted of [break] point
+ * This class is used to merge two input consisted of BREAK point
  *
  * @author LY SAMRITH
  */
