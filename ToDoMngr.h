@@ -2,8 +2,8 @@
  * This class is the main logic layer of TaskCal
  * It add, edit, delete and view the task inside its calendar
  * 
- * @author Ly Samrith: view
- * @author Rishov Prabhah Barman: alert
+ * @author Ly Samrith: view table repeat
+ * @author Rishov Prabhah Barman: alert,reminder,table and view
  * @author Yeo Lock Wei Ben: add, edit, delete, undo and redo
  */
 #ifndef TODOMNGR_H
