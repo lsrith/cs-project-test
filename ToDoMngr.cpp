@@ -370,15 +370,14 @@ list<Task> ToDoMngr::add(Task task, bool forceAdd)
 				// forceAdd is true or is timetask 
 				Task *ptr = &task;
 				_addList.push_back(task);
-				_dataStorage.save(_addList); 
+				int index = _dataStorage.save(&_addList); 
 
 				//add to undoStack;
 				UserTask newAdd;
 				newAdd._cmd = _addTask;
 				newAdd._force = forceAdd;
 				newAdd._task = task;
-				int index = ptr->get_index();
-				newAdd._index.push_back(index); 
+				newAdd._taskId = index; 
 				_undoStack.push(newAdd);
 
 				// and return empty list
@@ -399,20 +398,18 @@ list<Task> ToDoMngr::add(Task task, bool forceAdd)
 				if(task.repeat == 0 || (task.get_period().get_start_time().operator>(task.r_period.get_start_time()) && 
 					task.get_period().get_end_time().operator<(task.r_period.get_end_time()))){
 					//ptr to address of task to get the index after adding to _dataStorage
-					Task* ptr = &task;
+					Task *ptr = &task;
 					_addList.push_back(task);
-					_dataStorage.save(&_addList); 
-				
+					int index = _dataStorage.save(&_addList); 
+						
 					//add to undoStack;
 					UserTask newAdd;
 					newAdd._cmd = _addTask;
 					newAdd._force = forceAdd;
 					newAdd._task = task;
-					int index = ptr->get_index();
-					newAdd._index.push_back(index); 
+					newAdd._taskId = index; 
 					_undoStack.push(newAdd);
-
-
+						
 					// and return empty list
 					_addList.clear();
 					return _addList;
@@ -479,27 +476,26 @@ void ToDoMngr::erase(TimePeriod period){
 		_dataStorage.erase(deletedIdxList);
 } 
 
-
-void ToDoMngr::erase(string name){
-
+//ok
+void ToDoMngr::erase(string name)
+{
 	list<Task> deleteList;
-
 	deleteList = _dataStorage.load(name);
-	list<int> deleteIdxList;
+	list<int> deletedIdxList;
 	list<Task>::iterator di = deleteList.begin();
-	for(int i=0; i<deleteList.size(); i++){
-		deleteIdxList.push_back(di->get_index());
+	for(int i=0; i<deleteList.size(); i++)
+	{
+		deletedIdxList.push_back(di->get_index());
 		di++;
 	}
 
-	//add to undoStack
 	UserTask newErase;
 	newErase._cmd = _eraseTable;
-	newErase._index = deleteIdxList;
 	newErase._tableName = name;
+	newErase._index = deletedIdxList;
 	_undoStack.push(newErase);
 
-	_dataStorage.erase(deleteIdxList);		
+	_dataStorage.erase(deletedIdxList);
 }
 
 //ok
@@ -587,6 +583,7 @@ list<Task> ToDoMngr::add(string tableName, Task task, bool forceAdd){
 			// if periodtask is within table period
 			if(task.get_period().get_start_time().operator>(_table.period.get_start_time()) && task.get_period().get_end_time().operator<(_table.period.get_end_time()))
 			{
+        taskList.push_back(task);
 				_dataStorage.save(_table, &taskList);
 			}
 			//if task period is earlier than table period
@@ -711,7 +708,6 @@ list<Task> ToDoMngr::edit(int taskId, TaskElement* taskElem, Task* task, bool fo
         newEdit._cmd = _editTask;
         newEdit._force = forceEdit;
         newEdit._eTask = task;
-        newEdit._taskElem = taskElem;
         newEdit._task = *taskIterator;
 
         // check taskElem for what to edit
@@ -720,6 +716,7 @@ list<Task> ToDoMngr::edit(int taskId, TaskElement* taskElem, Task* task, bool fo
                 taskIterator->modify_time(task->get_time());
                 //add the updated task to the UserTask
                 newEdit._updatedTask = *taskIterator;
+
                 _undoStack.push(newEdit);
 				_dataStorage.save(_activeTaskList);
                 return _blankList;
@@ -787,6 +784,10 @@ list<Task> ToDoMngr::edit(int taskId, TaskElement* taskElem, Task* task, bool fo
 				_dataStorage.save(_activeTaskList);
                 return _blankList;
         }
+		else
+		{
+			return _blankList;
+		}
 }
 
 void ToDoMngr::undo (){
@@ -796,7 +797,7 @@ void ToDoMngr::undo (){
 
 		if(undoTask._cmd == _addTask){
 			//prev add, delete task from dataStorage
-			undoTask._index.push_back (undoTask._ptr->get_index());
+			undoTask._index.push_back (undoTask._taskId);
 
 			_dataStorage.erase(undoTask._index);
 		}
@@ -839,22 +840,28 @@ void ToDoMngr::undo (){
 			
 		}
 		else if(undoTask._cmd == _editTask){
-			list<Task>::iterator li = _activeTaskList.begin ();
-			for (int i = 1; i < undoTask._taskId; i++) {
-				if (li != _activeTaskList.end ())
-					li++;
-			}
-			   //erase old task from dataStorage
-			   list<int> deleteIdxList;
-			   deleteIdxList.push_back(li->get_index());
-			   _dataStorage.erase(deleteIdxList);
-			   
-			   //modify _activeTaskList
-			   *li = undoTask._updatedTask;
+		  list<Task>::iterator li = _activeTaskList.begin ();
+		  for (int i = 1; i < undoTask._taskId; i++) {
+		   if (li != _activeTaskList.end ())
+		    li++;
+		   }
+	    
+		  //erase old task from dataStorage
+		  list<int> deleteIdxList;
+		  deleteIdxList.push_back(li->get_index());
+		  _dataStorage.erase(deleteIdxList);
+      
+		  //modify _activeTaskList
+		  *li = undoTask._task;
 
-			   //add task to dataStorage
-			   _dataStorage.save(undoTask._index);
+		  //add task to dataStorage
+		  Task Etask = undoTask._task;
+		  list<Task> taskList;
+		  taskList.push_back(Etask);
+
+		  _dataStorage.save(&taskList);
 		}
+
 		_undoStack.pop();
 		_redoStack.push(undoTask);
 	}
@@ -868,7 +875,7 @@ void ToDoMngr::redo () {
 
 		if(redoTask._cmd == _addTask){
 			list <Task> blankList;
-			blankList = add(redoTask._updatedTask, redoTask._force);
+			blankList = add(redoTask._task, redoTask._force);
 		}
 		else if(redoTask._cmd == _eraseTask){
 			Task blankTask;
@@ -886,8 +893,26 @@ void ToDoMngr::redo () {
 			erase(redoTask._tableName);
 		}
 		else if(redoTask._cmd == _editTask){
-			list<Task>blankList;
-			blankList = edit(redoTask._taskId, redoTask._taskElem, redoTask._eTask, redoTask._force);
+			list<Task>::iterator li = _activeTaskList.begin ();
+			for (int i = 1; i < redoTask._taskId; i++) {
+				if (li != _activeTaskList.end ())
+					li++;
+			}
+	    
+		  //erase old task from dataStorage
+		  list<int> deleteIdxList;
+		  deleteIdxList.push_back(li->get_index());
+		  _dataStorage.erase(deleteIdxList);
+      
+		  //modify _activeTaskList
+		  *li = redoTask._updatedTask;
+
+		  //add task to dataStorage
+		  Task Etask = redoTask._updatedTask;
+		  list<Task> taskList;
+		  taskList.push_back(Etask);
+
+		  _dataStorage.save(&taskList);
 		}	
 		else if(redoTask._cmd == _erasePeriod){
 			erase(redoTask._period);

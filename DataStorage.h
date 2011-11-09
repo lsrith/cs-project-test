@@ -45,7 +45,7 @@ public:
 	void updateStorageName (string storageName);
 
 	void save (list<Task> taskList);
-	void save (list<Task>* taskList);
+	int save (list<Task>* taskList);
 	// save the templates to the storageFile by overwriting any overlapping index
 	// give an idex to each templates if it's not given
 	void save (list<int> taskIdex);
