@@ -417,16 +417,7 @@ string ToDoMngr::view (list<Task> taskList) {
 						oss<<"Time Unspecified"<<"\n";
 
 
-					oss<<setw(31)<<setfill(' ')<<right<<"Alert :"<<" ";
-					if(l->alert!=_tm) {
-						oss<<l->alert.display_day(l->alert.get_day());
-						oss<<" "<<((l->alert.get_date())/1000000)<<" ";
-						oss<<l->alert.display_month((((l->alert.get_date())% 1000000) / 10000))<<" ";
-						oss<<((l->alert.get_date())%10000)<<" ";
-						oss<<l->alert.string_clock()<<"\n";
-					}
-					else
-						oss<<"Unspecified"<<"\n";
+				
 
 
 					oss<<setw(32)<<setfill(' ')<<right<<"Repeat :"<<" ";
@@ -572,19 +563,7 @@ string ToDoMngr::view (list<Task> taskList) {
 						oss<<"Time Unspecified"<<"\n";
 
 
-					oss<<setw(31)<<setfill(' ')<<right<<"Alert :"<<" ";
-					if(l->alert!=_tm) {
-						oss<<l->alert.display_day(l->alert.get_day());
-						oss<<" "<<((l->alert.get_date())/1000000)<<" ";
-						oss<<l->alert.display_month((((l->alert.get_date())% 1000000) / 10000))<<" ";
-						oss<<((l->alert.get_date())%10000)<<" ";
-						oss<<l->alert.string_clock()<<"\n";
-						oss<<"\n";
-					}
-					else{
-						oss<<"Unspecified"<<"\n";
-						
-					}
+					
 						
 					oss<<setw(32)<<setfill(' ')<<right<<"Repeat :"<<" ";
 					if(l->repeat!=0) 
@@ -665,17 +644,7 @@ string ToDoMngr::view (list<Task> taskList) {
 					//<<l->venue<<"\n";
 
 					oss<<setw(31)<<setfill(' ')<<"Alert :"<<" ";
-					if(l->alert!=_tm) {
-						oss<<l->alert.display_day(l->alert.get_day());
-						oss<<" "<<((l->alert.get_date())/1000000)<<" ";
-						oss<<l->alert.display_month((((l->alert.get_date())% 1000000) / 10000))<<" ";
-						oss<<((l->alert.get_date())%10000)<<"\n";
-						oss<<"\n";
-					}
-					else{
-						oss<<"Unspecified"<<"\n";
-						
-					}
+					
 					oss<<setw(32)<<setfill(' ')<<right<<"Repeat :"<<" ";
 						if(l->repeat!=0) 
 						oss<<repeat (l->repeat) + l->r_period.string_time_period ();
@@ -767,19 +736,7 @@ string ToDoMngr::view (list<Task> taskList) {
 					end_word_venue=40;
 					oss<<"\n";
 
-					oss<<setw(31)<<setfill(' ')<<"Alert :"<<" ";
-
-					if(l->alert!=_tm) {
-						oss<<l->alert.display_day(l->alert.get_day());
-						oss<<" "<<((l->alert.get_date())/1000000)<<" ";
-						oss<<l->alert.display_month((((l->alert.get_date())% 1000000) / 10000))<<" ";
-						oss<<((l->alert.get_date())%10000)<<"\n";
-						oss<<"\n";
-					}
-					else{
-						oss<<"Unspecified"<<"\n";
-						
-					}
+					
 					oss<<setw(32)<<setfill(' ')<<right<<"Repeat :"<<" ";
 						if(l->repeat!=0) 
 						oss<<repeat (l->repeat) + l->r_period.string_time_period ();
