@@ -131,7 +131,7 @@ string ToDoMngr::view (Task task, int id, int numTasks) {
 		__alert = _space + ALERT + task.alert.string_date () + ' ' + task.get_time ().string_clock () + '\n';
 	}
 
-	//to be modified
+
 	if (task.repeat != 0) {
 		__repeat = _space + REPEAT + repeat (task.repeat) + task.r_period.string_time_period () + '\n';
 	}
@@ -171,27 +171,656 @@ string ToDoMngr::repeat (unsigned int __repeat) {
 }
 
 string ToDoMngr::view (list<Task> taskList) {
-	if (taskList.empty ())
-		return NOTHING_TO_VIEW;
+	Time obj;
+	int full_date,_date,temp_date,temp_year;
+	temp_date=0;
+	string month,temp_month;
+	temp_month=" ";
+	temp_year=0;
+	int year;
+	int pos=0;
+	int endpos=0;
+	int end_word=40;
+	int pos_venue=0;
+	int endpos_venue=0;
+	int end_word_venue=40;
+	Time _tm;
 
-	string str;
-	int i, size = taskList.size ();
-	list<Task>::iterator iter;
-	for (i = 1, iter = taskList.begin (); i <= size ; i++, iter++) {
-		str += view (*iter, i, size);
+
+
+	std::ostringstream oss,index_convert;
+	list<Task> taskl=taskList;
+	taskl.sort(Task::compareByStartTime);
+
+	if(taskl.size()>0&&taskl.size()<=9)
+		index_convert<<10;
+	else
+		index_convert<<taskl.size();
+
+	list<Task>::iterator l;
+	int index=1;
+
+	
+
+	if(taskList.empty())
+		oss<<"\n"<<NOTHING_TO_VIEW<<"\n";
+	else{
+
+		for(l =taskl.begin (); l !=taskl.end (); l++)
+		{ 
+
+
+
+
+
+
+			if(l->get_time()==obj){
+				full_date=l->get_period().get_start_time().get_date();
+				_date=full_date/1000000;
+
+
+				month=l->get_period().get_start_time().display_month((full_date % 1000000) / 10000);
+				year=full_date%10000;
+
+
+
+				if(temp_date==_date&&temp_month==month&&temp_year==year){
+
+					oss<<setw(index_convert.str().length())<<setfill(' ')<<right<<index<<"."<<" ";
+					oss<<"Start :"<<" ";
+
+					if(l->get_period().get_start_time().get_clock()!=-1)
+						oss<<l->get_period().get_start_time().string_clock();
+					else
+						oss<<"        ";
+
+					oss<<setw(10-(index_convert.str().length()-2))<<setfill(' ')<<right<<"Note :"<<" ";
+					while( pos<l->note.length())      
+
+					{   
+						if(pos<end_word){
+
+							pos=l->note.find_first_of(' ',endpos+1);
+							oss<<l->note.substr(endpos,pos-endpos)<<" ";
+							endpos=pos+1;
+						}
+						else{
+							oss<<"\n"<<"                               ";
+							end_word+=40;
+						}
+					}
+					pos=0;
+					endpos=0;
+					end_word=40;
+					oss<<"\n";
+					//oss<<l->note<<endl;
+					oss<<setw(31)<<setfill(' ')<<right<<"Venue :"<<" ";//<<l->venue<<"\n";
+					while( pos_venue<l->venue.length())      
+
+					{   
+						if(pos_venue<end_word_venue){
+							pos_venue=l->venue.find_first_of(' ',endpos_venue+1);
+							oss<<l->venue.substr(endpos_venue,pos_venue-endpos_venue)<<" ";
+							endpos_venue=pos_venue+1;
+						}
+						else{
+							oss<<"\n"<<"                                ";
+							end_word_venue+=40;
+						}
+					}
+					pos_venue=0;
+					endpos_venue=0;
+					end_word_venue=40;
+
+					oss<<"\n";
+					oss<<setw(29)<<setfill(' ')<<right<<"End :"<<" ";
+
+					if(l->get_period().get_end_time().get_date()!=Time::DFLT_DATE){
+						oss<<l->get_period().get_end_time().display_day(l->get_period().get_end_time().get_day());
+					oss<<" "<<((l->get_period().get_end_time().get_date())/1000000)<<" ";
+					oss<<l->get_period().get_end_time().display_month((((l->get_period().get_end_time().get_date())% 1000000) / 10000))<<" ";
+					oss<<((l->get_period().get_end_time().get_date())%10000)<<" ";
+					}
+
+					if(l->get_period().get_end_time().get_clock()!=Time::DFLT_CLOCK)
+						oss<<l->get_period().get_end_time().string_clock()<<"\n";
+
+					else
+						oss<<"Time Unspecified"<<"\n";
+
+
+					oss<<setw(31)<<setfill(' ')<<right<<"Alert :"<<" ";
+					if(l->alert!=_tm) {
+						oss<<l->alert.display_day(l->alert.get_day());
+						oss<<" "<<((l->alert.get_date())/1000000)<<" ";
+						oss<<l->alert.display_month((((l->alert.get_date())% 1000000) / 10000))<<" ";
+						oss<<((l->alert.get_date())%10000)<<" ";
+						oss<<l->alert.string_clock()<<"\n";
+					}
+					else
+						oss<<"Unspecified"<<"\n";
+
+					oss<<"\n";
+
+					
+				}
+				else
+				{ 
+					oss<<"\n";
+					oss<<setw(38)<<setfill(' ')<<"-------------------"<<"\n";
+					oss<<setw(20)<<setfill(' ')<<"|"<<" "<<l->get_period().get_start_time().display_day(l->get_period().get_start_time().get_day())<<" "<<setw(2)<<setfill(' ')<<_date<<" ";
+
+					if(temp_month==month){
+
+						oss<<temp_month<<" ";
+					}
+					else{
+					
+						oss<<month<<" ";
+						temp_month=month;
+
+						temp_date=0;
+
+					}
+
+					if(temp_year==year){
+						oss<<temp_year<<" "<<"|"<<"\n";
+						
+					}
+					else{
+						oss<<year<<" "<<"|"<<"\n";
+						//oss<<"\n";
+						temp_year=year;
+
+					}
+					oss<<setw(38)<<setfill(' ')<<"-------------------"<<"\n";
+					oss<<"\n";
+				
+
+
+					oss<<setw(index_convert.str().length())<<setfill(' ')<<right<<index<<"."<<" ";
+					oss<<"Start :"<<" ";
+
+					if(l->get_period().get_start_time().get_clock()!=-1)
+						oss<<l->get_period().get_start_time().string_clock();
+					else
+						oss<<"        ";
+
+					oss<<setw(10-(index_convert.str().length()-2))<<setfill(' ')<<right/*"    "*/<<"Note :"<<" ";
+
+					while( pos<l->note.length())      
+
+					{   
+						if(pos<end_word)
+
+						{
+
+							pos=l->note.find_first_of(' ',endpos+1);
+
+							oss<<l->note.substr(endpos,pos-endpos)<<" ";
+
+							endpos=pos+1;
+
+						}
+
+
+						else
+
+						{
+
+							oss<<"\n"<<"                               ";
+
+
+							end_word+=40;//l->note.length();
+
+						}
+					}
+					pos=0;
+					endpos=0;
+					end_word=40;
+
+					//oss<<l->note<<endl;
+					oss<<"\n";
+					oss<<setw(31)<<setfill(' ')<<right<<"Venue :"<<" ";
+					while( pos_venue<l->venue.length())      
+
+					{   
+						if(pos_venue<end_word_venue)
+
+						{
+
+							pos_venue=l->venue.find_first_of(' ',endpos_venue+1);
+
+							oss<<l->venue.substr(endpos_venue,pos_venue-endpos_venue)<<" ";
+
+							endpos_venue=pos_venue+1;
+
+						}
+
+
+						else
+
+						{
+
+							oss<<"\n"<<"                                ";
+
+							end_word_venue+=40;
+
+						}
+					}
+
+
+					pos_venue=0;
+					endpos_venue=0;
+					end_word_venue=40;
+
+
+
+					oss<<"\n";
+					//;<<l->venue<<"\n";
+					oss<<setw(29)<<setfill(' ')<<right<<"End :"<<" ";
+
+					if(l->get_period().get_end_time().get_date()!=Time::DFLT_DATE){
+						oss<<l->get_period().get_end_time().display_day(l->get_period().get_end_time().get_day());
+					oss<<" "<<((l->get_period().get_end_time().get_date())/1000000)<<" ";
+					oss<<l->get_period().get_end_time().display_month((((l->get_period().get_end_time().get_date())% 1000000) / 10000))<<" ";
+					oss<<((l->get_period().get_end_time().get_date())%10000)<<" ";
+					}
+					
+					if(l->get_period().get_end_time().get_clock()!=-1)
+						oss<<l->get_period().get_end_time().string_clock()<<"\n";
+
+					else
+						oss<<"Time Unspecified"<<"\n";
+
+
+					oss<<setw(31)<<setfill(' ')<<right<<"Alert :"<<" ";
+					if(l->alert!=_tm) {
+						oss<<l->alert.display_day(l->alert.get_day());
+						oss<<" "<<((l->alert.get_date())/1000000)<<" ";
+						oss<<l->alert.display_month((((l->alert.get_date())% 1000000) / 10000))<<" ";
+						oss<<((l->alert.get_date())%10000)<<" ";
+						oss<<l->alert.string_clock()<<"\n";
+						oss<<"\n";
+					}
+					else{
+						oss<<"Unspecified"<<"\n";
+						oss<<"\n";
+					}
+
+					temp_date=_date;
+
+				}
+
+
+
+			}
+			else
+			{
+				full_date=l->get_time().get_date();
+				_date=full_date/1000000;
+
+
+				month=l->get_time().display_month((full_date % 1000000) / 10000);
+				year=full_date%10000;
+
+				if(temp_date==_date&&temp_month==month&&temp_year==year){
+
+					oss<<setw(index_convert.str().length())<<setfill(' ')<<index<<"."<<" ";
+					oss<<"Start :"<<" ";
+
+					if(l->get_time().get_clock()!=Time::DFLT_CLOCK)
+						oss<<l->get_time().string_clock();
+					else
+						oss<<"        ";
+
+					oss<<setw(10-(index_convert.str().length()-2))<<setfill(' ')<<right<<"Note :"<<" ";
+					while( pos<l->note.length())      
+
+					{   
+						if(pos<end_word){
+
+							pos=l->note.find_first_of(' ',endpos+1);
+							oss<<l->note.substr(endpos,pos-endpos)<<" ";
+							endpos=pos+1;
+						}
+						else{
+							oss<<"\n"<<"                               ";
+							end_word+=40;
+						}
+
+					}
+					pos=0;
+					endpos=0;
+					end_word=40;
+
+
+					oss<<"\n";
+
+					oss<<setw(31)<<setfill(' ')<<"Venue :"<<" ";
+					while( pos_venue<l->venue.length())      
+
+					{   
+						if(pos_venue<end_word_venue){
+							pos_venue=l->venue.find_first_of(' ',endpos_venue+1);
+							oss<<l->venue.substr(endpos_venue,pos_venue-endpos_venue)<<" ";
+							endpos_venue=pos_venue+1;
+						}
+						else{
+							oss<<"\n"<<"                                ";
+							end_word_venue+=40;
+						}
+					}
+					pos_venue=0;
+					endpos_venue=0;
+					end_word_venue=40;
+					oss<<"\n";
+					//<<l->venue<<"\n";
+
+					oss<<setw(31)<<setfill(' ')<<"Alert :"<<" ";
+					if(l->alert!=_tm) {
+						oss<<l->alert.display_day(l->alert.get_day());
+						oss<<" "<<((l->alert.get_date())/1000000)<<" ";
+						oss<<l->alert.display_month((((l->alert.get_date())% 1000000) / 10000))<<" ";
+						oss<<((l->alert.get_date())%10000)<<"\n";
+						oss<<"\n";
+					}
+					else{
+						oss<<"Unspecified"<<"\n";
+						oss<<"\n";
+					}
+					
+				}
+				else
+				{
+					oss<<"\n";
+					oss<<setw(38)<<setfill(' ')<<"-------------------"<<"\n";
+					oss<<setw(20)<<setfill(' ')<<"|"<<" "<<l->get_time().display_day(l->get_time().get_day())<<" "<<setw(2)<<setfill(' ')<<_date<<" ";
+					if(temp_month==month){
+
+						oss<<temp_month<<" ";
+					}
+					else{
+						//oss<<"\n";
+						oss<<month<<" ";
+						temp_month=month;
+
+						temp_date=0;
+
+					}
+
+					if(temp_year==year){
+						oss<<temp_year<<" "<<"|"<<"\n";
+
+					}
+					else{
+						oss<<year<<" "<<"|"<<"\n";
+
+						temp_year=year;
+
+					}
+					oss<<setw(38)<<setfill(' ')<<"-------------------"<<"\n";
+					oss<<"\n";
+					
+
+					oss<<setw(index_convert.str().length())<<setfill(' ')<<index<<"."<<" ";
+					oss<<"Start :"<<" ";
+
+					if(l->get_time().get_clock()!=Time::DFLT_CLOCK)
+						oss<<l->get_time().string_clock();
+					else
+						oss<<"        ";
+
+					oss<<setw(10-(index_convert.str().length()-2))<<setfill(' ')<<right<<"Note :"<<" ";
+
+					while( pos<l->note.length())      
+
+					{   
+						if(pos<end_word){
+
+							pos=l->note.find_first_of(' ',endpos+1);
+							oss<<l->note.substr(endpos,pos-endpos)<<" ";
+							endpos=pos+1;
+						}
+						else{
+							oss<<"\n"<<"                               ";
+							end_word+=40;
+						}
+					}
+
+
+					pos=0;
+					endpos=0;
+					end_word=40;
+
+					oss<<"\n";
+
+					oss<<setw(31)<<setfill(' ')<<"Venue :"<<" ";
+
+					while( pos_venue<l->venue.length())      
+
+					{   
+						if(pos_venue<end_word_venue){
+							pos_venue=l->venue.find_first_of(' ',endpos_venue+1);
+							oss<<l->venue.substr(endpos_venue,pos_venue-endpos_venue)<<" ";
+							endpos_venue=pos_venue+1;
+						}
+						else{
+							oss<<"\n"<<"                                ";
+							end_word_venue+=40;
+						}
+					}
+					pos_venue=0;
+					endpos_venue=0;
+					end_word_venue=40;
+					oss<<"\n";
+
+					oss<<setw(31)<<setfill(' ')<<"Alert :"<<" ";
+
+					if(l->alert!=_tm) {
+						oss<<l->alert.display_day(l->alert.get_day());
+						oss<<" "<<((l->alert.get_date())/1000000)<<" ";
+						oss<<l->alert.display_month((((l->alert.get_date())% 1000000) / 10000))<<" ";
+						oss<<((l->alert.get_date())%10000)<<"\n";
+						oss<<"\n";
+					}
+					else{
+						oss<<"Unspecified"<<"\n";
+						oss<<"\n";
+					}
+
+					temp_date=_date;
+					
+
+				}
+			}
+			index++;
+		}
 	}
-	return str;
+	return oss.str();
+
 }
+
+
 
 string ToDoMngr::view (int taskId) {
-	if (taskId < 1 || taskId > (int) _activeTaskList.size ())
-		return WRONG_ID;
+	Time obj;
+	ToDoMngr todo;
 
-	list<Task>::iterator iter = _activeTaskList.begin ();
-	for (int i = 1; i < taskId; i++, iter++);
-	return view (*iter, taskId, _activeTaskList.size ());
-}
+	int full_date,_date,temp_date;
+	temp_date=0;
+	string month,temp_month;
+	temp_month=" ";
+	int year;
+	Time _time;
+	int pos=0;
+	int endpos=0;
+	int end_word=65;
+	int pos_venue=0;
+	int endpos_venue=0;
+	int end_word_venue=65;
+	std::ostringstream oss;
+	int i=1;
+	// list<Task> _activeTasklist;
+	list<Task>::iterator _taskpointer;
+	_taskpointer=_activeTaskList.begin();
 
+	if(taskId>_activeTaskList.size())
+		oss<<ToDoMngr::NOTHING_TO_VIEW;
+	else{
+		for(int i=1;i<taskId;i++){
+			if(_taskpointer!=_activeTaskList.end())
+				_taskpointer++;
+		}
+
+
+		if(_taskpointer->get_time()==obj){
+
+			full_date=_taskpointer->get_period().get_start_time().get_date();
+			_date=full_date/1000000;
+			month=_taskpointer->get_period().get_start_time().display_month((full_date % 1000000) / 10000);
+			year=full_date%10000;
+
+			oss<<"\n";
+			if(_taskpointer->get_period().get_start_time().get_date()!=Time::DFLT_DATE){
+				oss<<setw(28)<<setfill(' ')<<month<<" "<<year<<"\n";
+				oss<<setw(33)<<setfill(' ')<<"--------"<<"\n";
+				oss<<setw(28)<<setfill(' ')<<_date<<" "<<_taskpointer->get_period().get_start_time().display_day(_taskpointer->get_period().get_start_time().get_day())<<"\n";
+			}
+			oss<<"\n";
+
+			oss<<taskId<<"."<<" ";
+
+			if(_taskpointer->get_period().get_start_time().get_clock()!=Time::DFLT_CLOCK)
+				oss<<"Start time : "<<_taskpointer->get_period().get_start_time().string_clock()<<" "<<"-"<<" ";
+
+			if(_taskpointer->get_period().get_end_time().get_clock()!=Time::DFLT_CLOCK)
+				oss<<"End time : "<<_taskpointer->get_period().get_end_time().string_clock();
+			
+
+
+			if(_taskpointer->get_period().get_end_time().get_date()!=Time::DFLT_DATE){
+				oss<<"\n   End date :"<<" "<<"("<<(_taskpointer->get_period().get_end_time().get_date()/1000000)<<" "<<_taskpointer->get_period().get_end_time().display_month((_taskpointer->get_period().get_end_time().get_date()%1000000)/10000);
+				oss<<" "<<_taskpointer->get_period().get_end_time().get_date()%10000<<")";
+			}
+			oss<<"\n   Note : ";
+			while( pos<_taskpointer->note.length())      
+
+			{   
+				if(pos<end_word){
+
+					pos=_taskpointer->note.find_first_of(' ',endpos+1);
+					oss<<_taskpointer->note.substr(endpos,pos-endpos)<<" ";
+					endpos=pos+1;
+				}
+				else{
+					oss<<"\n"<<"   ";
+					end_word+=65;
+				}
+
+			}
+			pos=0;
+			endpos=0;
+			end_word=40;
+
+
+			oss<<"\n";
+
+			oss<<"   Venue :"<<" ";
+			while( pos_venue<_taskpointer->venue.length())      
+
+			{   
+				if(pos_venue<end_word_venue){
+					pos_venue=_taskpointer->venue.find_first_of(' ',endpos_venue+1);
+					oss<<_taskpointer->venue.substr(endpos_venue,pos_venue-endpos_venue)<<" ";
+					endpos_venue=pos_venue+1;
+				}
+				else{
+					oss<<"\n"<<"   ";
+					end_word_venue+=65;
+				}
+			}
+			pos_venue=0;
+			endpos_venue=0;
+			end_word_venue=40;
+			oss<<"\n";
+			//oss<<" "<<_taskpointer->note<<" "<<"at"<<" "<<_taskpointer->venue<<"\n\n";
+
+		}
+
+
+		else
+		{
+			full_date=_taskpointer->get_time().get_date();
+			_date=full_date/1000000;
+			month=_taskpointer->get_time().display_month((full_date % 1000000) / 10000);
+			year=full_date%10000;
+
+
+			oss<<"\n";
+			if(_taskpointer->get_time().get_date()!=Time::DFLT_DATE){
+
+				oss<<month<<" "<<year<<"\n";
+				oss<<"--------"<<"\n";
+				oss<<"\n";              
+				oss<<_date<<" "<<_taskpointer->get_time().display_day(_taskpointer->get_time().get_day())<<"\n";
+			}
+			oss<<"\n";
+			oss<<taskId<<"."<<" ";
+
+			if(_taskpointer->get_time().get_clock()!=Time::DFLT_CLOCK)
+				oss<<_taskpointer->get_time().string_clock();
+
+			oss<<"\n   Note : ";
+			while( pos<_taskpointer->note.length())      
+
+			{   
+				if(pos<end_word){
+
+					pos=_taskpointer->note.find_first_of(' ',endpos+1);
+					oss<<_taskpointer->note.substr(endpos,pos-endpos)<<" ";
+					endpos=pos+1;
+				}
+				else{
+					oss<<"\n"<<"   ";
+					end_word+=65;
+				}
+
+			}
+			pos=0;
+			endpos=0;
+			end_word=40;
+
+
+			oss<<"\n";
+
+			oss<<"   Venue :"<<" ";
+			while( pos_venue<_taskpointer->venue.length())      
+
+			{   
+				if(pos_venue<end_word_venue){
+					pos_venue=_taskpointer->venue.find_first_of(' ',endpos_venue+1);
+					oss<<_taskpointer->venue.substr(endpos_venue,pos_venue-endpos_venue)<<" ";
+					endpos_venue=pos_venue+1;
+				}
+				else{
+					oss<<"\n"<<"   ";
+					end_word_venue+=65;
+				}
+			}
+			pos_venue=0;
+			endpos_venue=0;
+			end_word_venue=40;
+			oss<<"\n";										//oss<<" "<<_taskpointer->note<<" "<<"at"<<" "<<_taskpointer->venue<<"\n\n";
+			temp_date=_date;
+			/* oss<<l->get_period().string_time_period()<<"\n"<<index<<"."
+			<<" "<<l->note<<" "<<"at"<<" "<<l->venue<<endl;*/
+		}
+
+	}
+	return oss.str();
+
+} 
 string ToDoMngr::view (view_t viewType, Time time) {
 	TimePeriod period;
 	time.modify_clock (0);
@@ -245,8 +874,8 @@ string ToDoMngr::reminder(){
 	return _format.str();
 }
 
-/*pos = str.find_first_of (" ", 0)
-str[pos]*/
+
+
 string ToDoMngr::view (string tableN){
 	
 	_activeTaskList=_dataStorage.load(tableN);
@@ -284,38 +913,13 @@ string ToDoMngr::viewTableNames () {
 	return table_view.str();
 }
 	
-//modify the front task's alert += mins
-//resort ur alertTaskList
-//set the alertActive as false;
-/*string ToDoMngr::alert () {
-	
 
-	list<Task>::iterator time_control;
-	std::ostringstream alerter;
-    
-	Time _time;
-	
-	
-	  for(time_control =_activeTaskList.begin (); time_control!=_activeTaskList.end (); time_control++)
-	  {   _time.current_time();
-		  if(time_control->alert==_time){
-			  alerter<<"ALERT"<<"\a"<<"\n";
-			  alerter<<"You have the following task/tasks now"<<"\n";
-		      
-			 return view(DAILY,time_control->alert);
-
-		  }
-
-
-
-		  }
-	//return "alert";
-}*/
 
 bool ToDoMngr::ifExistedTable (string tableName) {
 	return false;
 }
 
+//ok
 bool ToDoMngr::clashed(Task task){
 // check if there is clashed of period tasks
 	list<Task> checkList;
@@ -340,7 +944,6 @@ bool ToDoMngr::clashed(Task task){
 					if(task.compareByVenue(task,*li2) && task.compareByAlert(task, *li2) && task.compareByEndTime(task, *li2) && task.compareByStartTime(task, *li2)){
 						_clashList.pop_back();
 					}
-					li2++;
 				} // end of check for duplication of clashed task
 			}
 			li++;
@@ -354,7 +957,7 @@ bool ToDoMngr::clashed(Task task){
 	}
 } 
 
-
+//ok
 list<Task> ToDoMngr::add(Task task, bool forceAdd)                                                                      
 {
 //	cout<<tableName;
@@ -364,25 +967,7 @@ list<Task> ToDoMngr::add(Task task, bool forceAdd)
 
 	else{
 		list<Task> _addList;
-		if(forceAdd == true){
-				// forceAdd is true or is timetask 
-				Task *ptr = &task;
-				_addList.push_back(task);
-				int index = _dataStorage.save(&_addList); 
-
-				//add to undoStack;
-				UserTask newAdd;
-				newAdd._cmd = _addTask;
-				newAdd._force = forceAdd;
-				newAdd._task = task;
-				newAdd._taskId = index; 
-				_undoStack.push(newAdd);
-
-				// and return empty list
-				_addList.clear();
-				return _addList;
-		}
-		if(task.timeTask == true){ 
+		if(forceAdd == true || task.timeTask == true){ 
 			if(task.repeat == 0 || (task.get_time().operator>(task.r_period.get_start_time()) 
 				&& task.get_time().operator<(task.r_period.get_end_time()))){
 				// forceAdd is true or is timetask 
@@ -440,7 +1025,7 @@ list<Task> ToDoMngr::add(Task task, bool forceAdd)
 	}
 }
 
-
+//ok
 bool ToDoMngr::newTable(string name, TimePeriod period){  
 	
 		//check if the timetable period is valid
@@ -473,7 +1058,7 @@ bool ToDoMngr::newTable(string name, TimePeriod period){
 		}
 }
 
-
+//ok
 void ToDoMngr::erase(TimePeriod period){
 	    list<Task> deleteList;
         deleteList = _dataStorage.load(period);
@@ -494,7 +1079,7 @@ void ToDoMngr::erase(TimePeriod period){
 		_dataStorage.erase(deletedIdxList);
 } 
 
-
+//ok
 void ToDoMngr::erase(string name)
 {
 	list<Task> deleteList;
@@ -516,7 +1101,7 @@ void ToDoMngr::erase(string name)
 	_dataStorage.erase(deletedIdxList);
 }
 
-
+//ok
 Task ToDoMngr::erase(int taskId){
 // delete from dataStorage given the taskId
 
@@ -712,7 +1297,7 @@ bool ToDoMngr::tillStart(int duration, list<Task> taskList, Task task, bool forc
 	return got_clash;
 }
 
-
+//ok
 list<Task> ToDoMngr::edit(int taskId, TaskElement* taskElem, Task* task, bool forceEdit){
         list<Task> _blankList;
         // get the task that will be edited
