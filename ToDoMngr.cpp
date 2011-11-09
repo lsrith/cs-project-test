@@ -83,61 +83,194 @@ string ToDoMngr::intToString (int num, int max) {
 	return s_str.str ();
 }
 
-string ToDoMngr::view (Task task) {
-	return view (task, 0, 1);
-}
+string ToDoMngr::view (Task taskId) {
+	Time obj;
+	int  pos=0;
+	int endpos=0;
+	int end_word=65;
+	int pos_venue=0;
+	int endpos_venue=0;
+	int end_word_venue=65;
 
-string ToDoMngr::view (Task task, int id, int numTasks) {
-	list<string> strList;
-	list<string>::iterator iter;
-	string __id = intToString (id, numTasks);
-	string _space;
-	for (unsigned int i = 0; i < __id.size (); i++)
-		_space += ' ';
+	Time _t;       
 
-	string __space = _space + SPACE;
-	int __len = CmdTextChange::MAX_WIDTH - __space.size ();
-	__id = intToString (id, numTasks);
-	string __note, __venue, __duration, __alert, __repeat;
-	string _note = __id + NOTE;
-	string _venue = _space + VENUE;
+	int full_date,_date,temp_date;
+	temp_date=0;
+	string month,temp_month;
+	temp_month=" ";
+	int year;
+	std::ostringstream oss;
 
-	if (!task.note.empty ()) {
-		strList = wrapSentence (task.note, __len);
-		for (iter = strList.begin (); iter != strList.end (); iter++)
-			__note += __space + *iter + "\n";
-		__note.replace (0, _note.size (), _note);
-	} else {
-		__note = _note + '\n';
+	// list<Task> _activeTasklist;
+
+
+	if(taskId.get_time()==obj){
+
+		full_date=taskId.get_period().get_start_time().get_date();
+		_date=full_date/1000000;
+		month=taskId.get_period().get_start_time().display_month((full_date % 1000000) / 10000);
+		year=full_date%10000;
+
+		oss<<"\n";
+		if(taskId.get_period().get_start_time().get_date()!=Time::DFLT_DATE){
+			oss<<setw(24)<<setfill(' ')<<month<<" "<<year<<"  "<<_date<<" "<<taskId.get_period().get_start_time().display_day(taskId.get_period().get_start_time().get_day())<<"\n";
+
+			oss<<"\n";
+		}
+		else{
+			oss<<"\n\n";
+
+		}
+
+		if(taskId.get_period().get_start_time().get_clock()!=Time::DFLT_CLOCK)
+			oss<<taskId.get_period().get_start_time().string_clock()<<" "<<"-"<<" "<<taskId.get_period().get_end_time().string_clock()<<"\n";
+
+
+
+
+
+		oss<<"Note :"<<" ";  
+		while( pos<taskId.note.length())      
+
+		{   
+			if(pos<end_word){
+
+			   pos=taskId.note.find_first_of(' ',endpos+1);
+			    oss<<taskId.note.substr(endpos,pos-endpos)<<" ";
+                endpos=pos+1;
+
+			}
+
+
+			else
+
+			{
+
+				oss<<"\n";
+
+
+				end_word+=65;//l->note.length();
+
+			}
+		}
+		pos=0;
+		endpos=0;
+		end_word=40;
+
+
+		oss<<"\n";
+		oss<<"Venue :"<<" ";//<<taskId.venue;
+
+		while( pos_venue<taskId.venue.length())      
+
+		{   
+			if(pos_venue<end_word_venue){
+				pos_venue=taskId.venue.find_first_of(' ',endpos_venue+1);
+				oss<<taskId.venue.substr(endpos_venue,pos_venue-endpos_venue)<<" ";
+				endpos_venue=pos_venue+1;
+			}
+			else{
+				oss<<"\n"<<"                                ";
+				end_word_venue+=65;
+			}
+		}
+		pos_venue=0;
+		endpos_venue=0;
+		end_word_venue=40;
+		oss<<"\n\n";
+
 	}
 
-	if (!task.venue.empty ()) {
-		strList = wrapSentence (task.venue, __len);
-		for (iter = strList.begin (); iter != strList.end (); iter++)
-			__venue += __space + *iter + "\n";
-		__venue.replace (0, _venue.size (), _venue);
-	} else {
-		__venue = _venue + '\n';
-	}
 
-	__duration = _space + TIME;
-	if (task.timeTask)
-		__duration += task.get_time ().string_date () + ' ' + task.get_time ().string_clock () + '\n';
 	else
-		__duration += task.get_period ().string_time_period () + '\n';
+	{
+		full_date=taskId.get_time().get_date();
+		_date=full_date/1000000;
+		month=taskId.get_time().display_month((full_date % 1000000) / 10000);
+		year=full_date%10000;
 
-	Time dfltTime;
-	if (task.alert != dfltTime) {
-		__alert = _space + ALERT + task.alert.string_date () + ' ' + task.get_time ().string_clock () + '\n';
+
+		oss<<"\n";
+		if(taskId.get_time().get_date()!=Time::DFLT_DATE){
+			oss<<setw(24)<<setfill(' ')<<month<<" "<<year<<"  "<<_date<<" "<<taskId.get_time().display_day(taskId.get_time().get_day())<<"\n";
+
+			oss<<"\n";
+		}
+		else
+		{
+			oss<<"\n";
+		}
+
+		if(taskId.get_time().get_clock()!=Time::DFLT_CLOCK)
+			oss<<taskId.get_time().string_clock();
+
+
+
+
+		oss<<"Note :"<<" ";  
+		while( pos<taskId.note.length())      
+
+		{   
+			if(pos<end_word)
+
+			{
+
+				pos=taskId.note.find_first_of(' ',endpos+1);
+
+				oss<<taskId.note.substr(endpos,pos-endpos)<<" ";
+
+				endpos=pos+1;
+
+			}
+
+
+			else
+
+			{
+
+				oss<<"\n";
+
+
+				end_word+=65;//l->note.length();
+
+			}
+		}
+		pos=0;
+		endpos=0;
+		end_word=40;
+
+		oss<<"\n";
+
+		oss<<"Venue :"<<" ";//<<taskId.venue;
+
+		while( pos_venue<taskId.venue.length())      
+
+		{   
+			if(pos_venue<end_word_venue){
+				pos_venue=taskId.venue.find_first_of(' ',endpos_venue+1);
+				oss<<taskId.venue.substr(endpos_venue,pos_venue-endpos_venue)<<" ";
+				endpos_venue=pos_venue+1;
+			}
+			else{
+				oss<<"\n"<<"                                ";
+				end_word_venue+=65;
+			}
+		}
+		pos_venue=0;
+		endpos_venue=0;
+		end_word_venue=40;
+		oss<<"\n\n";		
+		
 	}
 
+	
+	return oss.str();
 
-	if (task.repeat != 0) {
-		__repeat = _space + REPEAT + repeat (task.repeat) + task.r_period.string_time_period () + '\n';
-	}
-
-	return __note + __venue + __duration + __alert + __repeat + '\n';
+	
 }
+
+
+
 
 string ToDoMngr::repeat (unsigned int __repeat) {
 	string str;
@@ -209,12 +342,7 @@ string ToDoMngr::view (list<Task> taskList) {
 		for(l =taskl.begin (); l !=taskl.end (); l++)
 		{ 
 
-
-
-
-
-
-			if(l->get_time()==obj){
+               if(l->get_time()==obj){
 				full_date=l->get_period().get_start_time().get_date();
 				_date=full_date/1000000;
 
@@ -253,8 +381,8 @@ string ToDoMngr::view (list<Task> taskList) {
 					endpos=0;
 					end_word=40;
 					oss<<"\n";
-					//oss<<l->note<<endl;
-					oss<<setw(31)<<setfill(' ')<<right<<"Venue :"<<" ";//<<l->venue<<"\n";
+				
+					oss<<setw(31)<<setfill(' ')<<right<<"Venue :"<<" ";
 					while( pos_venue<l->venue.length())      
 
 					{   
@@ -300,9 +428,20 @@ string ToDoMngr::view (list<Task> taskList) {
 					else
 						oss<<"Unspecified"<<"\n";
 
+
+					oss<<setw(32)<<setfill(' ')<<right<<"Repeat :"<<" ";
+					
+					if(l->repeat!=0) 
+						oss<<repeat (l->repeat) + l->r_period.string_time_period ();
+					
+					else
+						oss<<"Unspecified"<<"\n";
+
+
+
 					oss<<"\n";
 
-					
+				
 				}
 				else
 				{ 
@@ -329,14 +468,13 @@ string ToDoMngr::view (list<Task> taskList) {
 					}
 					else{
 						oss<<year<<" "<<"|"<<"\n";
-						//oss<<"\n";
+					
 						temp_year=year;
 
 					}
 					oss<<setw(38)<<setfill(' ')<<"-------------------"<<"\n";
 					oss<<"\n";
-				
-
+					
 
 					oss<<setw(index_convert.str().length())<<setfill(' ')<<right<<index<<"."<<" ";
 					oss<<"Start :"<<" ";
@@ -371,7 +509,7 @@ string ToDoMngr::view (list<Task> taskList) {
 							oss<<"\n"<<"                               ";
 
 
-							end_word+=40;//l->note.length();
+							end_word+=40;
 
 						}
 					}
@@ -417,7 +555,7 @@ string ToDoMngr::view (list<Task> taskList) {
 
 
 					oss<<"\n";
-					//;<<l->venue<<"\n";
+					
 					oss<<setw(29)<<setfill(' ')<<right<<"End :"<<" ";
 
 					if(l->get_period().get_end_time().get_date()!=Time::DFLT_DATE){
@@ -443,6 +581,15 @@ string ToDoMngr::view (list<Task> taskList) {
 						oss<<l->alert.string_clock()<<"\n";
 						oss<<"\n";
 					}
+					else{
+						oss<<"Unspecified"<<"\n";
+						
+					}
+						
+					oss<<setw(32)<<setfill(' ')<<right<<"Repeat :"<<" ";
+					if(l->repeat!=0) 
+						oss<<repeat (l->repeat) + l->r_period.string_time_period ();
+					
 					else{
 						oss<<"Unspecified"<<"\n";
 						oss<<"\n";
@@ -527,9 +674,16 @@ string ToDoMngr::view (list<Task> taskList) {
 					}
 					else{
 						oss<<"Unspecified"<<"\n";
-						oss<<"\n";
+						
 					}
+					oss<<setw(32)<<setfill(' ')<<right<<"Repeat :"<<" ";
+						if(l->repeat!=0) 
+						oss<<repeat (l->repeat) + l->r_period.string_time_period ();
 					
+					else{
+						oss<<"Unspecified"<<"\n";
+						oss<<"\n";}
+				
 				}
 				else
 				{
@@ -561,8 +715,6 @@ string ToDoMngr::view (list<Task> taskList) {
 					}
 					oss<<setw(38)<<setfill(' ')<<"-------------------"<<"\n";
 					oss<<"\n";
-					
-
 					oss<<setw(index_convert.str().length())<<setfill(' ')<<index<<"."<<" ";
 					oss<<"Start :"<<" ";
 
@@ -595,7 +747,7 @@ string ToDoMngr::view (list<Task> taskList) {
 
 					oss<<"\n";
 
-					oss<<setw(31)<<setfill(' ')<<"Venue :"<<" ";
+					oss<<setw(31)<<setfill(' ')<<"Venue :"<<" ";//<<l->venue<<"\n";
 
 					while( pos_venue<l->venue.length())      
 
@@ -626,11 +778,18 @@ string ToDoMngr::view (list<Task> taskList) {
 					}
 					else{
 						oss<<"Unspecified"<<"\n";
-						oss<<"\n";
+						
 					}
+					oss<<setw(32)<<setfill(' ')<<right<<"Repeat :"<<" ";
+						if(l->repeat!=0) 
+						oss<<repeat (l->repeat) + l->r_period.string_time_period ();
+					
+					else{
+						oss<<"Unspecified"<<"\n";
+						oss<<"\n";}
 
 					temp_date=_date;
-					
+				
 
 				}
 			}
@@ -640,8 +799,6 @@ string ToDoMngr::view (list<Task> taskList) {
 	return oss.str();
 
 }
-
-
 
 string ToDoMngr::view (int taskId) {
 	Time obj;
@@ -820,7 +977,8 @@ string ToDoMngr::view (int taskId) {
 	}
 	return oss.str();
 
-} 
+}
+
 string ToDoMngr::view (view_t viewType, Time time) {
 	TimePeriod period;
 	time.modify_clock (0);
@@ -874,8 +1032,8 @@ string ToDoMngr::reminder(){
 	return _format.str();
 }
 
-
-
+/*pos = str.find_first_of (" ", 0)
+str[pos]*/
 string ToDoMngr::view (string tableN){
 	
 	_activeTaskList=_dataStorage.load(tableN);
@@ -913,13 +1071,38 @@ string ToDoMngr::viewTableNames () {
 	return table_view.str();
 }
 	
+//modify the front task's alert += mins
+//resort ur alertTaskList
+//set the alertActive as false;
+/*string ToDoMngr::alert () {
+	
 
+	list<Task>::iterator time_control;
+	std::ostringstream alerter;
+    
+	Time _time;
+	
+	
+	  for(time_control =_activeTaskList.begin (); time_control!=_activeTaskList.end (); time_control++)
+	  {   _time.current_time();
+		  if(time_control->alert==_time){
+			  alerter<<"ALERT"<<"\a"<<"\n";
+			  alerter<<"You have the following task/tasks now"<<"\n";
+		      
+			 return view(DAILY,time_control->alert);
+
+		  }
+
+
+
+		  }
+	//return "alert";
+}*/
 
 bool ToDoMngr::ifExistedTable (string tableName) {
 	return false;
 }
 
-//ok
 bool ToDoMngr::clashed(Task task){
 // check if there is clashed of period tasks
 	list<Task> checkList;
@@ -944,6 +1127,7 @@ bool ToDoMngr::clashed(Task task){
 					if(task.compareByVenue(task,*li2) && task.compareByAlert(task, *li2) && task.compareByEndTime(task, *li2) && task.compareByStartTime(task, *li2)){
 						_clashList.pop_back();
 					}
+					li2++;
 				} // end of check for duplication of clashed task
 			}
 			li++;
@@ -957,7 +1141,7 @@ bool ToDoMngr::clashed(Task task){
 	}
 } 
 
-//ok
+
 list<Task> ToDoMngr::add(Task task, bool forceAdd)                                                                      
 {
 //	cout<<tableName;
@@ -967,7 +1151,25 @@ list<Task> ToDoMngr::add(Task task, bool forceAdd)
 
 	else{
 		list<Task> _addList;
-		if(forceAdd == true || task.timeTask == true){ 
+		if(forceAdd == true){
+				// forceAdd is true or is timetask 
+				Task *ptr = &task;
+				_addList.push_back(task);
+				int index = _dataStorage.save(&_addList); 
+
+				//add to undoStack;
+				UserTask newAdd;
+				newAdd._cmd = _addTask;
+				newAdd._force = forceAdd;
+				newAdd._task = task;
+				newAdd._taskId = index; 
+				_undoStack.push(newAdd);
+
+				// and return empty list
+				_addList.clear();
+				return _addList;
+		}
+		if(task.timeTask == true){ 
 			if(task.repeat == 0 || (task.get_time().operator>(task.r_period.get_start_time()) 
 				&& task.get_time().operator<(task.r_period.get_end_time()))){
 				// forceAdd is true or is timetask 
@@ -1025,7 +1227,7 @@ list<Task> ToDoMngr::add(Task task, bool forceAdd)
 	}
 }
 
-//ok
+
 bool ToDoMngr::newTable(string name, TimePeriod period){  
 	
 		//check if the timetable period is valid
@@ -1058,7 +1260,7 @@ bool ToDoMngr::newTable(string name, TimePeriod period){
 		}
 }
 
-//ok
+
 void ToDoMngr::erase(TimePeriod period){
 	    list<Task> deleteList;
         deleteList = _dataStorage.load(period);
@@ -1079,7 +1281,7 @@ void ToDoMngr::erase(TimePeriod period){
 		_dataStorage.erase(deletedIdxList);
 } 
 
-//ok
+
 void ToDoMngr::erase(string name)
 {
 	list<Task> deleteList;
@@ -1101,7 +1303,7 @@ void ToDoMngr::erase(string name)
 	_dataStorage.erase(deletedIdxList);
 }
 
-//ok
+
 Task ToDoMngr::erase(int taskId){
 // delete from dataStorage given the taskId
 
@@ -1297,7 +1499,7 @@ bool ToDoMngr::tillStart(int duration, list<Task> taskList, Task task, bool forc
 	return got_clash;
 }
 
-//ok
+
 list<Task> ToDoMngr::edit(int taskId, TaskElement* taskElem, Task* task, bool forceEdit){
         list<Task> _blankList;
         // get the task that will be edited
