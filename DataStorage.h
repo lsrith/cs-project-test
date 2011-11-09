@@ -45,7 +45,7 @@ public:
 	void updateStorageName (string storageName);
 
 	void save (list<Task> taskList);
-	void save (list<Task>* taskList);
+	int save (list<Task>* taskList);
 	// save the templates to the storageFile by overwriting any overlapping index
 	// give an idex to each templates if it's not given
 	void save (list<int> taskIdex);
@@ -61,7 +61,7 @@ public:
 	void exit ();
 
 	void save (string tableName, list<Task> tasks);
-	void save (Table __table, list<Task> tasks);
+	void save (Table __table, list<Task>* tasks);
 	// save the timetable with the name and period so that you can load back all tasks
 	// if the tableName is the existing one, check the period
 	// if the period is the same, add more index inside; else, overwrite the old one
