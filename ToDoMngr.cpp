@@ -479,7 +479,6 @@ void ToDoMngr::erase(TimePeriod period){
 		_dataStorage.erase(deletedIdxList);
 } 
 
-
 void ToDoMngr::erase(string name){
 
 	list<Task> deleteList;
