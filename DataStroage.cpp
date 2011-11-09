@@ -462,7 +462,8 @@ void DataStorage::save (list<int> taskIndx) {
 
 	appendToFile (&newTasks);
 }
-
+/*
+//This is the correct version
 void DataStorage::save (list<Task>* taskList) {
 	if (taskList->empty ()) return;
 
@@ -489,11 +490,12 @@ void DataStorage::save (list<Task>* taskList) {
 	
 	appendToFile (&newTasks);
 }
-
+*/
 void DataStorage::save (list<Task> taskList) {
 	save (&taskList);
 }
 
+//the change is wrong... have to be modified :(
 int DataStorage::save (list<Task>* taskList) {
 	if (taskList->empty ()) return 0;
 
@@ -524,6 +526,33 @@ int DataStorage::save (list<Task>* taskList) {
 	appendToFile (&newTasks);
 	return _index;
 }
+
+void DataStorage::save (TableNode* table, list<Task>* taskList) {
+	if (taskList->empty ()) return;
+
+	list<Task>::iterator iter;
+	list<TaskNode*>::iterator nodeIter;
+	list<TaskNode*> newTasks;
+	for (iter = taskList->begin(); iter != taskList->end(); iter++) {	
+		if (iter->_index == 0) {
+			iter->_index = _largestIndex;
+			_largestIndex++;
+			TaskNode* node = new TaskNode;
+			node->_active = true;
+			node->_table = table->_name;
+			node->_task = *iter;
+			_indxTasks.push_back (node);
+			table->_tasks.push_back (node);
+			newTasks.push_back (node);
+		} else {
+			unsigned int i;
+			for (i = 0, nodeIter = _indxTasks.begin (); i < iter->_index; i++, nodeIter++);
+			(*nodeIter)->_task = *iter;
+			(*nodeIter)->_table = table->_name;
+			(*nodeIter)->_active = true;
+			newTasks.push_back (*nodeIter);
+		}
+	}
 	
 	appendToFile (&newTasks);
 }
