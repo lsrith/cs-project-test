@@ -316,7 +316,6 @@ bool ToDoMngr::ifExistedTable (string tableName) {
 	return false;
 }
 
-//ok
 bool ToDoMngr::clashed(Task task){
 // check if there is clashed of period tasks
 	list<Task> checkList;
@@ -341,6 +340,7 @@ bool ToDoMngr::clashed(Task task){
 					if(task.compareByVenue(task,*li2) && task.compareByAlert(task, *li2) && task.compareByEndTime(task, *li2) && task.compareByStartTime(task, *li2)){
 						_clashList.pop_back();
 					}
+					li2++;
 				} // end of check for duplication of clashed task
 			}
 			li++;
@@ -354,7 +354,7 @@ bool ToDoMngr::clashed(Task task){
 	}
 } 
 
-//ok
+
 list<Task> ToDoMngr::add(Task task, bool forceAdd)                                                                      
 {
 //	cout<<tableName;
@@ -364,7 +364,25 @@ list<Task> ToDoMngr::add(Task task, bool forceAdd)
 
 	else{
 		list<Task> _addList;
-		if(forceAdd == true || task.timeTask == true){ 
+		if(forceAdd == true){
+				// forceAdd is true or is timetask 
+				Task *ptr = &task;
+				_addList.push_back(task);
+				int index = _dataStorage.save(&_addList); 
+
+				//add to undoStack;
+				UserTask newAdd;
+				newAdd._cmd = _addTask;
+				newAdd._force = forceAdd;
+				newAdd._task = task;
+				newAdd._taskId = index; 
+				_undoStack.push(newAdd);
+
+				// and return empty list
+				_addList.clear();
+				return _addList;
+		}
+		if(task.timeTask == true){ 
 			if(task.repeat == 0 || (task.get_time().operator>(task.r_period.get_start_time()) 
 				&& task.get_time().operator<(task.r_period.get_end_time()))){
 				// forceAdd is true or is timetask 
@@ -422,7 +440,7 @@ list<Task> ToDoMngr::add(Task task, bool forceAdd)
 	}
 }
 
-//ok
+
 bool ToDoMngr::newTable(string name, TimePeriod period){  
 	
 		//check if the timetable period is valid
@@ -455,7 +473,7 @@ bool ToDoMngr::newTable(string name, TimePeriod period){
 		}
 }
 
-//ok
+
 void ToDoMngr::erase(TimePeriod period){
 	    list<Task> deleteList;
         deleteList = _dataStorage.load(period);
@@ -476,7 +494,7 @@ void ToDoMngr::erase(TimePeriod period){
 		_dataStorage.erase(deletedIdxList);
 } 
 
-//ok
+
 void ToDoMngr::erase(string name)
 {
 	list<Task> deleteList;
@@ -498,7 +516,7 @@ void ToDoMngr::erase(string name)
 	_dataStorage.erase(deletedIdxList);
 }
 
-//ok
+
 Task ToDoMngr::erase(int taskId){
 // delete from dataStorage given the taskId
 
@@ -694,7 +712,7 @@ bool ToDoMngr::tillStart(int duration, list<Task> taskList, Task task, bool forc
 	return got_clash;
 }
 
-//ok
+
 list<Task> ToDoMngr::edit(int taskId, TaskElement* taskElem, Task* task, bool forceEdit){
         list<Task> _blankList;
         // get the task that will be edited
