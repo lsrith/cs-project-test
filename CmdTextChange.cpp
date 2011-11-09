@@ -82,6 +82,7 @@ string CmdTextChange::read (string __str) {
 }
 
 string CmdTextChange::pswdRead () {
+	_cursor = 0;
 	short int ch;
 	do {
 		buffer ();
@@ -440,7 +441,7 @@ void CmdTextChange::insPswdChar (short int ch) {
 	chNode node = {ch, WHITE};
 
 	if (_cursor == _chList.size ()) {
-		putChar (node);
+		putChar ('*');
 		_chList.push_back (node);
 		_cursor++;
 		return;
@@ -449,7 +450,7 @@ void CmdTextChange::insPswdChar (short int ch) {
 	list<chNode>::iterator iter = getNode (_cursor);
 	iter = _chList.insert (iter, node);
 	while (iter != _chList.end ()) {
-		putChar (*iter);
+		putChar ('*');
 		iter++;
 	}
 	_cursor++;

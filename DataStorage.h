@@ -61,7 +61,7 @@ public:
 	void exit ();
 
 	void save (string tableName, list<Task> tasks);
-	void save (Table __table, list<Task> tasks);
+	void save (Table __table, list<Task>* tasks);
 	// save the timetable with the name and period so that you can load back all tasks
 	// if the tableName is the existing one, check the period
 	// if the period is the same, add more index inside; else, overwrite the old one

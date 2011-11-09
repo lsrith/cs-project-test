@@ -1088,8 +1088,8 @@ bool AccCtrl::execute ()
 			iss >> temp;
 			_retypedPassword = temp;
 			_result = "Re-type password: ";
-			unsigned int pos = _input.find_last_of (' ', 0);
-			_input = _input.substr (0, pos);
+//			unsigned int pos = _input.find_last_of (' ', 0);
+//			_input = _input.substr (0, pos);
 		}
 		else if (_userStatus == UNEW && !_retypedPassword.empty ())
 		{
@@ -1109,16 +1109,16 @@ bool AccCtrl::execute ()
 				_userStatus = UNONE;
 				_toDoMngr->updateStorageName (convert(_username));
 				_username.erase ();
-				_accCtrl = false;
 				return true; 
 			}
 			else
 			{
 				_result = "Password does not match! Please re-enter the password.";
-				_password = _password.erase();
-				unsigned int pos = _input.find_last_of (' ', 0);
+				_password.erase();
+				_retypedPassword.erase ();
+				unsigned int pos = _input.find_last_of (' ');
 				_input = _input.substr (0, pos);
-				pos = _input.find_last_of (' ', 0);
+				pos = _input.find_last_of (' ');
 				_input = _input.substr (0, pos);
 			}
 		}
@@ -1131,7 +1131,6 @@ bool AccCtrl::execute ()
 
 			if(getline(readFile, str) == false)
 			{
-
 					return false;
 			}
 
@@ -1150,7 +1149,6 @@ bool AccCtrl::execute ()
 					_userStatus = UNONE;
 					_toDoMngr->updateStorageName (convert(_username));
 					_username.erase ();
-					_accCtrl = false;
 					return true; 
 				}
 			}

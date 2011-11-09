@@ -328,6 +328,10 @@ bool DataStorage::checkRepeatClash (TaskNode* node, TimePeriod* period) {
 */
 list<Task> DataStorage::load (string tableName) {
 	list<Task> taskList;
+
+	if (_tables.empty ())
+		return taskList;
+
 	list<TableNode*>::iterator iter;
 	for (iter = _tables.begin (); iter != _tables.end (); iter++)
 		if ((*iter)->_name == tableName)
@@ -537,10 +541,10 @@ void DataStorage::save (string tableName, list<Task> tasks) {
 	if (tableIter == _tables.end ())
 		return;
 	else
-		save (__table, tasks);
+		save (__table, &tasks);
 }
 
-void DataStorage::save (Table __table, list<Task> tasks) {
+void DataStorage::save (Table __table, list<Task>* tasks) {
 	bool existingTable = false;
 	TableNode* table;
 	list<TableNode*>::iterator tableIter;
@@ -551,13 +555,13 @@ void DataStorage::save (Table __table, list<Task> tasks) {
 				if ((*tableIter)->_active &&
 					(*tableIter)->_period.get_start_time () == __table.period.get_start_time () &&
 					(*tableIter)->_period.get_end_time () == __table.period.get_end_time ()) {
-					save (*tableIter, &tasks);
+					save (*tableIter, tasks);
 				} else {
 					setInactive (&((*tableIter)->_tasks));
 					(*tableIter)->_period = __table.period;
 					(*tableIter)->_active = true;
 					(*tableIter)->_tasks.clear ();
-					save (*tableIter, &tasks);
+					save (*tableIter, tasks);
 				}
 
 				existingTable = true;
@@ -573,7 +577,7 @@ void DataStorage::save (Table __table, list<Task> tasks) {
 		node->_name = __table.name;
 		node->_period = __table.period;
 		_tables.push_back (node);
-		save (node, &tasks);
+		save (node, tasks);
 		table = node;
 	}
 
