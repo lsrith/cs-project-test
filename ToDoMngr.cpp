@@ -1081,7 +1081,7 @@ bool ToDoMngr::clashed(Task task){
 				//check if there is duplication of the clashed task, delete duplication
 				list<Task>::iterator li2 = checkList.begin();
 				for(int i=1; i<checkList.size(); i++){
-					if(task.compareByVenue(task,*li2) && task.compareByAlert(task, *li2) && task.compareByEndTime(task, *li2) && task.compareByStartTime(task, *li2)){
+            if((task.venue == li2->venue) && (task.alert == li2->alert) && (task.get_period().get_end_time() == li2->get_period().get_end_time()) && (task.get_period().get_start_time() == li2->get_period().get_start_time){
 						_clashList.pop_back();
 					}
 					li2++;
