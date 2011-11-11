@@ -5,7 +5,6 @@
 #include <list>
 #include <cassert>
 #include <iomanip>
-#include <iostream>
 using namespace std;
 
 ExecuteCmd::ExecuteCmd () {
@@ -68,8 +67,7 @@ bool Add::execute () {
 	}
 
 	if (_sequence->empty ()) {
-		return false;
-		_flagError = DATA;
+		return true;
 	}
 
 	if (_sequence->front () == CMD && _cmdInput->front () == CFORCE) {

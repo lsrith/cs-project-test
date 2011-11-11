@@ -7,7 +7,6 @@
 #include <fstream>
 #include <iomanip>
 #include <assert.h>
-#include <iostream>
 using namespace std;
 
 string ToDoMngr::NOTE =   "Note:   ";
@@ -422,8 +421,11 @@ string ToDoMngr::view (list<Task> taskList) {
 
 					oss<<setw(32)<<setfill(' ')<<right<<"Repeat :"<<" ";
 					
-					if(l->repeat!=0) 
+					if(l->repeat!=0){ 
 						oss<<repeat (l->repeat) + l->r_period.string_time_period ();
+					oss<<"\n\n";
+					}
+
 					
 					else
 						oss<<"Unspecified"<<"\n";
@@ -567,7 +569,7 @@ string ToDoMngr::view (list<Task> taskList) {
 						
 					oss<<setw(32)<<setfill(' ')<<right<<"Repeat :"<<" ";
 					if(l->repeat!=0) 
-						oss<<repeat (l->repeat) + l->r_period.string_time_period ();
+						oss<<repeat (l->repeat) + l->r_period.string_time_period () + "\n\n";
 					
 					else{
 						oss<<"Unspecified"<<"\n";
@@ -646,10 +648,11 @@ string ToDoMngr::view (list<Task> taskList) {
 					oss<<setw(31)<<setfill(' ')<<"Alert :"<<" ";
 					
 					oss<<setw(32)<<setfill(' ')<<right<<"Repeat :"<<" ";
-						if(l->repeat!=0) 
+						if(l->repeat!=0) { 
 						oss<<repeat (l->repeat) + l->r_period.string_time_period ();
+						oss<<"\n\n";
 					
-					else{
+						}else{
 						oss<<"Unspecified"<<"\n";
 						oss<<"\n";}
 				
@@ -738,10 +741,11 @@ string ToDoMngr::view (list<Task> taskList) {
 
 					
 					oss<<setw(32)<<setfill(' ')<<right<<"Repeat :"<<" ";
-						if(l->repeat!=0) 
+						if(l->repeat!=0) {
 						oss<<repeat (l->repeat) + l->r_period.string_time_period ();
+						oss<<"\n\n";
 					
-					else{
+						}else{
 						oss<<"Unspecified"<<"\n";
 						oss<<"\n";}
 
@@ -1081,7 +1085,7 @@ bool ToDoMngr::clashed(Task task){
 				//check if there is duplication of the clashed task, delete duplication
 				list<Task>::iterator li2 = checkList.begin();
 				for(int i=1; i<checkList.size(); i++){
-            if((task.venue == li2->venue) && (task.alert == li2->alert) && (task.get_period().get_end_time() == li2->get_period().get_end_time()) && (task.get_period().get_start_time() == li2->get_period().get_start_time){
+            if((task.venue == li2->venue) && (task.alert == li2->alert) && (task.get_period().get_end_time() == li2->get_period().get_end_time()) && (task.get_period().get_start_time() == li2->get_period().get_start_time ())){
 						_clashList.pop_back();
 					}
 					li2++;
@@ -1342,7 +1346,7 @@ list<Task> ToDoMngr::add(string tableName, Task task, bool forceAdd){
 	else{
 		if((task.get_period().get_end_time().operator-(task.get_period().get_start_time())) - ((_table.period.get_end_time().operator-(_table.period.get_start_time()) <0 )))
 		{
-			// if periodtask is within table period
+			// if periodtask is within table period{
 			if(task.get_period().get_start_time().operator>(_table.period.get_start_time()) && task.get_period().get_end_time().operator<(_table.period.get_end_time()))
 			{
         taskList.push_back(task);
@@ -1378,7 +1382,11 @@ list<Task> ToDoMngr::add(string tableName, Task task, bool forceAdd){
 			}
 		}
 	}
-		
+
+	UserTask addTask;
+	addTask._cmd = _addTable2;
+	addTask._tableName = tableName;
+	addTask._index.push_back(task.get_index());
 	
 	taskList.clear();
 	return taskList;
@@ -1585,12 +1593,8 @@ void ToDoMngr::undo (){
 			_dataStorage.erase(undoTask._tableName);
 		}
 		else if(undoTask._cmd == _addTable2){
-			//prev add task into timetable, delete timetable from dataStorage
-			_dataStorage.erase(undoTask._tableName);
+			_dataStorage.erase(undoTask._index);
 
-			//add a blank timetable with the same name back to dataStorage
-			list<Task> blankList;
-			_dataStorage.save(undoTask._tableName, blankList);
 		}
 		else if(undoTask._cmd == _eraseTable){
 			//add new table with no task
